@@ -1,0 +1,244 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── 사용자 ───────────────────────────────────────────────────────────────────
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  name        String?
+  major       String? // 전공 (예: 컴퓨터공학)
+  targetJob   String? // 목표 직무 (예: 백엔드 개발자)
+  skills      String // JSON string[] (기술 스택)
+  role        String   @default("USER") // USER | ADMIN | RECRUITER
+  // RECRUITER 전용
+  companyName String? // 기업명
+  companyDesc String? // 기업 소개
+  isApproved  Boolean  @default(false) // 관리자 승인 여부
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  portfolios       Portfolio[]
+  jobPostings      JobPosting[]
+  roadmapItems     RoadmapItem[]
+  interviewAnswers InterviewAnswer[]
+  customQuestions  InterviewQuestion[]
+  coverLetters     CoverLetter[]
+  notifications    UserNotification[]
+  bookmarks        JobBookmark[]
+  recruitListings  JobListing[]        @relation("RecruiterListings")
+}
+
+// ─── 포트폴리오 ───────────────────────────────────────────────────────────────
+model Portfolio {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  techStack   String // JSON string[]
+  startDate   DateTime
+  endDate     DateTime?
+  githubUrl   String?
+  deployUrl   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── 내 지원 현황 (학생이 직접 관리) ──────────────────────────────────────────
+model JobPosting {
+  id          String    @id @default(cuid())
+  userId      String
+  company     String
+  position    String
+  url         String?
+  deadline    DateTime?
+  interviewAt DateTime? // 면접 날짜
+  status      String    @default("PREPARING") // PREPARING|APPLIED|DOCUMENT_PASS|INTERVIEW|FINAL_PASS|REJECTED
+  contacts    String? // JSON: [{name, role, email, phone, memo}]
+  followUpAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  statusHistory StatusHistory[]
+  coverLetters  CoverLetter[]
+}
+
+model StatusHistory {
+  id        String   @id @default(cuid())
+  jobId     String
+  status    String
+  changedAt DateTime @default(now())
+  note      String?
+
+  job JobPosting @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+// ─── 기술 스택 로드맵 ─────────────────────────────────────────────────────────
+model RoadmapItem {
+  id             String   @id @default(cuid())
+  userId         String
+  jobCategory    String // frontend|backend|fullstack|data|ai
+  skill          String
+  status         String   @default("NOT_STARTED") // NOT_STARTED|IN_PROGRESS|COMPLETED
+  referenceLinks String // JSON string[]
+  isCustom       Boolean  @default(false)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── 면접 준비 ────────────────────────────────────────────────────────────────
+model InterviewQuestion {
+  id        String  @id @default(cuid())
+  category  String // TECHNICAL|PERSONALITY|SITUATIONAL
+  jobType   String? // frontend|backend|common
+  question  String
+  isDefault Boolean @default(false)
+  userId    String?
+
+  user    User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers InterviewAnswer[]
+}
+
+model InterviewAnswer {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  answer     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question InterviewQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+}
+
+// ─── 자기소개서 (코칭 기능 핵심) ──────────────────────────────────────────────
+model CoverLetter {
+  id              String   @id @default(cuid())
+  userId          String
+  jobId           String? // optional link to JobPosting
+  company         String
+  position        String
+  items           String // JSON: [{question, answer}]
+  version         Int      @default(1)
+  analysisScore   Int? // 최근 분석 점수 (0~100)
+  analysisHistory String? // JSON: [{version, score, date, goodCount, warnCount, badCount}]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job      JobPosting?          @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  versions CoverLetterVersion[]
+}
+
+// ─── 자기소개서 버전 스냅샷 ───────────────────────────────────────────────────
+model CoverLetterVersion {
+  id            String   @id @default(cuid())
+  coverLetterId String
+  version       Int
+  items         String // JSON: [{question, answer}]
+  savedAt       DateTime @default(now())
+
+  coverLetter CoverLetter @relation(fields: [coverLetterId], references: [id], onDelete: Cascade)
+}
+
+// ─── 채용공고 DB (관리자가 엑셀 업로드로 등록, 핵심 기능) ─────────────────────
+model JobListing {
+  id          String    @id @default(cuid())
+  company     String
+  position    String
+  location    String? // 근무지
+  career      String? // 경력 (신입/경력/무관)
+  education   String? // 학력
+  employType  String? // 고용형태 (정규직/계약직/인턴)
+  salary      String? // 급여
+  deadline    DateTime?
+  url         String? // 원본 공고 링크
+  description String? // 공고 상세 내용
+  tags        String? // JSON: string[] (기술스택 태그)
+  source      String? // 출처 (예: 학생성공처, 사람인 등)
+  isActive    Boolean   @default(true)
+  recruiterId String? // RECRUITER 계정이 직접 등록한 경우
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  recruiter User?         @relation("RecruiterListings", fields: [recruiterId], references: [id], onDelete: SetNull)
+  bookmarks JobBookmark[]
+}
+
+// ─── 공고 북마크/찜 ───────────────────────────────────────────────────────────
+model JobBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing JobListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+}
+
+// ─── 취업 확정 기록 (관리자가 수동 등록) ──────────────────────────────────────
+model EmploymentRecord {
+  id          String    @id @default(cuid())
+  userId      String
+  company     String
+  position    String
+  employType  String? // 정규직/계약직/인턴
+  startDate   DateTime?
+  salary      String?
+  note        String?
+  confirmedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+}
+
+// ─── 공지사항 ─────────────────────────────────────────────────────────────────
+model Notice {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  isPinned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── 관리자 → 학생 개별 알림 ──────────────────────────────────────────────────
+model UserNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── 비밀번호 재설정 ──────────────────────────────────────────────────────────
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

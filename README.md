@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CS 취업지원 포털
 
-## Getting Started
+Next.js + Prisma + PostgreSQL(Supabase) 기반 취업지원 웹 애플리케이션
 
-First, run the development server:
+## 기술 스택
+
+- **Frontend**: Next.js 14, React, Tailwind CSS, shadcn/ui
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Database**: PostgreSQL (Supabase)
+- **Auth**: NextAuth.js
+- **Deploy**: Vercel
+
+## 로컬 개발 환경 설정
+
+### 1. 의존성 설치
+
+```bash
+npm install
+```
+
+### 2. 환경변수 설정
+
+`.env.example`을 복사해서 `.env.local` 생성 후 값 입력:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+DATABASE_URL="postgresql://..."
+DIRECT_URL="postgresql://..."
+NEXTAUTH_SECRET="랜덤 시크릿 키"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+### 3. DB 마이그레이션
+
+```bash
+npm run db:migrate
+```
+
+### 4. 개발 서버 실행
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Vercel 배포
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 환경변수 설정 (Vercel 대시보드)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 변수명 | 값 |
+|--------|-----|
+| `DATABASE_URL` | Supabase connection pooling URL (포트 6543) |
+| `DIRECT_URL` | Supabase direct URL (포트 5432) |
+| `NEXTAUTH_SECRET` | 랜덤 시크릿 (openssl rand -base64 32) |
+| `NEXTAUTH_URL` | 배포된 Vercel URL (예: https://your-app.vercel.app) |
 
-## Learn More
+### 배포
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Vercel CLI 사용 시
+vercel --prod
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+또는 GitHub 연동 후 main 브랜치 push 시 자동 배포
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 주요 기능
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 채용공고 조회 및 북마크
+- 지원 현황 관리 (칸반 보드)
+- 자기소개서 작성 및 AI 분석
+- 면접 질문 준비
+- 기술 스택 로드맵
+- 관리자: 공고 업로드, 사용자 관리, 통계
+- 리크루터: 공고 직접 등록
