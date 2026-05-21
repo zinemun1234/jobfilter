@@ -11,7 +11,7 @@ async function requireAdmin() {
   return session;
 }
 
-// GET ??취업?�정 목록
+// GET — 취업확정 목록
 export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -20,7 +20,7 @@ export async function GET() {
     orderBy: { confirmedAt: 'desc' },
   });
 
-  // userId�??��? ?�보 조회
+  // userId로 사용자 정보 조회
   const userIds = Array.from(new Set(records.map(r => r.userId)));
   const users = await prisma.user.findMany({
     where: { id: { in: userIds } },
@@ -33,7 +33,7 @@ export async function GET() {
   });
 }
 
-// POST ??취업?�정 ?�록
+// POST — 취업확정 등록
 export async function POST(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -42,11 +42,11 @@ export async function POST(req: NextRequest) {
   const { userId, company, position, employType, startDate, salary, note } = body;
 
   if (!userId || !company || !position) {
-    return NextResponse.json({ error: 'userId, company, position ?�수' }, { status: 400 });
+    return NextResponse.json({ error: 'userId, company, position 필수' }, { status: 400 });
   }
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) return NextResponse.json({ error: '?�용?��? 찾을 ???�습?�다' }, { status: 404 });
+  if (!user) return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
 
   const record = await prisma.employmentRecord.create({
     data: {
@@ -60,18 +60,18 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // ?�당 ?�생??JobPosting �?같�? ?�사+직무가 ?�으�?FINAL_PASS�??�데?�트
+  // 해당 학생의 JobPosting 중 같은 회사+직무가 있으면 FINAL_PASS로 업데이트
   await prisma.jobPosting.updateMany({
     where: { userId, company, position },
     data: { status: 'FINAL_PASS' },
   });
 
-  // ?�생?�게 ?�림 발송
+  // 학생에게 알림 발송
   await prisma.userNotification.create({
     data: {
       userId,
-      title: '취업 ?�정 ?�록',
-      body: `${company} ${position} 취업???�정 ?�록?�었?�니?? 축하?�니??`,
+      title: '취업 확정 등록',
+      body: `${company} ${position} 취업이 확정 등록되었습니다. 축하합니다!`,
     },
   });
 

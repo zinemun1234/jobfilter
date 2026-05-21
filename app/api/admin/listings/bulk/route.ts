@@ -23,15 +23,15 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
   const rows: BulkRow[] = body.rows ?? [];
-  if (!rows.length) return NextResponse.json({ error: '?�록????��???�습?�다' }, { status: 400 });
+  if (!rows.length) return NextResponse.json({ error: '등록할 데이터가 없습니다.' }, { status: 400 });
 
-  // 1. 마감??지??공고 ?�동 비활?�화
+  // 1. 마감일 지난 공고 자동 비활성화
   await prisma.jobListing.updateMany({
     where: { deadline: { lt: new Date() }, isActive: true },
     data: { isActive: false },
   });
 
-  // 2. 기존 공고 (company + position) 중복 감�?
+  // 2. 기존 공고 (company + position) 중복 감지
   const existing = await prisma.jobListing.findMany({
     select: { company: true, position: true },
   });
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   const duplicateCount = rows.length - newRows.length;
 
   if (!newRows.length) {
-    return NextResponse.json({ data: { count: 0, duplicateCount, message: '모두 중복 공고?�니?? } });
+    return NextResponse.json({ data: { count: 0, duplicateCount, message: '모두 중복 공고입니다.' } });
   }
 
   const created = await prisma.jobListing.createMany({
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ data: { count: created.count, duplicateCount } }, { status: 201 });
 }
 
-// 마감??지??공고 ?�괄 비활?�화 (GET?�로 ?�동 ?�리�?가??
+// 마감일 지난 공고 일괄 비활성화 (GET으로 수동 처리도 가능)
 export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
