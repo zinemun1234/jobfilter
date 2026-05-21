@@ -5,6 +5,8 @@ import { successResponse, badRequest, conflict } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import { registerSchema } from '@/lib/validations/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -22,7 +24,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return conflict('이미 사용 중인 이메일입니다.');
+      return conflict('?��? ?�용 중인 ?�메?�입?�다.');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

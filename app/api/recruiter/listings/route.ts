@@ -3,17 +3,19 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 async function requireRecruiter() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
   if (session.user.role !== 'RECRUITER') return null;
-  // 승인된 기업만 허용
+  // ?�인??기업�??�용
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { isApproved: true } });
   if (!user?.isApproved) return null;
   return session;
 }
 
-// GET — 내 공고 목록
+// GET ????공고 목록
 export async function GET() {
   const session = await requireRecruiter();
   if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -31,7 +33,7 @@ export async function GET() {
   });
 }
 
-// POST — 공고 등록 (관리자 검토 후 활성화)
+// POST ??공고 ?�록 (관리자 검?????�성??
 export async function POST(req: NextRequest) {
   const session = await requireRecruiter();
   if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
   const { company, position, location, career, education, employType, salary, deadline, url, description, tags } = body;
 
   if (!company || !position) {
-    return NextResponse.json({ error: '회사명과 직무는 필수입니다' }, { status: 400 });
+    return NextResponse.json({ error: '?�사명과 직무???�수?�니?? }, { status: 400 });
   }
 
   const listing = await prisma.jobListing.create({
@@ -56,8 +58,8 @@ export async function POST(req: NextRequest) {
       url: url || null,
       description: description || null,
       tags: tags?.length ? JSON.stringify(tags) : null,
-      source: '구인자 직접등록',
-      isActive: false, // 관리자 승인 후 활성화
+      source: '구인??직접?�록',
+      isActive: false, // 관리자 ?�인 ???�성??
       recruiterId: session.user.id,
     },
   });

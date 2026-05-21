@@ -6,6 +6,8 @@ import { roadmapItemSchema } from '@/lib/validations';
 import { ApiResponse } from '@/lib/api';
 import { getRoadmapTemplate } from '@/lib/roadmap-templates';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,7 +19,7 @@ export async function GET(request: NextRequest) {
     const jobCategory = searchParams.get('jobCategory');
 
     if (jobCategory) {
-      // 특정 직무 카테고리의 로드맵 조회
+      // ?�정 직무 카테고리??로드�?조회
       let roadmapItems = await prisma.roadmapItem.findMany({
         where: { 
           userId: session.user.id,
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
         orderBy: { order: 'asc' },
       });
 
-      // 해당 카테고리에 아이템이 없으면 템플릿에서 생성
+      // ?�당 카테고리???�이?�이 ?�으�??�플릿에???�성
       if (roadmapItems.length === 0) {
         const template = getRoadmapTemplate(jobCategory);
         if (template) {
@@ -58,7 +60,7 @@ export async function GET(request: NextRequest) {
       }));
       return NextResponse.json({ data: parsed });
     } else {
-      // 전체 로드맵 목록 조회
+      // ?�체 로드�?목록 조회
       const roadmapItems = await prisma.roadmapItem.findMany({
         where: { userId: session.user.id },
         orderBy: [
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = roadmapItemSchema.parse(body);
 
-    // 커스텀 아이템인 경우 마지막 순서로 설정
+    // 커스?� ?�이?�인 경우 마�?�??�서�??�정
     if (validatedData.isCustom && !validatedData.order) {
       const lastItem = await prisma.roadmapItem.findFirst({
         where: { 

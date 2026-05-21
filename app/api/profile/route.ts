@@ -10,6 +10,8 @@ import { successResponse, getAuthSession, notFound, badRequest } from '@/lib/api
 import { handleApiError } from '@/lib/errors';
 import { profileSchema } from '@/lib/validations/profile';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const userId = await getAuthSession();

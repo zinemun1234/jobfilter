@@ -2,17 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const { token, password } = await request.json();
     if (!token || !password) {
-      return NextResponse.json({ error: '토큰과 비밀번호를 입력해주세요.' }, { status: 400 });
+      return NextResponse.json({ error: '?�큰�?비�?번호�??�력?�주?�요.' }, { status: 400 });
     }
     if (password.length < 8) {
-      return NextResponse.json({ error: '비밀번호는 8자 이상이어야 합니다.' }, { status: 400 });
+      return NextResponse.json({ error: '비�?번호??8???�상?�어???�니??' }, { status: 400 });
     }
 
-    // raw SQL — Prisma 캐시 이슈 우회
+    // raw SQL ??Prisma 캐시 ?�슈 ?�회
     const rows = await prisma.$queryRawUnsafe<{ id: string; email: string; expiresAt: string; used: number }[]>(
       `SELECT id, email, expiresAt, used FROM PasswordResetToken WHERE token = ? LIMIT 1`,
       token
@@ -20,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const resetToken = rows[0];
     if (!resetToken || resetToken.used === 1 || new Date() > new Date(resetToken.expiresAt)) {
-      return NextResponse.json({ error: '유효하지 않거나 만료된 토큰입니다.' }, { status: 400 });
+      return NextResponse.json({ error: '?�효?��? ?�거??만료???�큰?�니??' }, { status: 400 });
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -35,9 +37,9 @@ export async function POST(request: NextRequest) {
       token
     );
 
-    return NextResponse.json({ message: '비밀번호가 변경되었습니다.' });
+    return NextResponse.json({ message: '비�?번호가 변경되?�습?�다.' });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+    return NextResponse.json({ error: '?�버 ?�류가 발생?�습?�다.' }, { status: 500 });
   }
 }

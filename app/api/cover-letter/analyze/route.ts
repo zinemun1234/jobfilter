@@ -1,31 +1,10 @@
-/**
- * POST /api/cover-letter/analyze
- *
- * 자소서 텍스트를 키워드 기반으로 분석하고 피드백을 반환한다.
- * AI를 사용하지 않으며 서버 비용이 없다.
- *
- * 분석 파이프라인 (순서대로 실행):
- * 1. 기본 키워드 분석 (11가지 항목) — lib/cover-letter-analysis.ts
- * 2. 프로필 기반 개인화 — 보유 기술 스택 언급 여부
- * 3. 심층 분석 — 반복 단어, 문단 구조
- * 4. 공고 매칭 분석 — 공고 태그/직무명과 자소서 키워드 겹침률
- * 5. 재분석 비교 — 이전 피드백 대비 개선/잔존/신규 이슈
- *
- * coverLetterId가 있으면 분석 점수와 히스토리를 DB에 저장한다.
- */
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { analyzeText, calculateWeightedScore, type FeedbackItem } from '@/lib/cover-letter-analysis';
 import { prisma } from '@/lib/prisma';
 
-/**
- * 재분석 시 이전 피드백과 현재 피드백을 비교한다.
- * - resolved: 이전에 warn/bad였는데 현재 good으로 바뀐 항목
- * - remaining: 여전히 warn/bad인 항목
- * - new: 이전에 없던 새 warn/bad 항목
- * - score: 이전 문제 중 해결된 비율 (0~100)
- */
+// 재분석 비교
 function compareWithPrevious(
   current: FeedbackItem[],
   previous: FeedbackItem[]
@@ -44,15 +23,7 @@ function compareWithPrevious(
   return { resolved, remaining, new: newIssues, score };
 }
 
-/**
- * 공고 매칭 분석
- *
- * 공고의 태그 배열과 직무명에서 키워드를 추출하고,
- * 자소서 텍스트에 해당 키워드가 몇 % 포함되어 있는지 계산한다.
- * - 60% 이상: good
- * - 30~59%: warn (부족한 키워드 제안)
- * - 30% 미만: bad (핵심 키워드 목록 제시)
- */
+// 공고 매칭 분석 — listingInfo의 태그/직무명과 자소서 텍스트 간 키워드 겹침률
 function analyzeListingMatch(
   text: string,
   listingInfo: { company?: string; position?: string; tags?: string[] } | null

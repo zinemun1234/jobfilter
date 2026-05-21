@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { portfolioSchema } from '@/lib/validations';
 import { ApiResponse } from '@/lib/api';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);

@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   const { email, password, name, companyName, companyDesc } = await req.json();
 
   if (!email || !password || !name || !companyName) {
-    return NextResponse.json({ error: '이메일, 비밀번호, 담당자명, 기업명은 필수입니다' }, { status: 400 });
+    return NextResponse.json({ error: '?�메?? 비�?번호, ?�당?�명, 기업명�? ?�수?�니?? }, { status: 400 });
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) return NextResponse.json({ error: '이미 사용 중인 이메일입니다' }, { status: 409 });
+  if (existing) return NextResponse.json({ error: '?��? ?�용 중인 ?�메?�입?�다' }, { status: 409 });
 
   const hashed = await bcrypt.hash(password, 12);
   const user = await prisma.user.create({
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
       companyDesc: companyDesc || null,
       role: 'RECRUITER',
       skills: '[]',
-      isApproved: false, // 관리자 승인 후 활성화
+      isApproved: false, // 관리자 ?�인 ???�성??
     },
   });
 

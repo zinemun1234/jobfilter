@@ -1,9 +1,15 @@
+/**
+ * GET /api/listings/bookmark  — 내 북마크 목록 (공고 정보 포함)
+ * POST /api/listings/bookmark — 북마크 토글 (있으면 해제, 없으면 추가)
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-// GET — 내 북마크 목록
+export const dynamic = 'force-dynamic';
+
+// GET — 북마크 목록
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -23,7 +29,7 @@ export async function GET() {
   });
 }
 
-// POST — 북마크 토글 (있으면 삭제, 없으면 추가)
+// POST — 북마크 토글 (없으면 추가, 있으면 해제)
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
