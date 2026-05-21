@@ -9,7 +9,7 @@ import { CustomSkillForm } from '@/components/roadmap/CustomSkillForm';
 import { SlideOver } from '@/components/ui/slide-over';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { toast } from 'sonner';
-import { RoadmapItem } from '@prisma/client';
+import { RoadmapItem } from '@/lib/generated/prisma';
 import { calculateProgress } from '@/lib/roadmap-templates';
 
 type SkillStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';

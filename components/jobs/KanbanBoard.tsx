@@ -32,7 +32,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { JobPosting } from '@prisma/client';
+import { JobPosting } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
 import { AlertCircle, ExternalLink, Trash2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';

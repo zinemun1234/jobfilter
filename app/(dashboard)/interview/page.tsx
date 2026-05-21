@@ -21,7 +21,7 @@ import { CustomQuestionForm } from '@/components/interview/CustomQuestionForm';
 import { MockInterviewModal } from '@/components/interview/MockInterviewModal';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { toast } from 'sonner';
-import type { InterviewQuestion, InterviewAnswer } from '@prisma/client';
+import type { InterviewQuestion, InterviewAnswer } from '@/lib/generated/prisma';
 import type { QuestionCategory } from '@/types';
 
 type QuestionWithAnswers = InterviewQuestion & { answers?: InterviewAnswer[] };

@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { portfolioSchema } from '@/lib/validations';
-import { Portfolio } from '@prisma/client';
+import { Portfolio } from '@/lib/generated/prisma';
 import { toast } from 'sonner';
 
 type PortfolioFormData = z.infer<typeof portfolioSchema>;

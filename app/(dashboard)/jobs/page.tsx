@@ -10,7 +10,7 @@ import { SlideOver } from '@/components/ui/slide-over';
 import { JobForm } from '@/components/jobs/JobForm';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { toast } from 'sonner';
-import { JobPosting } from '@prisma/client';
+import { JobPosting } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
 
 const statusConfig: Record<ApplicationStatus, { label: string; dot: string; text: string; bg: string }> = {

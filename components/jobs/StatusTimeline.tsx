@@ -1,4 +1,4 @@
-import type { JobPosting, StatusHistory } from '@prisma/client';
+import type { JobPosting, StatusHistory } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

@@ -1,4 +1,4 @@
-import { RoadmapItem } from '@prisma/client';
+import { RoadmapItem } from '@/lib/generated/prisma';
 
 type SkillStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 import { ExternalLink, Trash2 } from 'lucide-react';

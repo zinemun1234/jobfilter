@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, CheckCircle } from 'lucide-react';
-import { InterviewQuestion, InterviewAnswer } from '@prisma/client';
+import { InterviewQuestion, InterviewAnswer } from '@/lib/generated/prisma';
 import { toast } from 'sonner';
 
 interface AnswerSlideOverProps {

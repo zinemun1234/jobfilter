@@ -7,7 +7,7 @@ import { SlideOver } from '@/components/ui/slide-over';
 import { PortfolioForm } from '@/components/portfolio/PortfolioForm';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { toast } from 'sonner';
-import { Portfolio } from '@prisma/client';
+import { Portfolio } from '@/lib/generated/prisma';
 
 async function fetchPortfolios(): Promise<Portfolio[]> {
   const res = await fetch('/api/portfolio');

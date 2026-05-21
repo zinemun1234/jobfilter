@@ -1,7 +1,7 @@
  'use client';
 
 import { Edit, Trash2, CheckCircle } from 'lucide-react';
-import { InterviewQuestion, InterviewAnswer } from '@prisma/client';
+import { InterviewQuestion, InterviewAnswer } from '@/lib/generated/prisma';
 
 interface InterviewCardProps {
   question: InterviewQuestion & { answers?: InterviewAnswer[] };

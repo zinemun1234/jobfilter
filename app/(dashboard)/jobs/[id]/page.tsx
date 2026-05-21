@@ -9,7 +9,7 @@ import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { JobForm } from '@/components/jobs/JobForm';
 import { toast } from 'sonner';
 import { useState } from 'react';
-import { JobPosting, StatusHistory } from '@prisma/client';
+import { JobPosting, StatusHistory } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
 
 type JobWithHistory = JobPosting & {

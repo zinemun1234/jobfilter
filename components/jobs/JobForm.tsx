@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { jobPostingSchema } from '@/lib/validations';
-import type { JobPosting as PrismaJobPosting } from '@prisma/client';
+import type { JobPosting as PrismaJobPosting } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
 import { toast } from 'sonner';
 
