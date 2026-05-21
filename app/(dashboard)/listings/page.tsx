@@ -11,6 +11,10 @@
  * - 공고 상세 보기 / 자소서 작성 연결 (searchParams로 회사/직무 전달)
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Search, Plus, ExternalLink, MapPin, Briefcase, GraduationCap, Clock, CheckCircle, FileEdit, Zap, Bookmark } from 'lucide-react';
 import { toast } from 'sonner';
 
 type Listing = {
