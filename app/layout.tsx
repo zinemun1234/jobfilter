@@ -15,8 +15,8 @@ import Providers from '@/components/providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: '임시',
-  description: '컴퓨터공학부 학생을 위한 AI 맞춤 취업 필터링 & 자소서 코칭 시스템',
+  title: 'JobFilter',
+  description: '컴퓨터공학부 학생을 위한 맞춤 취업 공고 필터링 & 자소서 코칭 시스템',
 };
 
 export default function RootLayout({
