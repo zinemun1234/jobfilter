@@ -1491,5 +1491,119 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 <img src="screenshots/e2e/interaction-jobs-bulk.png" alt="[인터랙션] 지원 벌크 액션" style="display:block;max-width:100%;max-height:115mm;object-fit:contain;border:1px solid var(--gray-200);margin-bottom:14px">
 <div style="font-size:11px;color:var(--muted);line-height:1.7"><div class="detail-block"><h5>검증 목적</h5><p>다수 지원 공고를 선택하여 상태 변경, 마감일 적용, 삭제 등 일괄 작업을 수행하는 기능을 검증한다.</p></div><div class="detail-block"><h5>검증 조건</h5><p><code class="mono">/jobs</code> 페이지에서 2개 지원 공고에 체크하여 벌크 액션 툴바를 활성화한다.</p></div><div class="detail-block"><h5>확인 결과</h5><p>체크박스 선택 시 “2개 선택” 벌크 액션 툴바가 노출되며, 상태 변경/마감일 적용/선택 삭제 메뉴가 제공된다.</p></div></div>
 </div></div>
+<div class="page">
+<div class="content">
+<div class="page-header">
+<h2>추가 작업 보고 (Phase 6~8)</h2>
+<span class="page-num">52</span>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">01</span>
+<span class="section-text">개요</span>
+</div>
+<p>
+        2026.08.15에 Phase 6~8 추가 작업을 수행했다.
+        <span class="mono">background subagent</span>를 활용해 UX 개선과 Recruiter 스키마 정리 코드를 작성하고,
+        foreground에서 <span class="mono">npx tsc</span>, <span class="mono">npm run lint</span>,
+        <span class="mono">npx next build</span>, 스모크 테스트, Git 커밋을 직접 수행했다.
+      </p>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">02</span>
+<span class="section-text">Phase 6: UX 로딩·빈·에러 상태 개선</span>
+</div>
+<p>
+        <span class="mono">subagent</span>를 통해 18개 파일에 로딩/빈/에러 상태 및 중복 제출 방지를 추가했다.
+      </p>
+<ul>
+<li><strong>공통:</strong> <span class="mono">components/ui/delete-confirm-dialog.tsx</span>에 <span class="mono">isPending</span> prop 추가</li>
+<li><strong>사용자:</strong> <span class="mono">/jobs</span>, <span class="mono">/jobs/[id]</span>, <span class="mono">/portfolio</span>, <span class="mono">/cover-letter</span>, <span class="mono">/interview</span>, <span class="mono">/calendar</span>, <span class="mono">/notifications</span></li>
+<li><strong>관리자:</strong> <span class="mono">/admin</span>, <span class="mono">/admin/stats</span>, <span class="mono">/admin/users</span>, <span class="mono">/admin/listings</span>, <span class="mono">/admin/listings/keywords</span>, <span class="mono">/admin/employment</span>, <span class="mono">/admin/notices</span>, <span class="mono">/admin/questions</span></li>
+<li>저장/삭제 버튼에 <span class="mono">isPending</span>/<span class="mono">isMutating</span>/<span class="mono">disabled</span> 처리로 중복 제출 방지</li>
+</ul>
+<p>검증: <span class="mono">npm run test</span> 21개 통과, <span class="mono">npx tsc --noEmit</span>, <span class="mono">npm run lint</span>, <span class="mono">npx next build</span> 모두 통과.</p>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">03</span>
+<span class="section-text">Phase 7: Recruiter 스키마 정리</span>
+</div>
+<p>
+        먼저 DB에 실제 Recruiter 데이터가 있는지 확인했다. 조회 결과 <span class="mono">User</span> 테이블에 1명의 RECRUITER 사용자가 존재했고,
+        <span class="mono">JobListing</span> 테이블에서는 <span class="mono">recruiterId</span>를 사용하는 레코드가 0개였다.
+      </p>
+<ul>
+<li>데이터 보존을 위해 <span class="mono">User</span> 모델의 <span class="mono">role</span>, <span class="mono">companyName</span>, <span class="mono">companyDesc</span>, <span class="mono">isApproved</span>는 유지</li>
+<li><span class="mono">JobListing</span>의 <span class="mono">recruiterId</span> 컬럼과 <span class="mono">recruiter</span> 관계, <span class="mono">User</span>의 <span class="mono">recruitListings</span> 관계만 제거</li>
+<li><span class="mono">lib/api.ts</span>의 <span class="mono">sanitizeJobListing</span>에서 <span class="mono">recruiterId</span> 제거 로직 제거</li>
+<li><span class="mono">lib/security.test.ts</span>에서 <span class="mono">recruiterId</span> 관련 assertion 제거</li>
+<li><span class="mono">npx prisma generate</span>로 클라이언트 재생성</li>
+</ul>
+<p>
+        DB 마이그레이션은 원격 PostgreSQL(Supabase)에 적용하지 않고 보류했다.
+        마이그레이션 실행은 사용자 확인 후에 진행할 것을 권장한다.
+      </p>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">04</span>
+<span class="section-text">Phase 8: 최종 점검</span>
+</div>
+<table class="report-table">
+<thead>
+<tr><th>항목</th><th>명령어</th><th>결과</th></tr>
+</thead>
+<tbody>
+<tr><td>유닛 테스트</td><td><span class="mono">npm run test</span></td><td>21개 통과</td></tr>
+<tr><td>타입 검사</td><td><span class="mono">npx tsc --noEmit</span></td><td>오류 없음</td></tr>
+<tr><td>Lint</td><td><span class="mono">npm run lint</span></td><td>경고/오류 없음</td></tr>
+<tr><td>Production Build</td><td><span class="mono">npx next build</span></td><td>43/43 static pages</td></tr>
+<tr><td>Prisma Client</td><td><span class="mono">npx prisma generate</span></td><td>성공</td></tr>
+<tr><td>스모크 테스트</td><td><span class="mono">npx next start -p 3000</span> + <span class="mono">curl.exe</span></td><td>/open/listings 200, /dashboard → /login 200, /api/listings/public 200, /api/jobs 401</td></tr>
+<tr><td>Git 상태</td><td><span class="mono">git status</span></td><td>working tree clean</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">05</span>
+<span class="section-text">문제 해결</span>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">01</span>Prisma Client 생성 중 <span class="mono">query_engine-windows.dll.node</span> 잠김</h4>
+<div class="detail-block"><h5>원인</h5><p>이전 <span class="mono">npx next start -p 3000</span> 프로세스가 종료되지 않고 query engine 바이너리 핸들을 점유해 <span class="mono">EPERM</span> 오류 발생.</p></div>
+<div class="detail-block"><h5>해결</h5><p><span class="mono">Get-Process</span>와 <span class="mono">Get-WmiObject Win32_Process</span>로 <span class="mono">next start</span> Node 프로세스를 식별한 뒤 <span class="mono">Stop-Process -Force</span>로 종료하고 <span class="mono">npx prisma generate</span> 재실행.</p></div>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">02</span>원격 DB 마이그레이션 보류</h4>
+<div class="detail-block"><h5>원인</h5><p><span class="mono">npx prisma migrate diff</span> 결과 연결된 DB가 원격 PostgreSQL(Supabase)임을 확인. RECRUITER 사용자가 존재하므로 User 컬럼 삭제는 위험.</p></div>
+<div class="detail-block"><h5>해결</h5><p>사용자 데이터 보존을 위해 User 모델은 유지하고, 데이터가 없는 <span class="mono">JobListing</span>의 <span class="mono">recruiterId</span> 관계만 스키마에서 제거. 마이그레이션은 사용자 확인 후 적용.</p></div>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">03</span>PowerShell <span class="mono">curl</span> 파라미터 오류</h4>
+<div class="detail-block"><h5>원인</h5><p>PowerShell에서 <span class="mono">curl</span>은 <span class="mono">Invoke-WebRequest</span> 별칭이라 <span class="mono">-w</span>, <span class="mono">-o</span> 같은 curl 옵션을 해석하지 못함.</p></div>
+<div class="detail-block"><h5>해결</h5><p><span class="mono">curl.exe</span>로 직접 호출하여 HTTP 상태 코드만 확인.</p></div>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">04</span>백그라운드 subagent의 <span class="mono">exec</span> 제한</h4>
+<div class="detail-block"><h5>원인</h5><p>백그라운드 모드에서는 <span class="mono">exec</span> 도구가 자동 거부되어 <span class="mono">npm run test</span>, <span class="mono">npx next build</span> 등 실행 불가.</p></div>
+<div class="detail-block"><h5>해결</h5><p>subagent는 코드 수정만 수행하고, 검증/빌드/커밋은 foreground에서 직접 실행.</p></div>
+</div>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">06</span>
+<span class="section-text">Git 커밋</span>
+</div>
+<ul>
+<li><span class="mono">949f6fc</span> Phase 6 UX 개선: loading/empty/error 상태 및 중복 제출 방지</li>
+<li><span class="mono">b9a7fd4</span> Phase 7 Recruiter 스키마 부분 정리: JobListing recruiter 관계 제거</li>
+</ul>
+<p>working tree clean, 배포는 별도 요청 없이 진행하지 않음.</p>
+</div>
+</div>
+</div>
 </body>
 </html>
