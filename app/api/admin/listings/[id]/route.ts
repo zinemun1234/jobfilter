@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/api';
+import { requireAdmin, sanitizeJobListing } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +32,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     },
   });
 
-  return NextResponse.json({ data: listing });
+  return NextResponse.json({ data: sanitizeJobListing(listing) });
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {

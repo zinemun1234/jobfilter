@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/api';
+import { requireAdmin, sanitizeNotification, sanitizeUser } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +24,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   });
 
   if (!user) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json({ data: user });
+  return NextResponse.json({ data: sanitizeUser(user) });
 }
 
 // PATCH /api/admin/users/[id] — change role
@@ -54,7 +54,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     select: { id: true, email: true, role: true },
   });
 
-  return NextResponse.json({ data: updated });
+  return NextResponse.json({ data: sanitizeUser(updated) });
 }
 
 // DELETE /api/admin/users/[id] — delete user
@@ -94,5 +94,5 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     data: { userId: params.id, title: title.trim(), body: body.trim() },
   });
 
-  return NextResponse.json({ data: notification }, { status: 201 });
+  return NextResponse.json({ data: sanitizeNotification(notification) }, { status: 201 });
 }

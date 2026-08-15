@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { portfolioSchema } from '@/lib/validations';
-import { ApiResponse } from '@/lib/api';
+import { ApiResponse, sanitizePortfolio } from '@/lib/api';
 import { analyzeGitHubRepo } from '@/lib/github-analysis';
 
 export async function GET(
@@ -27,11 +27,11 @@ export async function GET(
       return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 });
     }
 
-    const parsed = {
+    const parsed = sanitizePortfolio({
       ...portfolio,
       techStack: (() => { try { return JSON.parse(portfolio.techStack as string); } catch { return []; } })(),
       githubAnalysis: (() => { try { return portfolio.githubAnalysis ? JSON.parse(portfolio.githubAnalysis) : null; } catch { return null; } })(),
-    };
+    });
     return NextResponse.json({ data: parsed } as ApiResponse<typeof parsed>);
   } catch (error) {
     console.error('Failed to fetch portfolio:', error);
@@ -74,11 +74,11 @@ export async function PUT(
       },
     });
 
-    const result = {
+    const result = sanitizePortfolio({
       ...portfolio,
       techStack: (() => { try { return JSON.parse(portfolio.techStack as string); } catch { return []; } })(),
       githubAnalysis: (() => { try { return portfolio.githubAnalysis ? JSON.parse(portfolio.githubAnalysis) : null; } catch { return null; } })(),
-    };
+    });
     return NextResponse.json({ data: result } as ApiResponse<typeof result>);
   } catch (error) {
     console.error('Failed to update portfolio:', error);
@@ -122,11 +122,11 @@ export async function POST(
       },
     });
 
-    const result = {
+    const result = sanitizePortfolio({
       ...updated,
       techStack: (() => { try { return JSON.parse(updated.techStack as string); } catch { return []; } })(),
       githubAnalysis: analysis,
-    };
+    });
     return NextResponse.json({ data: result } as ApiResponse<typeof result>);
   } catch (error) {
     console.error('Failed to analyze portfolio:', error);

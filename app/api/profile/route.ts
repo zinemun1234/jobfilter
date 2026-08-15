@@ -6,7 +6,7 @@
  */
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { successResponse, getAuthSession, notFound, badRequest } from '@/lib/api';
+import { successResponse, getAuthSession, notFound, badRequest, sanitizeUser } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import { profileSchema } from '@/lib/validations/profile';
 
@@ -29,7 +29,7 @@ export async function GET() {
       return notFound('사용자를 찾을 수 없습니다.');
     }
 
-    return successResponse(user);
+    return successResponse(sanitizeUser(user));
   } catch (error) {
     return handleApiError(error);
   }
@@ -68,7 +68,7 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    return successResponse(updatedUser);
+    return successResponse(sanitizeUser(updatedUser));
   } catch (error) {
     return handleApiError(error);
   }

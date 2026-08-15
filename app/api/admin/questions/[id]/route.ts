@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/api';
+import { requireAdmin, sanitizeInterviewQuestion } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import { z } from 'zod';
 
@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     data,
   });
 
-  return NextResponse.json({ data: updated });
+  return NextResponse.json({ data: sanitizeInterviewQuestion(updated) });
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {

@@ -104,16 +104,116 @@ export async function requireAdminOrOwner(resourceUserId: string): Promise<{ use
   return { userId: session.user.id, role: session.user.role };
 }
 
-// 민감정보 제거 DTO
-export function sanitizeUser<T extends { password?: string }>(user: T): Omit<T, 'password'> {
-  const { password, ...rest } = user;
-  return rest;
+// 민감정보 제거 DTO (password / passwordHash 모두 제거)
+export function sanitizeUser<T extends object>(
+  user: T & { password?: string; passwordHash?: string }
+): Omit<T, 'password' | 'passwordHash'> {
+  const { password, passwordHash, ...rest } = user;
+  void password;
+  void passwordHash;
+  return rest as Omit<T, 'password' | 'passwordHash'>;
 }
 
-export function sanitizeJobPosting<T extends { userId?: string; user?: unknown }>(
+export function sanitizeJobPosting<T extends object>(
   job: T
 ): Omit<T, 'userId' | 'user'> {
-  const { userId, user, ...rest } = job as T & { userId?: string; user?: unknown };
+  const { userId, user, ...rest } = job as T & { userId?: unknown; user?: unknown };
+  void userId;
+  void user;
+  return rest as Omit<T, 'userId' | 'user'>;
+}
+
+export function sanitizePortfolio<T extends object>(
+  portfolio: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = portfolio as T & { userId?: unknown; user?: unknown };
+  void userId;
+  void user;
+  return rest as Omit<T, 'userId' | 'user'>;
+}
+
+export function sanitizeExperience<T extends object>(
+  experience: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = experience as T & { userId?: unknown; user?: unknown };
+  void userId;
+  void user;
+  return rest as Omit<T, 'userId' | 'user'>;
+}
+
+export function sanitizeInterviewQuestion<T extends object>(
+  question: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = question as T & { userId?: unknown; user?: unknown };
+  void userId;
+  void user;
+
+  const restRecord = rest as Record<string, unknown>;
+  if (Array.isArray(restRecord.answers)) {
+    restRecord.answers = restRecord.answers.map((answer) =>
+      sanitizeInterviewAnswer(answer as Record<string, unknown>)
+    );
+  }
+
+  return rest as Omit<T, 'userId' | 'user'>;
+}
+
+export function sanitizeInterviewAnswer<T extends object>(
+  answer: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = answer as T & { userId?: unknown; user?: unknown };
+  void userId;
+  void user;
+
+  const restRecord = rest as Record<string, unknown>;
+  if (restRecord.question && typeof restRecord.question === 'object' && !Array.isArray(restRecord.question)) {
+    restRecord.question = sanitizeInterviewQuestion(restRecord.question as Record<string, unknown>);
+  }
+
+  return rest as Omit<T, 'userId' | 'user'>;
+}
+
+export function sanitizeJobListing<T extends object>(
+  listing: T
+): Omit<T, 'recruiterId' | 'user'> {
+  const { recruiterId, user, ...rest } = listing as T & { recruiterId?: unknown; user?: unknown };
+  void recruiterId;
+  void user;
+  return rest as Omit<T, 'recruiterId' | 'user'>;
+}
+
+export function sanitizeNotification<T extends object>(
+  notification: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = notification as T & { userId?: unknown; user?: unknown };
+  void userId;
+  void user;
+  return rest as Omit<T, 'userId' | 'user'>;
+}
+
+export function sanitizeRoadmapItem<T extends object>(
+  item: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = item as T & { userId?: unknown; user?: unknown };
+  void userId;
+  void user;
+  return rest as Omit<T, 'userId' | 'user'>;
+}
+
+export function sanitizeCoverLetter<T extends object>(
+  letter: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = letter as T & { userId?: unknown; user?: unknown };
+  void userId;
+  void user;
+  return rest as Omit<T, 'userId' | 'user'>;
+}
+
+export function sanitizeEmploymentRecord<T extends object>(
+  record: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = record as T & { userId?: unknown; user?: unknown };
+  void userId;
   void user;
   return rest as Omit<T, 'userId' | 'user'>;
 }

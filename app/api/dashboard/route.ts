@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthSession, successResponse } from '@/lib/api';
+import { getAuthSession, successResponse, sanitizeJobPosting } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import {
   aggregateByStatus,
@@ -30,11 +30,13 @@ export async function GET(): Promise<NextResponse> {
     const typedRoadmap = roadmapItems as unknown as { status: SkillStatus }[];
 
     const applicationCounts = aggregateByStatus(typedPostings);
-    const urgentDeadlines = filterUrgentDeadlines(typedPostings, 7);
-    const roadmapProgress = calculateRoadmapProgress(typedRoadmap);
-    const upcomingInterviews = typedPostings.filter(
-      (p) => p.status === 'INTERVIEW'
+    const urgentDeadlines = filterUrgentDeadlines(typedPostings, 7).map((p) =>
+      sanitizeJobPosting(p)
     );
+    const roadmapProgress = calculateRoadmapProgress(typedRoadmap);
+    const upcomingInterviews = typedPostings
+      .filter((p) => p.status === 'INTERVIEW')
+      .map((p) => sanitizeJobPosting(p));
 
     const summary: DashboardSummary = {
       applicationCounts,

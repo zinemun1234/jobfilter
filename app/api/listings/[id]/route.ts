@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sanitizeJobListing } from '@/lib/api';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -15,10 +16,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const listing = await prisma.jobListing.findUnique({ where: { id: params.id } });
   if (!listing || !listing.isActive) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  return NextResponse.json({
-    data: {
-      ...listing,
-      tags: (() => { try { return listing.tags ? JSON.parse(listing.tags) : []; } catch { return []; } })(),
-    },
+  const sanitized = sanitizeJobListing({
+    ...listing,
+    tags: (() => { try { return listing.tags ? JSON.parse(listing.tags) : []; } catch { return []; } })(),
   });
+  return NextResponse.json({ data: sanitized });
 }

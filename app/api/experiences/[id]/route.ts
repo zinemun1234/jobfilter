@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthSession } from '@/lib/api';
+import { getAuthSession, sanitizeExperience } from '@/lib/api';
 import { prisma } from '@/lib/prisma';
 
 function parseTechnologies(value: string): string[] {
@@ -51,7 +51,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         ...(typeof body.jobId === 'string' && { jobId: body.jobId.trim() || null }),
       },
     });
-    return NextResponse.json({ data: serializeExperience(experience) });
+    return NextResponse.json({ data: sanitizeExperience(serializeExperience(experience)) });
   } catch {
     return NextResponse.json({ error: '경험을 수정하지 못했습니다.' }, { status: 500 });
   }

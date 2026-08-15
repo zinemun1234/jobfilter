@@ -4,7 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/api';
+import { requireAdmin, sanitizeJobListing } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import { notifyUsersOfNewListing } from '@/lib/notifications';
 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: 'desc' },
   });
 
-  return NextResponse.json({ data: listings });
+  return NextResponse.json({ data: listings.map((listing) => sanitizeJobListing(listing)) });
 }
 
 export async function POST(req: NextRequest) {
@@ -70,5 +70,5 @@ export async function POST(req: NextRequest) {
     // 알림 생성 실패는 공고 등록 응답에 영향을 주지 않음
   }
 
-  return NextResponse.json({ data: listing }, { status: 201 });
+  return NextResponse.json({ data: sanitizeJobListing(listing) }, { status: 201 });
 }

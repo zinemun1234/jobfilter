@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sanitizeCoverLetter } from '@/lib/api';
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -21,7 +22,10 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   if (!letter) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   return NextResponse.json({
-    data: { ...letter, items: (() => { try { return JSON.parse(letter.items); } catch { return []; } })() },
+    data: sanitizeCoverLetter({
+      ...letter,
+      items: (() => { try { return JSON.parse(letter.items); } catch { return []; } })(),
+    }),
   });
 }
 

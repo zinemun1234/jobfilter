@@ -4,7 +4,7 @@
  */
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/api';
+import { requireAdmin, sanitizeUser } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 
 export const dynamic = 'force-dynamic';
@@ -38,5 +38,5 @@ export async function GET() {
     orderBy: { createdAt: 'desc' },
   });
 
-  return NextResponse.json({ data: users });
+  return NextResponse.json({ data: users.map((user) => sanitizeUser(user)) });
 }

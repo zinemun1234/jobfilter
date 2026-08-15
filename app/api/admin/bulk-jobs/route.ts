@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/api';
+import { requireAdmin, sanitizeJobListing } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import * as XLSX from 'xlsx';
 
@@ -175,5 +175,5 @@ export async function GET() {
     orderBy: { createdAt: 'desc' },
   });
 
-  return NextResponse.json({ data: listings });
+  return NextResponse.json({ data: listings.map((listing) => sanitizeJobListing(listing)) });
 }

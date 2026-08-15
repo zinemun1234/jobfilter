@@ -27,9 +27,9 @@ export type QuestionCategory = 'TECHNICAL' | 'PERSONALITY' | 'SITUATIONAL';
 // Dashboard summary type
 export type DashboardSummary = {
   applicationCounts: Record<ApplicationStatus, number>;
-  upcomingInterviews: JobPosting[];
+  upcomingInterviews: Omit<JobPosting, 'userId'>[];
   roadmapProgress: number; // 0-100
-  urgentDeadlines: JobPosting[]; // 7일 이내 마감
+  urgentDeadlines: Omit<JobPosting, 'userId'>[]; // 7일 이내 마감
 };
 
 // Roadmap progress type

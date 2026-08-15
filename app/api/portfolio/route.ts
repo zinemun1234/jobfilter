@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { portfolioSchema } from '@/lib/validations';
-import { ApiResponse } from '@/lib/api';
+import { ApiResponse, sanitizePortfolio } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,11 +19,25 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const parsed = portfolios.map(p => ({
-      ...p,
-      techStack: (() => { try { return JSON.parse(p.techStack as string); } catch { return []; } })(),
-      githubAnalysis: (() => { try { return p.githubAnalysis ? JSON.parse(p.githubAnalysis) : null; } catch { return null; } })(),
-    }));
+    const parsed = portfolios.map((p) =>
+      sanitizePortfolio({
+        ...p,
+        techStack: (() => {
+          try {
+            return JSON.parse(p.techStack as string);
+          } catch {
+            return [];
+          }
+        })(),
+        githubAnalysis: (() => {
+          try {
+            return p.githubAnalysis ? JSON.parse(p.githubAnalysis) : null;
+          } catch {
+            return null;
+          }
+        })(),
+      })
+    );
 
     return NextResponse.json({ data: parsed });
   } catch (error) {
@@ -53,7 +67,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ data: portfolio } as ApiResponse<typeof portfolio>, { status: 201 });
+    const result = {
+      ...portfolio,
+      techStack: validatedData.techStack,
+      githubAnalysis: null,
+    };
+
+    return NextResponse.json({ data: sanitizePortfolio(result) } as ApiResponse<typeof result>, { status: 201 });
   } catch (error) {
     console.error('Failed to create portfolio:', error);
     if (error instanceof Error && error.name === 'ZodError') {

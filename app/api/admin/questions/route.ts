@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/api';
+import { requireAdmin, sanitizeInterviewQuestion } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import { z } from 'zod';
 
@@ -26,7 +26,7 @@ export async function GET() {
     include: { _count: { select: { answers: true } } },
   });
 
-  return NextResponse.json({ data: questions });
+  return NextResponse.json({ data: questions.map((q) => sanitizeInterviewQuestion(q)) });
 }
 
 export async function POST(req: NextRequest) {
@@ -43,5 +43,5 @@ export async function POST(req: NextRequest) {
     data: { ...data, isDefault: true, userId: null },
   });
 
-  return NextResponse.json({ data: question }, { status: 201 });
+  return NextResponse.json({ data: sanitizeInterviewQuestion(question) }, { status: 201 });
 }

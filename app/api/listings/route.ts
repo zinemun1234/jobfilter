@@ -13,6 +13,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { extractJobChecklist } from '@/lib/job-checklist';
 import { getListings } from '@/lib/server/listings';
+import { sanitizeJobPosting } from '@/lib/api';
 
 // 유저용: 활성 공고 목록 조회
 export async function GET(req: NextRequest) {
@@ -56,5 +57,5 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({ data: job }, { status: 201 });
+  return NextResponse.json({ data: sanitizeJobPosting(job) }, { status: 201 });
 }

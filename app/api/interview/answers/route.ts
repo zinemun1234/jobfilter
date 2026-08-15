@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { ApiResponse } from '@/lib/api';
+import { ApiResponse, sanitizeInterviewAnswer } from '@/lib/api';
 import { z } from 'zod';
 
 const answerSchema = z.object({
@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
       orderBy: { updatedAt: 'desc' },
     });
 
-    return NextResponse.json({ data: answers } as ApiResponse<typeof answers>);
+    const sanitized = answers.map((answer) => sanitizeInterviewAnswer(answer));
+    return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
     console.error('Failed to fetch interview answers:', error);
     return NextResponse.json({ error: 'Failed to fetch interview answers' }, { status: 500 });
@@ -116,7 +117,8 @@ export async function POST(request: NextRequest) {
       include: { question: true },
     });
 
-    return NextResponse.json({ data: answer } as ApiResponse<typeof answer>);
+    const sanitized = sanitizeInterviewAnswer(answer);
+    return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
     console.error('Failed to save interview answer:', error);
     if (error instanceof Error && error.name === 'ZodError') {

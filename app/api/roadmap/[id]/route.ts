@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { roadmapItemSchema } from '@/lib/validations';
-import { ApiResponse } from '@/lib/api';
+import { ApiResponse, sanitizeRoadmapItem } from '@/lib/api';
 
 export async function PUT(
   request: NextRequest,
@@ -43,7 +43,8 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json({ data: roadmapItem } as ApiResponse<typeof roadmapItem>);
+    const sanitized = sanitizeRoadmapItem(roadmapItem);
+    return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
     console.error('Failed to update roadmap item:', error);
     if (error instanceof Error && error.name === 'ZodError') {

@@ -200,7 +200,8 @@ export async function PATCH(
       data: { status: validatedStatus },
     });
 
-    return NextResponse.json({ data: sanitizeJobPosting(job) } as ApiResponse<ReturnType<typeof sanitizeJobPosting>>);
+    const sanitized = sanitizeJobPosting(job);
+    return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
     console.error('Failed to patch job:', error);
     if (error instanceof Error && error.name === 'ZodError') {

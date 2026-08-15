@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { successResponse, badRequest, conflict } from '@/lib/api';
+import { successResponse, badRequest, conflict, sanitizeUser } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import { registerSchema } from '@/lib/validations/auth';
 
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return successResponse(user, 201);
+    return successResponse(sanitizeUser(user), 201);
   } catch (error) {
     return handleApiError(error);
   }

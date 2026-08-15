@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/api';
+import { requireAdmin, sanitizeEmploymentRecord } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +26,7 @@ export async function GET() {
   const userMap = Object.fromEntries(users.map(u => [u.id, u]));
 
   return NextResponse.json({
-    data: records.map(r => ({ ...r, user: userMap[r.userId] ?? null })),
+    data: records.map((r) => ({ ...sanitizeEmploymentRecord(r), user: userMap[r.userId] ?? null })),
   });
 }
 
@@ -75,5 +75,5 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({ data: record }, { status: 201 });
+  return NextResponse.json({ data: sanitizeEmploymentRecord(record) }, { status: 201 });
 }

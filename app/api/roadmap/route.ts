@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { roadmapItemSchema } from '@/lib/validations';
-import { ApiResponse } from '@/lib/api';
+import { ApiResponse, sanitizeRoadmapItem } from '@/lib/api';
 import { getRoadmapTemplate } from '@/lib/roadmap-templates';
 
 export const dynamic = 'force-dynamic';
@@ -54,10 +54,12 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      const parsed = roadmapItems.map(item => ({
-        ...item,
-        referenceLinks: (() => { try { return JSON.parse(item.referenceLinks as string); } catch { return []; } })(),
-      }));
+      const parsed = roadmapItems.map((item) =>
+        sanitizeRoadmapItem({
+          ...item,
+          referenceLinks: (() => { try { return JSON.parse(item.referenceLinks as string); } catch { return []; } })(),
+        })
+      );
       return NextResponse.json({ data: parsed });
     } else {
       // 전체 로드맵 목록 조회
@@ -69,10 +71,12 @@ export async function GET(request: NextRequest) {
         ],
       });
 
-      const parsed = roadmapItems.map(item => ({
-        ...item,
-        referenceLinks: (() => { try { return JSON.parse(item.referenceLinks as string); } catch { return []; } })(),
-      }));
+      const parsed = roadmapItems.map((item) =>
+        sanitizeRoadmapItem({
+          ...item,
+          referenceLinks: (() => { try { return JSON.parse(item.referenceLinks as string); } catch { return []; } })(),
+        })
+      );
       return NextResponse.json({ data: parsed });
     }
   } catch (error) {
@@ -111,7 +115,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ data: roadmapItem } as ApiResponse<typeof roadmapItem>, { status: 201 });
+    const sanitized = sanitizeRoadmapItem(roadmapItem);
+    return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>, { status: 201 });
   } catch (error) {
     console.error('Failed to create roadmap item:', error);
     if (error instanceof Error && error.name === 'ZodError') {

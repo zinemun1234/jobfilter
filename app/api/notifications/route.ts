@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sanitizeNotification } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,8 @@ export async function GET() {
     take: 20,
   });
 
-  return NextResponse.json({ data: notifications });
+  const sanitized = notifications.map((n) => sanitizeNotification(n));
+  return NextResponse.json({ data: sanitized });
 }
 
 // PATCH — 전체 읽음 처리 (body 없음) or 개별 읽음 처리 (body: { id })

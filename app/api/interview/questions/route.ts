@@ -14,7 +14,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { interviewQuestionSchema } from '@/lib/validations';
-import { ApiResponse } from '@/lib/api';
+import { ApiResponse, sanitizeInterviewQuestion } from '@/lib/api';
 import { getInterviewQuestions, getRandomQuestions } from '@/lib/interview-questions';
 
 export async function GET(request: NextRequest) {
@@ -59,7 +59,8 @@ export async function GET(request: NextRequest) {
 
       // Shuffle combined list
       const combined = [...customQuestions, ...templateMapped].sort(() => Math.random() - 0.5);
-      return NextResponse.json({ data: combined.slice(0, count) } as ApiResponse<typeof combined>);
+      const sanitized = combined.map((q) => sanitizeInterviewQuestion(q as Record<string, unknown>));
+      return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
     }
 
     // Normal listing: default templates + custom questions
@@ -75,7 +76,8 @@ export async function GET(request: NextRequest) {
     }));
 
     const questions = [...defaultQuestions, ...customQuestions];
-    return NextResponse.json({ data: questions } as ApiResponse<typeof questions>);
+    const sanitized = questions.map((q) => sanitizeInterviewQuestion(q as Record<string, unknown>));
+    return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
     console.error('Failed to fetch interview questions:', error);
     return NextResponse.json({ error: 'Failed to fetch interview questions' }, { status: 500 });
@@ -100,7 +102,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ data: question } as ApiResponse<typeof question>, { status: 201 });
+    const sanitized = sanitizeInterviewQuestion(question);
+    return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>, { status: 201 });
   } catch (error) {
     console.error('Failed to create interview question:', error);
     if (error instanceof Error && error.name === 'ZodError') {

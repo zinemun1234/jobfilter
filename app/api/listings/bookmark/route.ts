@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sanitizeJobListing } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,11 +22,13 @@ export async function GET() {
   });
 
   return NextResponse.json({
-    data: bookmarks.map(b => ({
-      ...b.listing,
-      tags: (() => { try { return b.listing.tags ? JSON.parse(b.listing.tags) : []; } catch { return []; } })(),
-      bookmarkedAt: b.createdAt,
-    })),
+    data: bookmarks.map((b) =>
+      sanitizeJobListing({
+        ...b.listing,
+        tags: (() => { try { return b.listing.tags ? JSON.parse(b.listing.tags) : []; } catch { return []; } })(),
+        bookmarkedAt: b.createdAt,
+      })
+    ),
   });
 }
 
