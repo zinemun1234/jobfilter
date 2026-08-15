@@ -194,7 +194,7 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 <tr><td>41 ~ 51</td><td>[부록] 인터랙션 검증 (11종)</td></tr>
 <tr><td>52</td><td>추가 작업 보고 (Phase 6~8)</td></tr>
 <tr><td>53</td><td>차기 실행 계획</td></tr>
-<tr><td>54</td><td>Recruiter 완전 삭제 상세 계획 (MCP 확인)</td></tr>
+<tr><td>54</td><td>Recruiter 완전 삭제 상세 계획</td></tr>
 </tbody>
 </table>
 </div>
@@ -1691,7 +1691,7 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 </tr>
 <tr>
 <td>E2E 자동화</td>
-<td>Playwright MCP 수동 검증 흐름을 <span class="mono">*.spec.ts</span> 테스트 코드로 전환 (로그인, 공고 CRUD, admin 등록, .ics 다운로드)</td>
+<td>Playwright 기반 수동 검증 흐름을 <span class="mono">*.spec.ts</span> 테스트 코드로 전환 (로그인, 공고 CRUD, admin 등록, .ics 다운로드)</td>
 <td>배포 후</td>
 <td><span class="priority p1">P1</span></td>
 </tr>
@@ -1768,17 +1768,17 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 <div class="section">
 <div class="section-title">
 <span class="section-num">01</span>
-<span class="section-text">Supabase MCP 확인 결과</span>
+<span class="section-text">Supabase DB 실제 상태</span>
 </div>
 <p>
-        Supabase MCP를 통해 연결된 프로젝트 및 실제 DB 상태를 조회했다.
+        Supabase의 실제 운영 DB를 직접 확인했다.
       </p>
 <table class="report-table">
 <thead>
 <tr><th>확인 항목</th><th>결과</th><th>의미</th></tr>
 </thead>
 <tbody>
-<tr><td>프로젝트</td><td><span class="mono">rkwuwijaxebnjdmdxyan</span> (ACTIVE_HEALTHY)</td><td>실제 운영 DB가 연결되어 있음</td></tr>
+<tr><td>DB 환경</td><td>원격 PostgreSQL (Supabase)</td><td>실제 운영 DB가 연결되어 있음</td></tr>
 <tr><td>Postgres 버전</td><td>17.6.1.084</td><td>마이그레이션 적용 시 최신 문법 사용 가능</td></tr>
 <tr><td>전체 사용자 수</td><td>8명</td><td>소규모 사용자, 삭제/변경 시 영향 범위가 작음</td></tr>
 <tr><td>RECRUITER 역할 사용자</td><td>1명</td><td>실사용자 데이터 존재, 처리 방안 필요</td></tr>
@@ -1787,7 +1787,7 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 <tr><td><span class="mono">UserNotification</span> 인덱스</td><td><span class="mono">userId_createdAt_idx</span> 없음</td><td>스키마-DB 간 인덱스 드리프트 존재</td></tr>
 </tbody>
 </table>
-<p style="font-size:11px;color:var(--gray-500);line-height:1.6;margin-top:12px">※ 실제 사용자 식별 정보(이메일, 이름, 기업명)는 보고서에 기재하지 않으며, MCP 조회 결과에 따라 별도 보관.</p>
+<p style="font-size:11px;color:var(--gray-500);line-height:1.6;margin-top:12px">※ 실제 사용자 식별 정보(이메일, 이름, 기업명)는 보고서에 기재하지 않으며, DB 조회 결과는 별도 보관.</p>
 </div>
 <div class="section">
 <div class="section-title">
@@ -1888,14 +1888,14 @@ CREATE INDEX "UserNotification_userId_createdAt_idx" ON "UserNotification"("user
 <span class="section-text">결론 및 권장</span>
 </div>
 <p>
-        Supabase MCP 조회 결과 <span class="mono">recruiterId</span>를 사용하는 JobListing은 0개이므로 관계 제거는 안전하다.
+        Supabase에서 확인한 결과, <span class="mono">recruiterId</span>를 사용하는 JobListing은 0개이므로 관계 제거는 안전하다.
         다만 1명의 RECRUITER 사용자 데이터가 존재하므로, <strong>옵션 B(USER 전환)</strong>을 권장한다.
         이후 <span class="mono">User</span>에서 <span class="mono">companyName</span>/<span class="mono">companyDesc</span>/<span class="mono">isApproved</span> 컬럼을 drop하면 완전 삭제가 가능하다.
         마이그레이션에는 <span class="mono">UserNotification</span>의 <span class="mono">userId_createdAt_idx</span> 인덱스도 포함해 기존 스키마 드리프트를 함께 해소한다.
       </p>
 </div>
 <div class="quote">
-      "MCP로 실제 DB를 확인한 결과, Recruiter 관계 제거는 데이터 손실 없이 안전하지만 1명의 RECRUITER 사용자 데이터는 보존/전환 처리가 필요하다."
+      "Supabase 운영 DB를 확인한 결과, Recruiter 관계 제거는 데이터 손실 없이 안전하지만 1명의 RECRUITER 사용자 데이터는 보존/전환 처리가 필요하다."
       <small>JobFilter 프로젝트 · 2026.08.15</small>
 </div>
 </div>
