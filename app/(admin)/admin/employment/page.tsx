@@ -2,9 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Plus, Trash2, Search, Trophy } from 'lucide-react';
+import { Plus, Trash2, Search, Trophy, AlertCircle } from 'lucide-react';
 import { SlideOver } from '@/components/ui/slide-over';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 
 type User = { id: string; name: string | null; email: string; major: string | null };
@@ -45,7 +46,7 @@ export default function AdminEmploymentPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
-  const { data: records = [], isLoading } = useQuery({ queryKey: ['admin-employment'], queryFn: fetchRecords });
+  const { data: records = [], isLoading, error, refetch } = useQuery({ queryKey: ['admin-employment'], queryFn: fetchRecords });
   const { data: users = [] } = useQuery({ queryKey: ['admin-users'], queryFn: fetchUsers });
 
   const filtered = records.filter(r =>
@@ -76,13 +77,17 @@ export default function AdminEmploymentPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => fetch(`/api/admin/employment/${id}`, { method: 'DELETE' }),
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/employment/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed');
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-employment'] });
       qc.invalidateQueries({ queryKey: ['admin-stats-detail'] });
       toast.success('삭제되었습니다');
       setDeleteId(null);
     },
+    onError: () => toast.error('삭제에 실패했습니다'),
   });
 
   const f = (key: keyof typeof emptyForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -125,11 +130,20 @@ export default function AdminEmploymentPage() {
       <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-6 space-y-3 animate-pulse">{[...Array(4)].map((_, i) => <div key={i} className="h-14 bg-gray-100 rounded" />)}</div>
+        ) : error ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="취업 확정 목록을 불러오지 못했습니다"
+            description={error.message}
+            action={{ label: '다시 시도', onClick: () => refetch() }}
+          />
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <Trophy className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-            <p className="text-sm text-gray-400">등록된 취업 확정이 없습니다</p>
-          </div>
+          <EmptyState
+            icon={Trophy}
+            title={search ? '검색 결과가 없습니다' : '등록된 취업 확정이 없습니다'}
+            description={search ? '다른 키워드로 검색해 보세요' : '취업 확정 학생을 등록하면 통계에 반영됩니다'}
+            action={search ? { label: '검색 초기화', onClick: () => setSearch('') } : undefined}
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -166,8 +180,8 @@ export default function AdminEmploymentPage() {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex justify-end">
-                      <button type="button" onClick={() => setDeleteId(r.id)} aria-label="삭제"
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                      <button type="button" onClick={() => setDeleteId(r.id)} aria-label="삭제" disabled={deleteMutation.isPending}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -247,6 +261,7 @@ export default function AdminEmploymentPage() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="취업 확정 삭제"
         description="이 취업 확정 기록을 삭제하시겠습니까?"
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

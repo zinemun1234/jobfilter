@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, ExternalLink, Github, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, Github, RefreshCw, AlertCircle, FolderOpen } from 'lucide-react';
 import { SlideOver } from '@/components/ui/slide-over';
 import { PortfolioForm } from '@/components/portfolio/PortfolioForm';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import EmptyState from '@/components/ui/EmptyState';
+import SkeletonList from '@/components/ui/SkeletonList';
 import { toast } from 'sonner';
 import { Portfolio, JobPosting } from '@/lib/generated/prisma';
 import GitHubAnalysisCard from '@/components/portfolio/GitHubAnalysisCard';
@@ -31,7 +33,7 @@ export default function PortfolioPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: portfolios = [], isLoading } = useQuery({
+  const { data: portfolios = [], isLoading, error, refetch } = useQuery({
     queryKey: ['portfolios'],
     queryFn: fetchPortfolios,
   });
@@ -101,27 +103,21 @@ export default function PortfolioPage() {
 
         {/* 목록 */}
         {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-2xl border border-gray-200 bg-white p-6 animate-pulse space-y-3">
-                <div className="h-4 bg-gray-100 rounded w-2/3" />
-                <div className="h-3 bg-gray-100 rounded" />
-                <div className="h-3 bg-gray-100 rounded w-4/5" />
-              </div>
-            ))}
-          </div>
+          <SkeletonList count={3} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" cardClassName="h-40" />
+        ) : error ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="포트폴리오를 불러오지 못했습니다"
+            description={error.message}
+            action={{ label: '다시 시도', onClick: () => refetch() }}
+          />
         ) : portfolios.length === 0 ? (
-          <div className="rounded-2xl border border-gray-200 bg-white py-24 text-center shadow-sm">
-            <p className="text-sm text-gray-400 mb-1">등록된 포트폴리오가 없습니다</p>
-            <p className="text-xs text-gray-300 mb-4">프로젝트 경험을 추가하고 자소서에 활용하세요</p>
-            <button
-              type="button"
-              onClick={openCreate}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              첫 포트폴리오 추가하기
-            </button>
-          </div>
+          <EmptyState
+            icon={FolderOpen}
+            title="등록된 포트폴리오가 없습니다"
+            description="프로젝트 경험을 추가하고 자소서와 면접에 활용하세요"
+            action={{ label: '첫 포트폴리오 추가하기', onClick: openCreate }}
+          />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {portfolios.map((p) => {
@@ -155,7 +151,8 @@ export default function PortfolioPage() {
                         type="button"
                         aria-label="삭제"
                         onClick={() => setDeleteId(p.id)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        disabled={deleteMutation.isPending}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -252,6 +249,7 @@ export default function PortfolioPage() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="포트폴리오 삭제"
         description="이 포트폴리오를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

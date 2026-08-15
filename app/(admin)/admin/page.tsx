@@ -2,10 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import EmptyState from '@/components/ui/EmptyState';
 import {
   Users, Briefcase, TrendingUp, ClipboardList,
   UserPlus, ChevronRight, BarChart2, MessageSquare,
-  FileText, HelpCircle, Bell, ArrowUpRight,
+  FileText, HelpCircle, Bell, ArrowUpRight, AlertCircle,
 } from 'lucide-react';
 
 type StatsData = {
@@ -47,9 +48,22 @@ const COLOR_MAP: Record<string, { bg: string; icon: string; badge: string }> = {
 };
 
 export default function AdminHomePage() {
-  const { data, isLoading } = useQuery({ queryKey: ['admin-stats-detail'], queryFn: fetchStats });
+  const { data, isLoading, error, refetch } = useQuery({ queryKey: ['admin-stats-detail'], queryFn: fetchStats });
 
   const summary = data?.summary;
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <EmptyState
+          icon={AlertCircle}
+          title="통계 데이터를 불러오지 못했습니다"
+          description={error.message}
+          action={{ label: '다시 시도', onClick: () => refetch() }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">

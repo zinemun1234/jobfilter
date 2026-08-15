@@ -11,9 +11,11 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Plus, Trash2, Pencil, Check, X, Pin } from 'lucide-react';
+import { Plus, Trash2, Pencil, Check, X, Pin, AlertCircle, Megaphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import EmptyState from '@/components/ui/EmptyState';
+import SkeletonList from '@/components/ui/SkeletonList';
 
 type Notice = {
   id: string;
@@ -38,7 +40,7 @@ export default function AdminNoticesPage() {
   const [showForm, setShowForm] = useState(false);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', isPinned: false });
 
-  const { data: notices = [], isLoading } = useQuery({ queryKey: ['admin-notices'], queryFn: fetchNotices });
+  const { data: notices = [], isLoading, error, refetch } = useQuery({ queryKey: ['admin-notices'], queryFn: fetchNotices });
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -88,6 +90,8 @@ export default function AdminNoticesPage() {
     onError: () => toast.error('삭제에 실패했습니다'),
   });
 
+  const isMutating = createMutation.isPending || editMutation.isPending || deleteMutation.isPending;
+
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
       {/* 헤더 */}
@@ -99,7 +103,8 @@ export default function AdminNoticesPage() {
         <button
           type="button"
           onClick={() => setShowForm(v => !v)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+          disabled={isMutating}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <Plus className="w-4 h-4" /> 공지 작성
         </button>
@@ -143,11 +148,11 @@ export default function AdminNoticesPage() {
             <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">취소</button>
             <button
               type="button"
-              disabled={!newNotice.title.trim() || !newNotice.content.trim() || createMutation.isPending}
+              disabled={!newNotice.title.trim() || !newNotice.content.trim() || isMutating}
               onClick={() => createMutation.mutate()}
               className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
-              등록
+              {createMutation.isPending ? '등록 중...' : '등록'}
             </button>
           </div>
         </div>
@@ -156,13 +161,21 @@ export default function AdminNoticesPage() {
       {/* 공지 목록 */}
       <div className="space-y-3">
         {isLoading ? (
-          <div className="space-y-3 animate-pulse">
-            {[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-xl" />)}
-          </div>
+          <SkeletonList count={3} cardClassName="h-24" />
+        ) : error ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="공지를 불러오지 못했습니다"
+            description={error.message}
+            action={{ label: '다시 시도', onClick: () => refetch() }}
+          />
         ) : notices.length === 0 ? (
-          <div className="rounded-xl border border-gray-100 bg-white py-16 text-center shadow-sm">
-            <p className="text-sm text-gray-400">등록된 공지가 없습니다</p>
-          </div>
+          <EmptyState
+            icon={Megaphone}
+            title="등록된 공지가 없습니다"
+            description="새 공지를 작성하면 학생들에게 표시됩니다"
+            action={{ label: '첫 공지 작성하기', onClick: () => setShowForm(true) }}
+          />
         ) : (
           notices.map(n => (
             <div
@@ -198,7 +211,8 @@ export default function AdminNoticesPage() {
                       type="button"
                       aria-label="저장"
                       onClick={() => editMutation.mutate({ id: n.id, data: editData })}
-                      className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                      disabled={editMutation.isPending}
+                      className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50"
                     >
                       <Check className="w-4 h-4" />
                     </button>
@@ -216,7 +230,8 @@ export default function AdminNoticesPage() {
                         type="button"
                         aria-label={n.isPinned ? '고정 해제' : '상단 고정'}
                         onClick={() => editMutation.mutate({ id: n.id, data: { isPinned: !n.isPinned } })}
-                        className={`p-1.5 rounded-lg transition-colors ${n.isPinned ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'}`}
+                        disabled={editMutation.isPending}
+                        className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 ${n.isPinned ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'}`}
                       >
                         <Pin className="w-3.5 h-3.5" />
                       </button>
@@ -224,7 +239,8 @@ export default function AdminNoticesPage() {
                         type="button"
                         aria-label="공지 수정"
                         onClick={() => { setEditId(n.id); setEditData({ title: n.title, content: n.content }); }}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                        disabled={editMutation.isPending}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
@@ -232,7 +248,8 @@ export default function AdminNoticesPage() {
                         type="button"
                         aria-label="공지 삭제"
                         onClick={() => setDeleteId(n.id)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        disabled={deleteMutation.isPending}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -255,6 +272,7 @@ export default function AdminNoticesPage() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="공지 삭제"
         description="이 공지사항을 삭제하시겠습니까?"
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Edit2, MessageSquare } from 'lucide-react';
+import { Plus, Trash2, Edit2, MessageSquare, AlertCircle, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import EmptyState from '@/components/ui/EmptyState';
+import SkeletonList from '@/components/ui/SkeletonList';
 
 type Category = 'TECHNICAL' | 'PERSONALITY' | 'SITUATIONAL';
 type JobType = 'frontend' | 'backend' | 'common';
@@ -48,7 +50,7 @@ export default function AdminQuestionsPage() {
   const [newQuestion, setNewQuestion] = useState('');
   const [addOpen, setAddOpen] = useState(false);
 
-  const { data: questions = [], isLoading } = useQuery({
+  const { data: questions = [], isLoading, error, refetch } = useQuery({
     queryKey: ['admin-questions'],
     queryFn: fetchQuestions,
   });
@@ -105,6 +107,8 @@ export default function AdminQuestionsPage() {
     onError: () => toast.error('삭제에 실패했습니다'),
   });
 
+  const isMutating = addMutation.isPending || editMutation.isPending || deleteMutation.isPending;
+
   const filtered = filterCategory === 'all'
     ? questions
     : questions.filter(q => q.category === filterCategory);
@@ -127,7 +131,8 @@ export default function AdminQuestionsPage() {
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          disabled={isMutating}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <Plus className="w-4 h-4" /> 질문 추가
         </button>
@@ -206,7 +211,7 @@ export default function AdminQuestionsPage() {
             <button
               type="button"
               onClick={() => addMutation.mutate()}
-              disabled={!newQuestion.trim() || addMutation.isPending}
+              disabled={!newQuestion.trim() || isMutating}
               className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               {addMutation.isPending ? '추가 중...' : '추가'}
@@ -217,9 +222,21 @@ export default function AdminQuestionsPage() {
 
       {/* 질문 목록 */}
       {isLoading ? (
-        <div className="text-center py-12 text-sm text-gray-400">불러오는 중...</div>
+        <SkeletonList count={5} cardClassName="h-24" />
+      ) : error ? (
+        <EmptyState
+          icon={AlertCircle}
+          title="질문 목록을 불러오지 못했습니다"
+          description={error.message}
+          action={{ label: '다시 시도', onClick: () => refetch() }}
+        />
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-sm text-gray-400">질문이 없습니다</div>
+        <EmptyState
+          icon={HelpCircle}
+          title={filterCategory === 'all' ? '등록된 질문이 없습니다' : '해당 카테고리 질문이 없습니다'}
+          description="면접 질문을 추가하면 학생들이 연습할 수 있습니다"
+          action={{ label: '첫 질문 추가하기', onClick: () => setAddOpen(true) }}
+        />
       ) : (
         <div className="rounded-xl border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
           {filtered.map(q => {
@@ -237,14 +254,14 @@ export default function AdminQuestionsPage() {
                       className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                     />
                     <div className="flex gap-2 justify-end">
-                      <button type="button" onClick={() => setEditId(null)} className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700">취소</button>
+                      <button type="button" onClick={() => setEditId(null)} disabled={isMutating} className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 disabled:opacity-50">취소</button>
                       <button
                         type="button"
                         onClick={() => editMutation.mutate({ id: q.id, question: editText })}
                         disabled={editMutation.isPending}
                         className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50"
                       >
-                        저장
+                        {editMutation.isPending ? '저장 중...' : '저장'}
                       </button>
                     </div>
                   </div>
@@ -270,7 +287,8 @@ export default function AdminQuestionsPage() {
                       <button
                         type="button"
                         onClick={() => { setEditId(q.id); setEditText(q.question); }}
-                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        disabled={isMutating}
+                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
                         aria-label="수정"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -278,7 +296,8 @@ export default function AdminQuestionsPage() {
                       <button
                         type="button"
                         onClick={() => setDeleteId(q.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        disabled={deleteMutation.isPending}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                         aria-label="삭제"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -298,6 +317,7 @@ export default function AdminQuestionsPage() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="질문 삭제"
         description="이 질문을 삭제하면 학생들의 답변 기록도 함께 삭제됩니다."
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

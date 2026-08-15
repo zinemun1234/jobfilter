@@ -2,7 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Briefcase, FolderOpen, Map } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
+import { ArrowLeft, Briefcase, FolderOpen, Map, AlertCircle, Users } from 'lucide-react';
 import { STATUS_CONFIG } from '@/lib/status-config';
 
 type UserDetail = {
@@ -24,7 +25,7 @@ export default function AdminUserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const { data: user, isLoading } = useQuery<UserDetail>({
+  const { data: user, isLoading, error, refetch } = useQuery<UserDetail>({
     queryKey: ['admin-user', id],
     queryFn: async () => {
       const res = await fetch(`/api/admin/users/${id}`);
@@ -42,7 +43,32 @@ export default function AdminUserDetailPage() {
       </div>
     );
   }
-  if (!user) return null;
+
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        <EmptyState
+          icon={AlertCircle}
+          title="사용자 정보를 불러오지 못했습니다"
+          description={error.message}
+          action={{ label: '다시 시도', onClick: () => refetch() }}
+        />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        <EmptyState
+          icon={Users}
+          title="사용자를 찾을 수 없습니다"
+          description="존재하지 않거나 삭제된 사용자입니다"
+          action={{ label: '목록으로', href: '/admin/users' }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">

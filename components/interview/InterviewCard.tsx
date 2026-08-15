@@ -8,6 +8,7 @@ interface InterviewCardProps {
   onEdit: () => void;
   onDelete?: () => void;
   canDelete?: boolean;
+  isDeleting?: boolean;
 }
 
 const categoryConfig: Record<string, { label: string; dot: string }> = {
@@ -16,7 +17,7 @@ const categoryConfig: Record<string, { label: string; dot: string }> = {
   SITUATIONAL: { label: '상황',  dot: 'bg-amber-500' },
 };
 
-export function InterviewCard({ question, onEdit, onDelete, canDelete = false }: InterviewCardProps) {
+export function InterviewCard({ question, onEdit, onDelete, canDelete = false, isDeleting }: InterviewCardProps) {
   const hasAnswer = !!question.answers?.[0]?.answer;
   const cat = categoryConfig[question.category] ?? { label: question.category, dot: 'bg-gray-400' };
 
@@ -46,7 +47,8 @@ export function InterviewCard({ question, onEdit, onDelete, canDelete = false }:
             <button
               type="button"
               onClick={onDelete}
-              className="rounded p-1 text-gray-400 hover:text-red-500 transition-colors"
+              disabled={isDeleting}
+              className="rounded p-1 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
               aria-label="삭제"
             >
               <Trash2 className="h-3.5 w-3.5" />

@@ -7,12 +7,13 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Cell,
 } from 'recharts';
-import { Users, Briefcase, TrendingUp, ClipboardList, UserPlus, ArrowUpRight, BarChart2, Download, Printer } from 'lucide-react';
+import { Users, Briefcase, TrendingUp, ClipboardList, UserPlus, ArrowUpRight, BarChart2, Download, Printer, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { STATUS_CONFIG } from '@/lib/status-config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import EmptyState from '@/components/ui/EmptyState';
 
 type StatsData = {
   summary: {
@@ -75,7 +76,7 @@ export default function AdminStatsPage() {
     [searchParams, router, pathname],
   );
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-stats', from, to],
     queryFn: () => fetchStats(from, to),
     staleTime: 60000,
@@ -108,6 +109,19 @@ export default function AdminStatsPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {[...Array(3)].map((_, i) => <div key={i} className="h-72 bg-muted rounded-2xl" />)}
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <EmptyState
+          icon={AlertCircle}
+          title="통계 데이터를 불러오지 못했습니다"
+          description={error.message}
+          action={{ label: '다시 시도', onClick: () => refetch() }}
+        />
       </div>
     );
   }

@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { Tag, Merge, Search, ArrowLeft } from 'lucide-react';
+import { Tag, Merge, Search, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import EmptyState from '@/components/ui/EmptyState';
+import SkeletonList from '@/components/ui/SkeletonList';
 import { toast } from 'sonner';
 
 type KeywordStat = {
@@ -26,7 +28,7 @@ export default function AdminKeywordsPage() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
 
-  const { data: stats = [], isLoading } = useQuery({
+  const { data: stats = [], isLoading, error, refetch } = useQuery({
     queryKey: ['admin-keywords'],
     queryFn: fetchKeywords,
   });
@@ -98,9 +100,21 @@ export default function AdminKeywordsPage() {
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-gray-400">키워드를 불러오는 중...</p>
+          <SkeletonList count={6} cardClassName="h-24" />
+        ) : error ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="키워드를 불러오지 못했습니다"
+            description={error.message}
+            action={{ label: '다시 시도', onClick: () => refetch() }}
+          />
         ) : stats.length === 0 ? (
-          <p className="text-sm text-gray-400">활성 공고의 태그가 없습니다.</p>
+          <EmptyState
+            icon={Tag}
+            title="활성 공고의 태그가 없습니다"
+            description="공고에 태그를 등록하면 키워드 집계가 표시됩니다"
+            action={{ label: '공고 관리로', href: '/admin/listings' }}
+          />
         ) : (
           <div className="space-y-6">
             {Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0])).map(([category, items]) => (

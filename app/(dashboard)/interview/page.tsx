@@ -14,13 +14,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Play, Lightbulb, BookOpen } from 'lucide-react';
+import { Plus, Play, Lightbulb, BookOpen, AlertCircle, HelpCircle, MessageSquare } from 'lucide-react';
 import { InterviewCard } from '@/components/interview/InterviewCard';
 import { AnswerSlideOver } from '@/components/interview/AnswerSlideOver';
 import { CustomQuestionForm } from '@/components/interview/CustomQuestionForm';
 import { MockInterviewModal } from '@/components/interview/MockInterviewModal';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { toast } from 'sonner';
+import EmptyState from '@/components/ui/EmptyState';
+import SkeletonList from '@/components/ui/SkeletonList';
 import type { InterviewQuestion, InterviewAnswer } from '@/lib/generated/prisma';
 import type { QuestionCategory } from '@/types';
 
@@ -104,7 +106,7 @@ export default function InterviewPage() {
     onError: () => toast.error('질문 추가에 실패했습니다'),
   });
 
-  const { data: questions = [], isLoading } = useQuery({
+  const { data: questions = [], isLoading, error, refetch } = useQuery({
     queryKey: ['interview-questions', selectedCategory, selectedJobType],
     queryFn: () => fetchInterviewQuestions(
       selectedCategory === 'all' ? undefined : selectedCategory as QuestionCategory,
@@ -242,15 +244,14 @@ export default function InterviewPage() {
         </div>
 
         {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="rounded-2xl border border-gray-200 bg-white p-6 animate-pulse space-y-3">
-                <div className="h-3 bg-gray-100 rounded w-1/4" />
-                <div className="h-4 bg-gray-100 rounded" />
-                <div className="h-4 bg-gray-100 rounded w-4/5" />
-              </div>
-            ))}
-          </div>
+          <SkeletonList count={6} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" cardClassName="h-32" />
+        ) : error ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="면접 질문을 불러오지 못했습니다"
+            description={error.message}
+            action={{ label: '다시 시도', onClick: () => refetch() }}
+          />
         ) : (
           <div className="space-y-8">
             {/* 기본 질문 */}
@@ -260,7 +261,11 @@ export default function InterviewPage() {
                 <span className="text-xs text-gray-400">({defaultQuestions.length})</span>
               </div>
               {defaultQuestions.length === 0 ? (
-                <p className="text-sm text-gray-400">해당하는 질문이 없습니다</p>
+                <EmptyState
+                  icon={HelpCircle}
+                  title="해당하는 기본 질문이 없습니다"
+                  description="다른 카테고리나 직무를 선택해 보세요"
+                />
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {defaultQuestions.map(q => (
@@ -282,13 +287,12 @@ export default function InterviewPage() {
                 <span className="text-xs text-gray-400">({customQuestions.length})</span>
               </div>
               {customQuestions.length === 0 ? (
-                <div className="rounded-2xl border border-gray-200 bg-white py-16 text-center shadow-sm">
-                  <p className="text-sm text-gray-400 mb-1">커스텀 질문이 없습니다</p>
-                  <p className="text-xs text-gray-300 mb-4">직무에 맞는 질문을 추가하고 답변을 준비하세요</p>
-                  <Button size="sm" variant="outline" onClick={() => setCustomOpen(true)} className="rounded-xl">
-                    첫 질문 추가하기
-                  </Button>
-                </div>
+                <EmptyState
+                  icon={MessageSquare}
+                  title="커스텀 질문이 없습니다"
+                  description="직무에 맞는 질문을 추가하고 답변을 준비하세요"
+                  action={{ label: '첫 질문 추가하기', onClick: () => setCustomOpen(true) }}
+                />
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {customQuestions.map(q => (
@@ -297,6 +301,7 @@ export default function InterviewPage() {
                       question={q}
                       onEdit={() => setActiveQuestion(q)}
                       onDelete={() => setDeleteId(q.id)}
+                      isDeleting={deleteMutation.isPending}
                       canDelete
                     />
                   ))}
@@ -326,6 +331,7 @@ export default function InterviewPage() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="질문 삭제"
         description="이 질문을 삭제하시겠습니까?"
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Plus, Trash2, ChevronDown, ChevronUp, Edit2, FileText, Download, Link2, Zap, RefreshCw, TrendingUp, BarChart2, History, Target, Copy } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Edit2, FileText, Download, Link2, Zap, RefreshCw, TrendingUp, BarChart2, History, Target, Copy, AlertCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { SlideOver } from '@/components/ui/slide-over';
 import Link from 'next/link';
@@ -528,7 +528,7 @@ function InlineAnalysis({
 export default function CoverLetterPage() {
   const qc = useQueryClient();
   const searchParams = useSearchParams();
-  const { data: letters = [], isLoading } = useQuery({ queryKey: ['cover-letters'], queryFn: fetchLetters });
+  const { data: letters = [], isLoading, error, refetch } = useQuery({ queryKey: ['cover-letters'], queryFn: fetchLetters });
   const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: fetchJobs });
   const { data: listings = [] } = useQuery({ queryKey: ['listings'], queryFn: fetchListings });
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
@@ -610,18 +610,26 @@ export default function CoverLetterPage() {
   const save = useMutation({
     mutationFn: async () => {
       const body = { company, position, jobId: jobId || null, items };
-      if (editing) {
-        await fetch(`/api/cover-letter/${editing.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      } else {
-        await fetch('/api/cover-letter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      }
+      const res = editing
+        ? await fetch(`/api/cover-letter/${editing.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        : await fetch('/api/cover-letter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error('Failed');
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['cover-letters'] }); setOpen(false); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cover-letters'] });
+      setOpen(false);
+      toast.success(editing ? '자기소개서가 수정되었습니다' : '자기소개서가 추가되었습니다');
+    },
+    onError: () => toast.error('저장에 실패했습니다'),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => fetch(`/api/cover-letter/${id}`, { method: 'DELETE' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['cover-letters'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cover-letters'] });
+      toast.success('자기소개서가 삭제되었습니다');
+    },
+    onError: () => toast.error('삭제에 실패했습니다'),
   });
 
   function updateItem(i: number, field: keyof CLItem, val: string) {
@@ -682,6 +690,13 @@ export default function CoverLetterPage() {
 
       {isLoading ? (
         <SkeletonList count={3} cardClassName="h-28" />
+      ) : error ? (
+        <EmptyState
+          icon={AlertCircle}
+          title="자기소개서를 불러오지 못했습니다"
+          description={error.message}
+          action={{ label: '다시 시도', onClick: () => refetch() }}
+        />
       ) : letters.length === 0 ? (
         <EmptyState
           icon={FileText}
@@ -779,7 +794,7 @@ export default function CoverLetterPage() {
                     <button type="button" onClick={() => openEdit(l)} aria-label="수정" className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button type="button" onClick={() => del.mutate(l.id)} aria-label="삭제" className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                    <button type="button" onClick={() => del.mutate(l.id)} aria-label="삭제" disabled={del.isPending} className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50">
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <button type="button" onClick={() => setExpanded(isOpen ? null : l.id)} aria-label={isOpen ? '접기' : '펼치기'} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors">

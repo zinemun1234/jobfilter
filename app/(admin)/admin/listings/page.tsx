@@ -11,10 +11,11 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Plus, Trash2, Search, ExternalLink, Edit2, ToggleLeft, ToggleRight, Upload, CheckCircle, Tag } from 'lucide-react';
+import { Plus, Trash2, Search, ExternalLink, Edit2, ToggleLeft, ToggleRight, Upload, CheckCircle, Tag, AlertCircle, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { SlideOver } from '@/components/ui/slide-over';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 
 type Listing = {
@@ -58,7 +59,7 @@ export default function AdminListingsPage() {
 
   const [tab, setTab] = useState<'all' | 'pending'>('all');
 
-  const { data: listings = [], isLoading } = useQuery({
+  const { data: listings = [], isLoading, error, refetch } = useQuery({
     queryKey: ['admin-listings', search],
     queryFn: () => fetchListings(search),
   });
@@ -96,15 +97,14 @@ export default function AdminListingsPage() {
         ...form,
         tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
       };
-      if (editing) {
-        await fetch(`/api/admin/listings/${editing.id}`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-        });
-      } else {
-        await fetch('/api/admin/listings', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-        });
-      }
+      const res = editing
+        ? await fetch(`/api/admin/listings/${editing.id}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+          })
+        : await fetch('/api/admin/listings', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+          });
+      if (!res.ok) throw new Error('Failed');
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-listings'] });
@@ -116,24 +116,31 @@ export default function AdminListingsPage() {
 
   const toggleMutation = useMutation({
     mutationFn: async (l: Listing) => {
-      await fetch(`/api/admin/listings/${l.id}`, {
+      const res = await fetch(`/api/admin/listings/${l.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...l, isActive: !l.isActive }),
       });
+      if (!res.ok) throw new Error('Failed');
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-listings'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-listings'] });
+      toast.success('상태가 변경되었습니다');
+    },
+    onError: () => toast.error('상태 변경에 실패했습니다'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await fetch(`/api/admin/listings/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/listings/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed');
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-listings'] });
       toast.success('공고가 삭제되었습니다');
       setDeleteId(null);
     },
+    onError: () => toast.error('삭제에 실패했습니다'),
   });
 
   const f = (key: keyof typeof emptyForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -200,11 +207,20 @@ export default function AdminListingsPage() {
       <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-6 space-y-3 animate-pulse">{[...Array(4)].map((_, i) => <div key={i} className="h-14 bg-gray-100 rounded" />)}</div>
+        ) : error ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="공고 목록을 불러오지 못했습니다"
+            description={error.message}
+            action={{ label: '다시 시도', onClick: () => refetch() }}
+          />
         ) : listings.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-gray-400 mb-3">등록된 공고가 없습니다</p>
-            <button type="button" onClick={openNew} className="text-sm font-medium text-primary hover:underline">첫 공고 등록하기</button>
-          </div>
+          <EmptyState
+            icon={ClipboardList}
+            title={search ? '검색 결과가 없습니다' : '등록된 공고가 없습니다'}
+            description={search ? '다른 키워드로 검색해 보세요' : '첫 공고를 등록하면 목록이 표시됩니다'}
+            action={search ? { label: '검색 초기화', onClick: () => setSearch('') } : { label: '첫 공고 등록하기', onClick: openNew }}
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -257,7 +273,8 @@ export default function AdminListingsPage() {
                       <button
                         type="button"
                         onClick={() => toggleMutation.mutate(l)}
-                        className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 transition-colors ${l.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}
+                        disabled={toggleMutation.isPending}
+                        className={`inline-flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 transition-colors disabled:opacity-50 ${l.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}
                       >
                         {l.isActive ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
                         {l.isActive ? '활성' : '비활성'}
@@ -267,8 +284,8 @@ export default function AdminListingsPage() {
                       <div className="flex items-center justify-end gap-1">
                         {/* 구인자 등록 공고 승인 버튼 */}
                         {l.source === '구인자 직접등록' && !l.isActive && (
-                          <button type="button" onClick={() => toggleMutation.mutate(l)} aria-label="승인"
-                            className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200">
+                          <button type="button" onClick={() => toggleMutation.mutate(l)} aria-label="승인" disabled={toggleMutation.isPending}
+                            className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200 disabled:opacity-50">
                             <CheckCircle className="w-3.5 h-3.5" /> 승인
                           </button>
                         )}
@@ -282,8 +299,8 @@ export default function AdminListingsPage() {
                           className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button type="button" onClick={() => setDeleteId(l.id)} aria-label="삭제"
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                        <button type="button" onClick={() => setDeleteId(l.id)} aria-label="삭제" disabled={deleteMutation.isPending}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -385,6 +402,7 @@ export default function AdminListingsPage() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="공고 삭제"
         description="이 공고를 삭제하시겠습니까?"
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

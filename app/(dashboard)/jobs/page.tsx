@@ -40,7 +40,7 @@ export default function JobsPage() {
   const [bulkDeadline, setBulkDeadline] = useState('');
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  const { data: jobs = [], isLoading } = useQuery({
+  const { data: jobs = [], isLoading, error, refetch } = useQuery({
     queryKey: ['jobs', search],
     queryFn: () => fetchJobs(search),
   });
@@ -283,6 +283,14 @@ export default function JobsPage() {
               variant="row"
               className="divide-y divide-border"
             />
+          ) : error ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="공고 목록을 불러오지 못했습니다"
+              description={error.message}
+              action={{ label: '다시 시도', onClick: () => refetch() }}
+              className="border-0 bg-transparent shadow-none"
+            />
           ) : jobs.length === 0 ? (
             search ? (
               <EmptyState
@@ -390,7 +398,8 @@ export default function JobsPage() {
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setDeleteId(job.id); }}
                             aria-label="채용 공고 삭제"
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            disabled={deleteMutation.isPending}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -427,6 +436,7 @@ export default function JobsPage() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="채용 공고 삭제"
         description="이 채용 공고를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+        isPending={deleteMutation.isPending}
       />
 
       <DeleteConfirmDialog
@@ -435,6 +445,7 @@ export default function JobsPage() {
         onConfirm={confirmBulkDelete}
         title="선택한 공고 삭제"
         description={`${selectedIds.length}개의 채용 공고를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`}
+        isPending={bulkMutation.isPending}
       />
     </div>
   );

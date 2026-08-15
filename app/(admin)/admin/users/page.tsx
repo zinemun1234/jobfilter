@@ -11,9 +11,10 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Trash2, ChevronRight, Search, Bell } from 'lucide-react';
+import { Trash2, ChevronRight, Search, Bell, AlertCircle, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import EmptyState from '@/components/ui/EmptyState';
 import Link from 'next/link';
 
 type AdminUser = {
@@ -40,7 +41,7 @@ export default function AdminUsersPage() {
   const [notifyUser, setNotifyUser] = useState<AdminUser | null>(null);
   const [notifyForm, setNotifyForm] = useState({ title: '', body: '' });
 
-  const { data: users = [], isLoading } = useQuery({ queryKey: ['admin-users'], queryFn: fetchUsers });
+  const { data: users = [], isLoading, error, refetch } = useQuery({ queryKey: ['admin-users'], queryFn: fetchUsers });
 
   const roleMutation = useMutation({
     mutationFn: async ({ id, role }: { id: string; role: string }) => {
@@ -108,8 +109,20 @@ export default function AdminUsersPage() {
           <div className="p-6 space-y-3 animate-pulse">
             {[...Array(5)].map((_, i) => <div key={i} className="h-12 bg-gray-100 rounded" />)}
           </div>
+        ) : error ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="사용자 목록을 불러오지 못했습니다"
+            description={error.message}
+            action={{ label: '다시 시도', onClick: () => refetch() }}
+          />
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-sm text-gray-400">사용자가 없습니다</div>
+          <EmptyState
+            icon={Users}
+            title={search ? '검색 결과가 없습니다' : '사용자가 없습니다'}
+            description={search ? '다른 키워드로 검색해 보세요' : '가입한 학생이 아직 없습니다'}
+            action={search ? { label: '검색 초기화', onClick: () => setSearch('') } : undefined}
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -141,8 +154,9 @@ export default function AdminUsersPage() {
                     <select
                       value={u.role}
                       onChange={e => roleMutation.mutate({ id: u.id, role: e.target.value })}
+                      disabled={roleMutation.isPending}
                       aria-label="사용자 권한"
-                      className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                      className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed ${
                         u.role === 'ADMIN'
                           ? 'bg-red-50 text-red-600 focus:ring-red-300'
                           : 'bg-gray-100 text-gray-600 focus:ring-gray-300'
@@ -176,7 +190,8 @@ export default function AdminUsersPage() {
                         type="button"
                         aria-label="사용자 삭제"
                         onClick={() => setDeleteId(u.id)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        disabled={deleteMutation.isPending}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -195,6 +210,7 @@ export default function AdminUsersPage() {
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
         title="사용자 삭제"
         description="이 사용자와 모든 데이터를 삭제합니다. 되돌릴 수 없습니다."
+        isPending={deleteMutation.isPending}
       />
 
       {notifyUser && (

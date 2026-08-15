@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bell, CheckCheck, Megaphone } from 'lucide-react';
+import { Bell, CheckCheck, Megaphone, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/EmptyState';
@@ -50,7 +50,7 @@ export default function NotificationsPage() {
   const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>('all');
 
-  const { data: notifications = [], isLoading } = useQuery({
+  const { data: notifications = [], isLoading, error, refetch } = useQuery({
     queryKey: ['notifications'],
     queryFn: fetchNotifications,
   });
@@ -149,6 +149,13 @@ export default function NotificationsPage() {
 
       {isLoading ? (
         <SkeletonList count={4} cardClassName="h-20" />
+      ) : error ? (
+        <EmptyState
+          icon={AlertCircle}
+          title="알림을 불러오지 못했습니다"
+          description={error.message}
+          action={{ label: '다시 시도', onClick: () => refetch() }}
+        />
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={activeTab === 'notice' ? Megaphone : Bell}
@@ -165,7 +172,7 @@ export default function NotificationsPage() {
             <div
               key={n.id}
               onClick={() => {
-                if (!n.isRead) markOneRead.mutate(n.id);
+                if (!n.isRead && !markOneRead.isPending) markOneRead.mutate(n.id);
               }}
               className={`rounded-2xl border p-5 transition-colors ${
                 n.isRead

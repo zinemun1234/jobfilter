@@ -3,10 +3,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, Calendar, Edit, Trash2, Clock, UserPlus, Bell, Phone, Mail, X, Plus, FileText, ListChecks } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Calendar, Edit, Trash2, Clock, UserPlus, Bell, Phone, Mail, X, Plus, FileText, ListChecks, AlertCircle, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SlideOver } from '@/components/ui/slide-over';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
+import EmptyState from '@/components/ui/EmptyState';
 import { JobForm } from '@/components/jobs/JobForm';
 import JobChecklist from '@/components/jobs/JobChecklist';
 import type { ChecklistItem } from '@/lib/job-checklist';
@@ -57,7 +58,7 @@ export default function JobDetailPage() {
   // 팔로업 날짜 상태
   const [followUpDate, setFollowUpDate] = useState('');
 
-  const { data: job, isLoading } = useQuery({
+  const { data: job, isLoading, error, refetch } = useQuery({
     queryKey: ['job', id],
     queryFn: () => fetchJob(id),
   });
@@ -177,7 +178,31 @@ export default function JobDetailPage() {
     );
   }
 
-  if (!job) return null;
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        <EmptyState
+          icon={AlertCircle}
+          title="공고 정보를 불러오지 못했습니다"
+          description={error.message}
+          action={{ label: '다시 시도', onClick: () => refetch() }}
+        />
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        <EmptyState
+          icon={Briefcase}
+          title="공고를 찾을 수 없습니다"
+          description="존재하지 않거나 삭제된 공고입니다"
+          action={{ label: '목록으로', href: '/jobs' }}
+        />
+      </div>
+    );
+  }
 
   const cfg = STATUS_CONFIG[job.status as ApplicationStatus] ?? STATUS_CONFIG.PREPARING;
   const isRejected = job.status === 'REJECTED';
@@ -235,7 +260,7 @@ export default function JobDetailPage() {
           <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
             <Edit className="w-3.5 h-3.5 mr-1" /> 수정
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setDeleteOpen(true)} className="text-red-500 hover:text-red-700 border-red-200 hover:border-red-300">
+          <Button variant="outline" size="sm" onClick={() => setDeleteOpen(true)} disabled={deleteMutation.isPending} className="text-red-500 hover:text-red-700 border-red-200 hover:border-red-300 disabled:opacity-50">
             <Trash2 className="w-3.5 h-3.5 mr-1" /> 삭제
           </Button>
         </div>
@@ -440,7 +465,8 @@ export default function JobDetailPage() {
               <button
                 type="button"
                 onClick={() => followUpMutation.mutate('')}
-                className="ml-auto p-1 text-gray-300 hover:text-red-400 transition-colors"
+                disabled={followUpMutation.isPending}
+                className="ml-auto p-1 text-gray-300 hover:text-red-400 transition-colors disabled:opacity-50"
                 aria-label="팔로업 날짜 삭제"
               >
                 <X className="w-3.5 h-3.5" />
@@ -515,7 +541,8 @@ export default function JobDetailPage() {
                   <button
                     type="button"
                     onClick={() => contactMutation.mutate(contacts.filter((_, idx) => idx !== i))}
-                    className="p-1 text-gray-300 hover:text-red-400 transition-colors shrink-0"
+                    disabled={contactMutation.isPending}
+                    className="p-1 text-gray-300 hover:text-red-400 transition-colors shrink-0 disabled:opacity-50"
                     aria-label="담당자 삭제"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -642,6 +669,7 @@ export default function JobDetailPage() {
         onConfirm={() => deleteMutation.mutate()}
         title="채용 공고 삭제"
         description="이 채용 공고를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

@@ -15,6 +15,7 @@ interface DeleteConfirmDialogProps {
   onConfirm: () => void;
   title: string;
   description: string;
+  isPending?: boolean;
 }
 
 export function DeleteConfirmDialog({
@@ -23,6 +24,7 @@ export function DeleteConfirmDialog({
   onConfirm,
   title,
   description,
+  isPending,
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -33,8 +35,8 @@ export function DeleteConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>취소</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700">
-            삭제
+          <AlertDialogAction onClick={onConfirm} disabled={isPending} className="bg-red-600 hover:bg-red-700 disabled:opacity-50">
+            {isPending ? '삭제 중...' : '삭제'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

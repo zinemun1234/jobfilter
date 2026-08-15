@@ -2,11 +2,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Briefcase, Clock, Bell, CalendarCheck, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Briefcase, Clock, Bell, CalendarCheck, Download, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isToday, isBefore } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { toast } from 'sonner';
+import EmptyState from '@/components/ui/EmptyState';
 import { STATUS_CONFIG, STATUS_ORDER } from '@/lib/status-config';
 import { downloadIcs } from '@/lib/calendar-ics';
 
@@ -107,7 +108,7 @@ export default function CalendarPage() {
   const [selected, setSelected] = useState<Date | null>(null);
   const [interviewModal, setInterviewModal] = useState<JobPosting | null>(null);
 
-  const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: fetchJobs });
+  const { data: jobs = [], isLoading, error, refetch } = useQuery({ queryKey: ['jobs'], queryFn: fetchJobs });
 
   const activeJobs = jobs.filter(j => !['FINAL_PASS', 'REJECTED'].includes(j.status));
   const jobsWithDeadline = activeJobs.filter(j => j.deadline);
@@ -153,6 +154,39 @@ export default function CalendarPage() {
       start: new Date(j.interviewAt!),
     }));
     downloadIcs(events, `jobfilter-interviews-${format(current, 'yyyy-MM')}.ics`);
+  }
+
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+        <div className="border-b border-gray-200 pb-6">
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Calendar</p>
+          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">지원 일정 캘린더</h1>
+          <p className="text-sm text-gray-500 mt-1.5">마감일과 면접 일정을 한눈에 확인하세요</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6 animate-pulse">
+          <div className="md:col-span-2 h-[520px] bg-gray-100 rounded-2xl" />
+          <div className="space-y-4">
+            <div className="h-40 bg-gray-100 rounded-2xl" />
+            <div className="h-40 bg-gray-100 rounded-2xl" />
+            <div className="h-40 bg-gray-100 rounded-2xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <EmptyState
+          icon={AlertCircle}
+          title="일정 정보를 불러오지 못했습니다"
+          description={error.message}
+          action={{ label: '다시 시도', onClick: () => refetch() }}
+        />
+      </div>
+    );
   }
 
   return (
