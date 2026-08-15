@@ -2142,7 +2142,6 @@ export namespace Prisma {
     experiences: number
     notifications: number
     bookmarks: number
-    recruitListings: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2155,7 +2154,6 @@ export namespace Prisma {
     experiences?: boolean | UserCountOutputTypeCountExperiencesArgs
     notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
     bookmarks?: boolean | UserCountOutputTypeCountBookmarksArgs
-    recruitListings?: boolean | UserCountOutputTypeCountRecruitListingsArgs
   }
 
   // Custom InputTypes
@@ -2230,13 +2228,6 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountBookmarksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: JobBookmarkWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountRecruitListingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: JobListingWhereInput
   }
 
 
@@ -2641,7 +2632,6 @@ export namespace Prisma {
     experiences?: boolean | User$experiencesArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     bookmarks?: boolean | User$bookmarksArgs<ExtArgs>
-    recruitListings?: boolean | User$recruitListingsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2687,7 +2677,6 @@ export namespace Prisma {
     experiences?: boolean | User$experiencesArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     bookmarks?: boolean | User$bookmarksArgs<ExtArgs>
-    recruitListings?: boolean | User$recruitListingsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2704,7 +2693,6 @@ export namespace Prisma {
       experiences: Prisma.$ExperiencePayload<ExtArgs>[]
       notifications: Prisma.$UserNotificationPayload<ExtArgs>[]
       bookmarks: Prisma.$JobBookmarkPayload<ExtArgs>[]
-      recruitListings: Prisma.$JobListingPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3093,7 +3081,6 @@ export namespace Prisma {
     experiences<T extends User$experiencesArgs<ExtArgs> = {}>(args?: Subset<T, User$experiencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findMany"> | Null>
     notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserNotificationPayload<ExtArgs>, T, "findMany"> | Null>
     bookmarks<T extends User$bookmarksArgs<ExtArgs> = {}>(args?: Subset<T, User$bookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobBookmarkPayload<ExtArgs>, T, "findMany"> | Null>
-    recruitListings<T extends User$recruitListingsArgs<ExtArgs> = {}>(args?: Subset<T, User$recruitListingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobListingPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3627,26 +3614,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: JobBookmarkScalarFieldEnum | JobBookmarkScalarFieldEnum[]
-  }
-
-  /**
-   * User.recruitListings
-   */
-  export type User$recruitListingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobListing
-     */
-    select?: JobListingSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobListingInclude<ExtArgs> | null
-    where?: JobListingWhereInput
-    orderBy?: JobListingOrderByWithRelationInput | JobListingOrderByWithRelationInput[]
-    cursor?: JobListingWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: JobListingScalarFieldEnum | JobListingScalarFieldEnum[]
   }
 
   /**
@@ -12915,7 +12882,6 @@ export namespace Prisma {
     tags: string | null
     source: string | null
     isActive: boolean | null
-    recruiterId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12935,7 +12901,6 @@ export namespace Prisma {
     tags: string | null
     source: string | null
     isActive: boolean | null
-    recruiterId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -12955,7 +12920,6 @@ export namespace Prisma {
     tags: number
     source: number
     isActive: number
-    recruiterId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -12977,7 +12941,6 @@ export namespace Prisma {
     tags?: true
     source?: true
     isActive?: true
-    recruiterId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -12997,7 +12960,6 @@ export namespace Prisma {
     tags?: true
     source?: true
     isActive?: true
-    recruiterId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13017,7 +12979,6 @@ export namespace Prisma {
     tags?: true
     source?: true
     isActive?: true
-    recruiterId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -13110,7 +13071,6 @@ export namespace Prisma {
     tags: string | null
     source: string | null
     isActive: boolean
-    recruiterId: string | null
     createdAt: Date
     updatedAt: Date
     _count: JobListingCountAggregateOutputType | null
@@ -13147,10 +13107,8 @@ export namespace Prisma {
     tags?: boolean
     source?: boolean
     isActive?: boolean
-    recruiterId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    recruiter?: boolean | JobListing$recruiterArgs<ExtArgs>
     bookmarks?: boolean | JobListing$bookmarksArgs<ExtArgs>
     _count?: boolean | JobListingCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["jobListing"]>
@@ -13170,10 +13128,8 @@ export namespace Prisma {
     tags?: boolean
     source?: boolean
     isActive?: boolean
-    recruiterId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    recruiter?: boolean | JobListing$recruiterArgs<ExtArgs>
   }, ExtArgs["result"]["jobListing"]>
 
   export type JobListingSelectScalar = {
@@ -13191,24 +13147,19 @@ export namespace Prisma {
     tags?: boolean
     source?: boolean
     isActive?: boolean
-    recruiterId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
   export type JobListingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    recruiter?: boolean | JobListing$recruiterArgs<ExtArgs>
     bookmarks?: boolean | JobListing$bookmarksArgs<ExtArgs>
     _count?: boolean | JobListingCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type JobListingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    recruiter?: boolean | JobListing$recruiterArgs<ExtArgs>
-  }
+  export type JobListingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $JobListingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "JobListing"
     objects: {
-      recruiter: Prisma.$UserPayload<ExtArgs> | null
       bookmarks: Prisma.$JobBookmarkPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -13226,7 +13177,6 @@ export namespace Prisma {
       tags: string | null
       source: string | null
       isActive: boolean
-      recruiterId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["jobListing"]>
@@ -13593,7 +13543,6 @@ export namespace Prisma {
    */
   export interface Prisma__JobListingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    recruiter<T extends JobListing$recruiterArgs<ExtArgs> = {}>(args?: Subset<T, JobListing$recruiterArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     bookmarks<T extends JobListing$bookmarksArgs<ExtArgs> = {}>(args?: Subset<T, JobListing$bookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobBookmarkPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -13638,7 +13587,6 @@ export namespace Prisma {
     readonly tags: FieldRef<"JobListing", 'String'>
     readonly source: FieldRef<"JobListing", 'String'>
     readonly isActive: FieldRef<"JobListing", 'Boolean'>
-    readonly recruiterId: FieldRef<"JobListing", 'String'>
     readonly createdAt: FieldRef<"JobListing", 'DateTime'>
     readonly updatedAt: FieldRef<"JobListing", 'DateTime'>
   }
@@ -13862,10 +13810,6 @@ export namespace Prisma {
      */
     data: JobListingCreateManyInput | JobListingCreateManyInput[]
     skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobListingIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -13956,21 +13900,6 @@ export namespace Prisma {
      * Filter which JobListings to delete
      */
     where?: JobListingWhereInput
-  }
-
-  /**
-   * JobListing.recruiter
-   */
-  export type JobListing$recruiterArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserInclude<ExtArgs> | null
-    where?: UserWhereInput
   }
 
   /**
@@ -18818,7 +18747,6 @@ export namespace Prisma {
     tags: 'tags',
     source: 'source',
     isActive: 'isActive',
-    recruiterId: 'recruiterId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -19012,7 +18940,6 @@ export namespace Prisma {
     experiences?: ExperienceListRelationFilter
     notifications?: UserNotificationListRelationFilter
     bookmarks?: JobBookmarkListRelationFilter
-    recruitListings?: JobListingListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -19038,7 +18965,6 @@ export namespace Prisma {
     experiences?: ExperienceOrderByRelationAggregateInput
     notifications?: UserNotificationOrderByRelationAggregateInput
     bookmarks?: JobBookmarkOrderByRelationAggregateInput
-    recruitListings?: JobListingOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -19067,7 +18993,6 @@ export namespace Prisma {
     experiences?: ExperienceListRelationFilter
     notifications?: UserNotificationListRelationFilter
     bookmarks?: JobBookmarkListRelationFilter
-    recruitListings?: JobListingListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -19849,10 +19774,8 @@ export namespace Prisma {
     tags?: StringNullableFilter<"JobListing"> | string | null
     source?: StringNullableFilter<"JobListing"> | string | null
     isActive?: BoolFilter<"JobListing"> | boolean
-    recruiterId?: StringNullableFilter<"JobListing"> | string | null
     createdAt?: DateTimeFilter<"JobListing"> | Date | string
     updatedAt?: DateTimeFilter<"JobListing"> | Date | string
-    recruiter?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     bookmarks?: JobBookmarkListRelationFilter
   }
 
@@ -19871,10 +19794,8 @@ export namespace Prisma {
     tags?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     isActive?: SortOrder
-    recruiterId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    recruiter?: UserOrderByWithRelationInput
     bookmarks?: JobBookmarkOrderByRelationAggregateInput
   }
 
@@ -19896,10 +19817,8 @@ export namespace Prisma {
     tags?: StringNullableFilter<"JobListing"> | string | null
     source?: StringNullableFilter<"JobListing"> | string | null
     isActive?: BoolFilter<"JobListing"> | boolean
-    recruiterId?: StringNullableFilter<"JobListing"> | string | null
     createdAt?: DateTimeFilter<"JobListing"> | Date | string
     updatedAt?: DateTimeFilter<"JobListing"> | Date | string
-    recruiter?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     bookmarks?: JobBookmarkListRelationFilter
   }, "id">
 
@@ -19918,7 +19837,6 @@ export namespace Prisma {
     tags?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     isActive?: SortOrder
-    recruiterId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: JobListingCountOrderByAggregateInput
@@ -19944,7 +19862,6 @@ export namespace Prisma {
     tags?: StringNullableWithAggregatesFilter<"JobListing"> | string | null
     source?: StringNullableWithAggregatesFilter<"JobListing"> | string | null
     isActive?: BoolWithAggregatesFilter<"JobListing"> | boolean
-    recruiterId?: StringNullableWithAggregatesFilter<"JobListing"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"JobListing"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"JobListing"> | Date | string
   }
@@ -20293,7 +20210,6 @@ export namespace Prisma {
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -20319,7 +20235,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUpdateInput = {
@@ -20345,7 +20260,6 @@ export namespace Prisma {
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -20371,7 +20285,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -21216,7 +21129,6 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    recruiter?: UserCreateNestedOneWithoutRecruitListingsInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutListingInput
   }
 
@@ -21235,7 +21147,6 @@ export namespace Prisma {
     tags?: string | null
     source?: string | null
     isActive?: boolean
-    recruiterId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutListingInput
@@ -21258,7 +21169,6 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    recruiter?: UserUpdateOneWithoutRecruitListingsNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutListingNestedInput
   }
 
@@ -21277,7 +21187,6 @@ export namespace Prisma {
     tags?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    recruiterId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutListingNestedInput
@@ -21298,7 +21207,6 @@ export namespace Prisma {
     tags?: string | null
     source?: string | null
     isActive?: boolean
-    recruiterId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21337,7 +21245,6 @@ export namespace Prisma {
     tags?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    recruiterId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21789,12 +21696,6 @@ export namespace Prisma {
     none?: JobBookmarkWhereInput
   }
 
-  export type JobListingListRelationFilter = {
-    every?: JobListingWhereInput
-    some?: JobListingWhereInput
-    none?: JobListingWhereInput
-  }
-
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -21833,10 +21734,6 @@ export namespace Prisma {
   }
 
   export type JobBookmarkOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type JobListingOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -22448,7 +22345,6 @@ export namespace Prisma {
     tags?: SortOrder
     source?: SortOrder
     isActive?: SortOrder
-    recruiterId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -22468,7 +22364,6 @@ export namespace Prisma {
     tags?: SortOrder
     source?: SortOrder
     isActive?: SortOrder
-    recruiterId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -22488,7 +22383,6 @@ export namespace Prisma {
     tags?: SortOrder
     source?: SortOrder
     isActive?: SortOrder
-    recruiterId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -22722,13 +22616,6 @@ export namespace Prisma {
     connect?: JobBookmarkWhereUniqueInput | JobBookmarkWhereUniqueInput[]
   }
 
-  export type JobListingCreateNestedManyWithoutRecruiterInput = {
-    create?: XOR<JobListingCreateWithoutRecruiterInput, JobListingUncheckedCreateWithoutRecruiterInput> | JobListingCreateWithoutRecruiterInput[] | JobListingUncheckedCreateWithoutRecruiterInput[]
-    connectOrCreate?: JobListingCreateOrConnectWithoutRecruiterInput | JobListingCreateOrConnectWithoutRecruiterInput[]
-    createMany?: JobListingCreateManyRecruiterInputEnvelope
-    connect?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-  }
-
   export type PortfolioUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<PortfolioCreateWithoutUserInput, PortfolioUncheckedCreateWithoutUserInput> | PortfolioCreateWithoutUserInput[] | PortfolioUncheckedCreateWithoutUserInput[]
     connectOrCreate?: PortfolioCreateOrConnectWithoutUserInput | PortfolioCreateOrConnectWithoutUserInput[]
@@ -22790,13 +22677,6 @@ export namespace Prisma {
     connectOrCreate?: JobBookmarkCreateOrConnectWithoutUserInput | JobBookmarkCreateOrConnectWithoutUserInput[]
     createMany?: JobBookmarkCreateManyUserInputEnvelope
     connect?: JobBookmarkWhereUniqueInput | JobBookmarkWhereUniqueInput[]
-  }
-
-  export type JobListingUncheckedCreateNestedManyWithoutRecruiterInput = {
-    create?: XOR<JobListingCreateWithoutRecruiterInput, JobListingUncheckedCreateWithoutRecruiterInput> | JobListingCreateWithoutRecruiterInput[] | JobListingUncheckedCreateWithoutRecruiterInput[]
-    connectOrCreate?: JobListingCreateOrConnectWithoutRecruiterInput | JobListingCreateOrConnectWithoutRecruiterInput[]
-    createMany?: JobListingCreateManyRecruiterInputEnvelope
-    connect?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -22941,20 +22821,6 @@ export namespace Prisma {
     deleteMany?: JobBookmarkScalarWhereInput | JobBookmarkScalarWhereInput[]
   }
 
-  export type JobListingUpdateManyWithoutRecruiterNestedInput = {
-    create?: XOR<JobListingCreateWithoutRecruiterInput, JobListingUncheckedCreateWithoutRecruiterInput> | JobListingCreateWithoutRecruiterInput[] | JobListingUncheckedCreateWithoutRecruiterInput[]
-    connectOrCreate?: JobListingCreateOrConnectWithoutRecruiterInput | JobListingCreateOrConnectWithoutRecruiterInput[]
-    upsert?: JobListingUpsertWithWhereUniqueWithoutRecruiterInput | JobListingUpsertWithWhereUniqueWithoutRecruiterInput[]
-    createMany?: JobListingCreateManyRecruiterInputEnvelope
-    set?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-    disconnect?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-    delete?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-    connect?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-    update?: JobListingUpdateWithWhereUniqueWithoutRecruiterInput | JobListingUpdateWithWhereUniqueWithoutRecruiterInput[]
-    updateMany?: JobListingUpdateManyWithWhereWithoutRecruiterInput | JobListingUpdateManyWithWhereWithoutRecruiterInput[]
-    deleteMany?: JobListingScalarWhereInput | JobListingScalarWhereInput[]
-  }
-
   export type PortfolioUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<PortfolioCreateWithoutUserInput, PortfolioUncheckedCreateWithoutUserInput> | PortfolioCreateWithoutUserInput[] | PortfolioUncheckedCreateWithoutUserInput[]
     connectOrCreate?: PortfolioCreateOrConnectWithoutUserInput | PortfolioCreateOrConnectWithoutUserInput[]
@@ -23079,20 +22945,6 @@ export namespace Prisma {
     update?: JobBookmarkUpdateWithWhereUniqueWithoutUserInput | JobBookmarkUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: JobBookmarkUpdateManyWithWhereWithoutUserInput | JobBookmarkUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: JobBookmarkScalarWhereInput | JobBookmarkScalarWhereInput[]
-  }
-
-  export type JobListingUncheckedUpdateManyWithoutRecruiterNestedInput = {
-    create?: XOR<JobListingCreateWithoutRecruiterInput, JobListingUncheckedCreateWithoutRecruiterInput> | JobListingCreateWithoutRecruiterInput[] | JobListingUncheckedCreateWithoutRecruiterInput[]
-    connectOrCreate?: JobListingCreateOrConnectWithoutRecruiterInput | JobListingCreateOrConnectWithoutRecruiterInput[]
-    upsert?: JobListingUpsertWithWhereUniqueWithoutRecruiterInput | JobListingUpsertWithWhereUniqueWithoutRecruiterInput[]
-    createMany?: JobListingCreateManyRecruiterInputEnvelope
-    set?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-    disconnect?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-    delete?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-    connect?: JobListingWhereUniqueInput | JobListingWhereUniqueInput[]
-    update?: JobListingUpdateWithWhereUniqueWithoutRecruiterInput | JobListingUpdateWithWhereUniqueWithoutRecruiterInput[]
-    updateMany?: JobListingUpdateManyWithWhereWithoutRecruiterInput | JobListingUpdateManyWithWhereWithoutRecruiterInput[]
-    deleteMany?: JobListingScalarWhereInput | JobListingScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutPortfoliosInput = {
@@ -23615,12 +23467,6 @@ export namespace Prisma {
     update?: XOR<XOR<CoverLetterUpdateToOneWithWhereWithoutVersionsInput, CoverLetterUpdateWithoutVersionsInput>, CoverLetterUncheckedUpdateWithoutVersionsInput>
   }
 
-  export type UserCreateNestedOneWithoutRecruitListingsInput = {
-    create?: XOR<UserCreateWithoutRecruitListingsInput, UserUncheckedCreateWithoutRecruitListingsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutRecruitListingsInput
-    connect?: UserWhereUniqueInput
-  }
-
   export type JobBookmarkCreateNestedManyWithoutListingInput = {
     create?: XOR<JobBookmarkCreateWithoutListingInput, JobBookmarkUncheckedCreateWithoutListingInput> | JobBookmarkCreateWithoutListingInput[] | JobBookmarkUncheckedCreateWithoutListingInput[]
     connectOrCreate?: JobBookmarkCreateOrConnectWithoutListingInput | JobBookmarkCreateOrConnectWithoutListingInput[]
@@ -23633,16 +23479,6 @@ export namespace Prisma {
     connectOrCreate?: JobBookmarkCreateOrConnectWithoutListingInput | JobBookmarkCreateOrConnectWithoutListingInput[]
     createMany?: JobBookmarkCreateManyListingInputEnvelope
     connect?: JobBookmarkWhereUniqueInput | JobBookmarkWhereUniqueInput[]
-  }
-
-  export type UserUpdateOneWithoutRecruitListingsNestedInput = {
-    create?: XOR<UserCreateWithoutRecruitListingsInput, UserUncheckedCreateWithoutRecruitListingsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutRecruitListingsInput
-    upsert?: UserUpsertWithoutRecruitListingsInput
-    disconnect?: UserWhereInput | boolean
-    delete?: UserWhereInput | boolean
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRecruitListingsInput, UserUpdateWithoutRecruitListingsInput>, UserUncheckedUpdateWithoutRecruitListingsInput>
   }
 
   export type JobBookmarkUpdateManyWithoutListingNestedInput = {
@@ -24226,56 +24062,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type JobListingCreateWithoutRecruiterInput = {
-    id?: string
-    company: string
-    position: string
-    location?: string | null
-    career?: string | null
-    education?: string | null
-    employType?: string | null
-    salary?: string | null
-    deadline?: Date | string | null
-    url?: string | null
-    description?: string | null
-    tags?: string | null
-    source?: string | null
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    bookmarks?: JobBookmarkCreateNestedManyWithoutListingInput
-  }
-
-  export type JobListingUncheckedCreateWithoutRecruiterInput = {
-    id?: string
-    company: string
-    position: string
-    location?: string | null
-    career?: string | null
-    education?: string | null
-    employType?: string | null
-    salary?: string | null
-    deadline?: Date | string | null
-    url?: string | null
-    description?: string | null
-    tags?: string | null
-    source?: string | null
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutListingInput
-  }
-
-  export type JobListingCreateOrConnectWithoutRecruiterInput = {
-    where: JobListingWhereUniqueInput
-    create: XOR<JobListingCreateWithoutRecruiterInput, JobListingUncheckedCreateWithoutRecruiterInput>
-  }
-
-  export type JobListingCreateManyRecruiterInputEnvelope = {
-    data: JobListingCreateManyRecruiterInput | JobListingCreateManyRecruiterInput[]
-    skipDuplicates?: boolean
-  }
-
   export type PortfolioUpsertWithWhereUniqueWithoutUserInput = {
     where: PortfolioWhereUniqueInput
     update: XOR<PortfolioUpdateWithoutUserInput, PortfolioUncheckedUpdateWithoutUserInput>
@@ -24559,45 +24345,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"JobBookmark"> | Date | string
   }
 
-  export type JobListingUpsertWithWhereUniqueWithoutRecruiterInput = {
-    where: JobListingWhereUniqueInput
-    update: XOR<JobListingUpdateWithoutRecruiterInput, JobListingUncheckedUpdateWithoutRecruiterInput>
-    create: XOR<JobListingCreateWithoutRecruiterInput, JobListingUncheckedCreateWithoutRecruiterInput>
-  }
-
-  export type JobListingUpdateWithWhereUniqueWithoutRecruiterInput = {
-    where: JobListingWhereUniqueInput
-    data: XOR<JobListingUpdateWithoutRecruiterInput, JobListingUncheckedUpdateWithoutRecruiterInput>
-  }
-
-  export type JobListingUpdateManyWithWhereWithoutRecruiterInput = {
-    where: JobListingScalarWhereInput
-    data: XOR<JobListingUpdateManyMutationInput, JobListingUncheckedUpdateManyWithoutRecruiterInput>
-  }
-
-  export type JobListingScalarWhereInput = {
-    AND?: JobListingScalarWhereInput | JobListingScalarWhereInput[]
-    OR?: JobListingScalarWhereInput[]
-    NOT?: JobListingScalarWhereInput | JobListingScalarWhereInput[]
-    id?: StringFilter<"JobListing"> | string
-    company?: StringFilter<"JobListing"> | string
-    position?: StringFilter<"JobListing"> | string
-    location?: StringNullableFilter<"JobListing"> | string | null
-    career?: StringNullableFilter<"JobListing"> | string | null
-    education?: StringNullableFilter<"JobListing"> | string | null
-    employType?: StringNullableFilter<"JobListing"> | string | null
-    salary?: StringNullableFilter<"JobListing"> | string | null
-    deadline?: DateTimeNullableFilter<"JobListing"> | Date | string | null
-    url?: StringNullableFilter<"JobListing"> | string | null
-    description?: StringNullableFilter<"JobListing"> | string | null
-    tags?: StringNullableFilter<"JobListing"> | string | null
-    source?: StringNullableFilter<"JobListing"> | string | null
-    isActive?: BoolFilter<"JobListing"> | boolean
-    recruiterId?: StringNullableFilter<"JobListing"> | string | null
-    createdAt?: DateTimeFilter<"JobListing"> | Date | string
-    updatedAt?: DateTimeFilter<"JobListing"> | Date | string
-  }
-
   export type UserCreateWithoutPortfoliosInput = {
     id?: string
     email: string
@@ -24620,7 +24367,6 @@ export namespace Prisma {
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutPortfoliosInput = {
@@ -24645,7 +24391,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutPortfoliosInput = {
@@ -24731,7 +24476,6 @@ export namespace Prisma {
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPortfoliosInput = {
@@ -24756,7 +24500,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type JobPostingUpsertWithoutPortfoliosInput = {
@@ -24832,7 +24575,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutExperiencesInput = {
@@ -24857,7 +24599,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutExperiencesInput = {
@@ -24943,7 +24684,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExperiencesInput = {
@@ -24968,7 +24708,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type JobPostingUpsertWithoutExperiencesInput = {
@@ -25044,7 +24783,6 @@ export namespace Prisma {
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutJobPostingsInput = {
@@ -25069,7 +24807,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutJobPostingsInput = {
@@ -25278,7 +25015,6 @@ export namespace Prisma {
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutJobPostingsInput = {
@@ -25303,7 +25039,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type StatusHistoryUpsertWithWhereUniqueWithoutJobInput = {
@@ -25515,7 +25250,6 @@ export namespace Prisma {
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutRoadmapItemsInput = {
@@ -25540,7 +25274,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutRoadmapItemsInput = {
@@ -25581,7 +25314,6 @@ export namespace Prisma {
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRoadmapItemsInput = {
@@ -25606,7 +25338,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserCreateWithoutCustomQuestionsInput = {
@@ -25631,7 +25362,6 @@ export namespace Prisma {
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutCustomQuestionsInput = {
@@ -25656,7 +25386,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutCustomQuestionsInput = {
@@ -25725,7 +25454,6 @@ export namespace Prisma {
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCustomQuestionsInput = {
@@ -25750,7 +25478,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type InterviewAnswerUpsertWithWhereUniqueWithoutQuestionInput = {
@@ -25791,7 +25518,6 @@ export namespace Prisma {
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutInterviewAnswersInput = {
@@ -25816,7 +25542,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutInterviewAnswersInput = {
@@ -25925,7 +25650,6 @@ export namespace Prisma {
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInterviewAnswersInput = {
@@ -25950,7 +25674,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type JobPostingUpsertWithoutInterviewAnswersInput = {
@@ -26055,7 +25778,6 @@ export namespace Prisma {
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutCoverLettersInput = {
@@ -26080,7 +25802,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutCoverLettersInput = {
@@ -26190,7 +25911,6 @@ export namespace Prisma {
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCoverLettersInput = {
@@ -26215,7 +25935,6 @@ export namespace Prisma {
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type JobPostingUpsertWithoutCoverLettersInput = {
@@ -26368,61 +26087,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type UserCreateWithoutRecruitListingsInput = {
-    id?: string
-    email: string
-    password: string
-    name?: string | null
-    major?: string | null
-    targetJob?: string | null
-    skills: string
-    role?: string
-    companyName?: string | null
-    companyDesc?: string | null
-    isApproved?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    portfolios?: PortfolioCreateNestedManyWithoutUserInput
-    jobPostings?: JobPostingCreateNestedManyWithoutUserInput
-    roadmapItems?: RoadmapItemCreateNestedManyWithoutUserInput
-    interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
-    customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
-    coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
-    experiences?: ExperienceCreateNestedManyWithoutUserInput
-    notifications?: UserNotificationCreateNestedManyWithoutUserInput
-    bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-  }
-
-  export type UserUncheckedCreateWithoutRecruitListingsInput = {
-    id?: string
-    email: string
-    password: string
-    name?: string | null
-    major?: string | null
-    targetJob?: string | null
-    skills: string
-    role?: string
-    companyName?: string | null
-    companyDesc?: string | null
-    isApproved?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    portfolios?: PortfolioUncheckedCreateNestedManyWithoutUserInput
-    jobPostings?: JobPostingUncheckedCreateNestedManyWithoutUserInput
-    roadmapItems?: RoadmapItemUncheckedCreateNestedManyWithoutUserInput
-    interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
-    customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
-    coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
-    notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
-    bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserCreateOrConnectWithoutRecruitListingsInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutRecruitListingsInput, UserUncheckedCreateWithoutRecruitListingsInput>
-  }
-
   export type JobBookmarkCreateWithoutListingInput = {
     id?: string
     createdAt?: Date | string
@@ -26443,67 +26107,6 @@ export namespace Prisma {
   export type JobBookmarkCreateManyListingInputEnvelope = {
     data: JobBookmarkCreateManyListingInput | JobBookmarkCreateManyListingInput[]
     skipDuplicates?: boolean
-  }
-
-  export type UserUpsertWithoutRecruitListingsInput = {
-    update: XOR<UserUpdateWithoutRecruitListingsInput, UserUncheckedUpdateWithoutRecruitListingsInput>
-    create: XOR<UserCreateWithoutRecruitListingsInput, UserUncheckedCreateWithoutRecruitListingsInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutRecruitListingsInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutRecruitListingsInput, UserUncheckedUpdateWithoutRecruitListingsInput>
-  }
-
-  export type UserUpdateWithoutRecruitListingsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    major?: NullableStringFieldUpdateOperationsInput | string | null
-    targetJob?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    companyName?: NullableStringFieldUpdateOperationsInput | string | null
-    companyDesc?: NullableStringFieldUpdateOperationsInput | string | null
-    isApproved?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    portfolios?: PortfolioUpdateManyWithoutUserNestedInput
-    jobPostings?: JobPostingUpdateManyWithoutUserNestedInput
-    roadmapItems?: RoadmapItemUpdateManyWithoutUserNestedInput
-    interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
-    customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
-    coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
-    experiences?: ExperienceUpdateManyWithoutUserNestedInput
-    notifications?: UserNotificationUpdateManyWithoutUserNestedInput
-    bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutRecruitListingsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    major?: NullableStringFieldUpdateOperationsInput | string | null
-    targetJob?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    companyName?: NullableStringFieldUpdateOperationsInput | string | null
-    companyDesc?: NullableStringFieldUpdateOperationsInput | string | null
-    isApproved?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    portfolios?: PortfolioUncheckedUpdateManyWithoutUserNestedInput
-    jobPostings?: JobPostingUncheckedUpdateManyWithoutUserNestedInput
-    roadmapItems?: RoadmapItemUncheckedUpdateManyWithoutUserNestedInput
-    interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
-    customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
-    coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
-    notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
-    bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type JobBookmarkUpsertWithWhereUniqueWithoutListingInput = {
@@ -26544,7 +26147,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutBookmarksInput = {
@@ -26569,7 +26171,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutBookmarksInput = {
@@ -26594,7 +26195,6 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    recruiter?: UserCreateNestedOneWithoutRecruitListingsInput
   }
 
   export type JobListingUncheckedCreateWithoutBookmarksInput = {
@@ -26612,7 +26212,6 @@ export namespace Prisma {
     tags?: string | null
     source?: string | null
     isActive?: boolean
-    recruiterId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -26655,7 +26254,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBookmarksInput = {
@@ -26680,7 +26278,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type JobListingUpsertWithoutBookmarksInput = {
@@ -26711,7 +26308,6 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    recruiter?: UserUpdateOneWithoutRecruitListingsNestedInput
   }
 
   export type JobListingUncheckedUpdateWithoutBookmarksInput = {
@@ -26729,7 +26325,6 @@ export namespace Prisma {
     tags?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    recruiterId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26756,7 +26351,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
     experiences?: ExperienceCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -26781,7 +26375,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
     experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
-    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -26822,7 +26415,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
     experiences?: ExperienceUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -26847,7 +26439,6 @@ export namespace Prisma {
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
     experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
-    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type PortfolioCreateManyUserInput = {
@@ -26951,25 +26542,6 @@ export namespace Prisma {
     id?: string
     listingId: string
     createdAt?: Date | string
-  }
-
-  export type JobListingCreateManyRecruiterInput = {
-    id?: string
-    company: string
-    position: string
-    location?: string | null
-    career?: string | null
-    education?: string | null
-    employType?: string | null
-    salary?: string | null
-    deadline?: Date | string | null
-    url?: string | null
-    description?: string | null
-    tags?: string | null
-    source?: string | null
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
   }
 
   export type PortfolioUpdateWithoutUserInput = {
@@ -27293,65 +26865,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     listingId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobListingUpdateWithoutRecruiterInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    company?: StringFieldUpdateOperationsInput | string
-    position?: StringFieldUpdateOperationsInput | string
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    career?: NullableStringFieldUpdateOperationsInput | string | null
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    employType?: NullableStringFieldUpdateOperationsInput | string | null
-    salary?: NullableStringFieldUpdateOperationsInput | string | null
-    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    url?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: NullableStringFieldUpdateOperationsInput | string | null
-    source?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bookmarks?: JobBookmarkUpdateManyWithoutListingNestedInput
-  }
-
-  export type JobListingUncheckedUpdateWithoutRecruiterInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    company?: StringFieldUpdateOperationsInput | string
-    position?: StringFieldUpdateOperationsInput | string
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    career?: NullableStringFieldUpdateOperationsInput | string | null
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    employType?: NullableStringFieldUpdateOperationsInput | string | null
-    salary?: NullableStringFieldUpdateOperationsInput | string | null
-    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    url?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: NullableStringFieldUpdateOperationsInput | string | null
-    source?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bookmarks?: JobBookmarkUncheckedUpdateManyWithoutListingNestedInput
-  }
-
-  export type JobListingUncheckedUpdateManyWithoutRecruiterInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    company?: StringFieldUpdateOperationsInput | string
-    position?: StringFieldUpdateOperationsInput | string
-    location?: NullableStringFieldUpdateOperationsInput | string | null
-    career?: NullableStringFieldUpdateOperationsInput | string | null
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    employType?: NullableStringFieldUpdateOperationsInput | string | null
-    salary?: NullableStringFieldUpdateOperationsInput | string | null
-    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    url?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: NullableStringFieldUpdateOperationsInput | string | null
-    source?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StatusHistoryCreateManyJobInput = {

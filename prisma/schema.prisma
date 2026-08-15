@@ -38,7 +38,6 @@ model User {
   experiences      Experience[]
   notifications    UserNotification[]
   bookmarks        JobBookmark[]
-  recruitListings  JobListing[]       @relation("RecruiterListings")
 }
 
 // ─── 포트폴리오 ───────────────────────────────────────────────────────────────
@@ -211,11 +210,9 @@ model JobListing {
   tags         String?   // JSON: string[] (기술스택 태그)
   source       String?   // 출처 (예: 학생성공처, 사람인 등)
   isActive     Boolean   @default(true)
-  recruiterId  String?   // RECRUITER 계정이 직접 등록한 경우
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  recruiter    User?       @relation("RecruiterListings", fields: [recruiterId], references: [id], onDelete: SetNull)
   bookmarks    JobBookmark[]
 }
 

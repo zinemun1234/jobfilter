@@ -175,11 +175,10 @@ export function sanitizeInterviewAnswer<T extends object>(
 
 export function sanitizeJobListing<T extends object>(
   listing: T
-): Omit<T, 'recruiterId' | 'user'> {
-  const { recruiterId, user, ...rest } = listing as T & { recruiterId?: unknown; user?: unknown };
-  void recruiterId;
+): Omit<T, 'user'> {
+  const { user, ...rest } = listing as T & { user?: unknown };
   void user;
-  return rest as Omit<T, 'recruiterId' | 'user'>;
+  return rest as Omit<T, 'user'>;
 }
 
 export function sanitizeNotification<T extends object>(

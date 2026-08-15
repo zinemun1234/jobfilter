@@ -189,17 +189,15 @@ describe('sanitizers remove sensitive fields', () => {
     expect(answers[0]).toEqual(expect.objectContaining({ id: 'a1', answer: '답변' }));
   });
 
-  it('sanitizeJobListing removes recruiterId and user', () => {
+  it('sanitizeJobListing removes user', () => {
     const listing = {
       id: 'l1',
       company: 'Company',
       position: 'Position',
-      recruiterId: 'r1',
       user: { id: 'r1' },
       tags: '[]',
     };
     const sanitized = sanitizeJobListing(listing);
-    expect(sanitized).not.toHaveProperty('recruiterId');
     expect(sanitized).not.toHaveProperty('user');
     expect(sanitized.id).toBe('l1');
   });
