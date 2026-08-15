@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import type { Session } from 'next-auth';
+import { requireAdmin } from '@/lib/api';
+import { handleApiError } from '@/lib/errors';
 
-function requireAdmin(session: Session | null) {
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (session.user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  return null;
-}
+export const dynamic = 'force-dynamic';
 
 // GET /api/admin/users/[id] — user detail
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  const err = requireAdmin(session);
-  if (err) return err;
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: params.id },
@@ -30,31 +27,24 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json({ data: user });
 }
 
-// PATCH /api/admin/users/[id] — change role or isApproved
+// PATCH /api/admin/users/[id] — change role
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  const err = requireAdmin(session);
-  if (err) return err;
+  let userId: string;
+  try {
+    ({ userId } = await requireAdmin());
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const body = await req.json();
 
-  // isApproved 승인/취소
-  if (typeof body.isApproved === 'boolean') {
-    const updated = await prisma.user.update({
-      where: { id: params.id },
-      data: { isApproved: body.isApproved },
-      select: { id: true, email: true, role: true, isApproved: true },
-    });
-    return NextResponse.json({ data: updated });
-  }
-
   // role 변경
   const { role } = body;
-  if (!['USER', 'ADMIN', 'RECRUITER'].includes(role)) {
+  if (!['USER', 'ADMIN'].includes(role)) {
     return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
   }
 
-  if (params.id === session!.user.id && role !== 'ADMIN') {
+  if (params.id === userId && role !== 'ADMIN') {
     return NextResponse.json({ error: '자신의 권한은 변경할 수 없습니다' }, { status: 400 });
   }
 
@@ -69,11 +59,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
 // DELETE /api/admin/users/[id] — delete user
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  const err = requireAdmin(session);
-  if (err) return err;
+  let userId: string;
+  try {
+    ({ userId } = await requireAdmin());
+  } catch (error) {
+    return handleApiError(error);
+  }
 
-  if (params.id === session!.user.id) {
+  if (params.id === userId) {
     return NextResponse.json({ error: '자신의 계정은 삭제할 수 없습니다' }, { status: 400 });
   }
 
@@ -83,9 +76,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
 
 // POST /api/admin/users/[id] — send individual notification
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  const err = requireAdmin(session);
-  if (err) return err;
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const { title, body } = await req.json();
   if (!title?.trim() || !body?.trim()) {

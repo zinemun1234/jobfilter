@@ -3,20 +3,19 @@
  * POST /api/admin/listings — 공고 직접 등록 (company, position 필수)
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/api';
+import { handleApiError } from '@/lib/errors';
+import { notifyUsersOfNewListing } from '@/lib/notifications';
 
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return null;
-  if (session.user.role !== 'ADMIN') return null;
-  return session;
-}
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const { searchParams } = new URL(req.url);
   const search = searchParams.get('search') ?? '';
@@ -35,8 +34,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const body = await req.json();
   const { company, position, location, career, education, employType, salary, deadline, url, description, tags } = body;
@@ -60,6 +62,13 @@ export async function POST(req: NextRequest) {
       tags: tags ? JSON.stringify(tags) : null,
     },
   });
+
+  // 사용자 알림 생성
+  try {
+    await notifyUsersOfNewListing(listing);
+  } catch {
+    // 알림 생성 실패는 공고 등록 응답에 영향을 주지 않음
+  }
 
   return NextResponse.json({ data: listing }, { status: 201 });
 }

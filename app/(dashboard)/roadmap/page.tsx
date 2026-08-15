@@ -95,20 +95,20 @@ export default function RoadmapPage() {
   }).filter(Boolean) as { value: string; label: string; total: number; completed: number; pct: number }[];
 
   return (
-    <div className="min-h-full bg-gray-50/50">
+    <div className="min-h-full">
       <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
 
         {/* 헤더 */}
-        <div className="flex items-end justify-between border-b border-gray-200 pb-5">
+        <div className="flex items-end justify-between border-b border-gray-200 pb-6">
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-1">Roadmap</p>
-            <h1 className="text-xl font-semibold text-gray-900">기술 스택 로드맵</h1>
-            <p className="text-xs text-gray-400 mt-1">목표 직무에 필요한 기술을 체계적으로 학습하세요</p>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Roadmap</p>
+            <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">기술 스택 로드맵</h1>
+            <p className="text-sm text-gray-500 mt-1.5">목표 직무에 필요한 기술을 체계적으로 학습하세요</p>
           </div>
           <button
             type="button"
             onClick={() => setSlideOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0f172a] px-3 py-2 text-sm font-medium text-white hover:bg-[#1e293b] transition-colors"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 transition-colors shadow-lg shadow-slate-900/10"
           >
             <Plus className="w-4 h-4" /> 기술 추가
           </button>
@@ -116,15 +116,15 @@ export default function RoadmapPage() {
 
         {/* 카테고리별 진행률 개요 */}
         {categoryProgress.length > 0 && (
-          <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-4">카테고리별 진행률</p>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">카테고리별 진행률</p>
             <div className="space-y-3">
               {categoryProgress.map(cat => (
                 <div key={cat.value} className="flex items-center gap-3">
                   <span className="text-xs text-gray-500 w-24 shrink-0">{cat.label}</span>
-                  <div className="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-[#0f172a] transition-all duration-500"
+                      className="h-full rounded-full bg-primary transition-all duration-500"
                       style={{ width: `${cat.pct}%` }}
                     />
                   </div>
@@ -139,15 +139,15 @@ export default function RoadmapPage() {
         {/* 필터 + 현재 카테고리 진행률 */}
         <div className="flex items-center gap-4">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-44 bg-white"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-44 bg-white border-gray-200 rounded-xl"><SelectValue /></SelectTrigger>
             <SelectContent>
               {jobCategories.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
             </SelectContent>
           </Select>
 
           <div className="flex-1 flex items-center gap-3">
-            <div className="flex-1 h-1.5 rounded-full bg-gray-200 overflow-hidden">
-              <div className="h-full rounded-full bg-[#0f172a] transition-all duration-500" style={{ width: `${progress}%` }} />
+            <div className="flex-1 h-2 rounded-full bg-gray-200 overflow-hidden">
+              <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
             <span className="text-xs font-medium text-gray-500 tabular-nums shrink-0">
               {completed}/{roadmapItems.length} ({progress}%)
@@ -158,15 +158,15 @@ export default function RoadmapPage() {
         {/* 상태 요약 칩 */}
         {roadmapItems.length > 0 && (
           <div className="flex gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600">
               <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
               미시작 {roadmapItems.length - completed - inProgress}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
               학습 중 {inProgress}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-600">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-600">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               완료 {completed}
             </span>
@@ -174,7 +174,7 @@ export default function RoadmapPage() {
         )}
 
         {/* 로드맵 */}
-        <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
           {isLoading ? (
             <div className="p-6 space-y-4 animate-pulse">
               {[...Array(5)].map((_, i) => (
@@ -188,12 +188,12 @@ export default function RoadmapPage() {
               ))}
             </div>
           ) : roadmapItems.length === 0 ? (
-            <div className="py-16 text-center">
+            <div className="py-20 text-center">
               <p className="text-sm text-gray-400 mb-3">로드맵 데이터가 없습니다</p>
               <button
                 type="button"
                 onClick={() => setSlideOpen(true)}
-                className="text-sm font-medium text-[#0f172a] hover:underline"
+                className="text-sm font-medium text-primary hover:underline"
               >
                 기술 추가하기 →
               </button>

@@ -16,7 +16,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0f172a] border-t border-white/10">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-sidebar border-t border-sidebar-border">
       <div className="flex items-stretch h-16">
         {tabs.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/');
@@ -24,7 +24,7 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-1 flex-col items-center justify-center gap-1 text-[10px] transition-colors ${
+              className={`flex flex-1 flex-col items-center justify-center gap-1 text-xs transition-colors ${
                 isActive
                   ? 'text-blue-400'
                   : 'text-white/40 hover:text-white/70'

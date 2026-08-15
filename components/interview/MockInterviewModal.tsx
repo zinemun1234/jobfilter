@@ -151,7 +151,7 @@ export function MockInterviewModal({ open, onOpenChange, category, jobType }: Mo
             <button
               onClick={() => setPhase('interview')}
               disabled={questions.length === 0}
-              className="w-full rounded-lg bg-[#0f172a] py-2.5 text-sm font-medium text-white hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+              className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               {questions.length === 0 ? '질문 로딩 중...' : '시작하기'}
             </button>
@@ -212,7 +212,7 @@ export function MockInterviewModal({ open, onOpenChange, category, jobType }: Mo
               <button
                 onClick={handleSaveAnswers}
                 disabled={isSaving || answeredCount === 0}
-                className="flex-1 rounded-lg bg-[#0f172a] py-2.5 text-sm font-medium text-white hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+                className="flex-1 rounded-lg bg-primary py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 {isSaving ? '저장 중...' : '답변 저장하기'}
               </button>
@@ -243,7 +243,7 @@ export function MockInterviewModal({ open, onOpenChange, category, jobType }: Mo
         {/* Progress bar */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gray-100 rounded-t-lg overflow-hidden">
           <div
-            className="h-full bg-[#0f172a] transition-all duration-1000"
+            className="h-full bg-primary transition-all duration-1000"
             style={{ width: `${((currentIndex) / questions.length) * 100}%` }}
           />
         </div>
@@ -270,7 +270,7 @@ export function MockInterviewModal({ open, onOpenChange, category, jobType }: Mo
                   {categoryConfig[currentQuestion.category]?.label}
                 </span>
                 {currentQuestion.jobType && (
-                  <span className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] text-gray-500">
+                  <span className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-500">
                     {currentQuestion.jobType}
                   </span>
                 )}
@@ -302,7 +302,7 @@ export function MockInterviewModal({ open, onOpenChange, category, jobType }: Mo
               </button>
               <button
                 onClick={goNext}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0f172a] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1e293b] transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
               >
                 {currentIndex < questions.length - 1 ? (
                   <>다음 질문 <ArrowRight className="h-3.5 w-3.5" /></>

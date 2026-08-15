@@ -24,6 +24,9 @@ type PreviewResult = {
   parsed: number;
   filtered: number;
   categoryStats?: { 개발: number; IT기술: number; 기획분석: number; 사무: number };
+  duplicateCount: number;
+  invalidCount: number;
+  excludedCount: number;
   rows: FilteredRow[];
 };
 
@@ -127,7 +130,7 @@ export default function ListingUploadPage() {
         onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
         onClick={() => inputRef.current?.click()}
         className={`relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed py-14 cursor-pointer transition-colors ${
-          dragging ? 'border-[#0f172a] bg-gray-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+          dragging ? 'border-primary bg-gray-50' : 'border-gray-200 hover:border-gray-300 bg-white'
         }`}
       >
         <input
@@ -158,7 +161,7 @@ export default function ListingUploadPage() {
           type="button"
           onClick={handleUpload}
           disabled={loading}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
         >
           <Filter className="w-4 h-4" />
           {loading ? '분석 중...' : '필터링 분석 시작'}
@@ -168,8 +171,12 @@ export default function ListingUploadPage() {
       {/* 분석 결과 */}
       {preview && (
         <div className="space-y-4">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+            현재 결과는 DB에 저장되지 않는 미리보기(dry-run)입니다. 아래에서 등록할 행을 선택한 뒤 등록을 실행하세요.
+          </div>
+
           {/* 통계 카드 */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <div className="rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
               <p className="text-xs text-gray-400 mb-1">전체 행</p>
               <p className="text-2xl font-semibold text-gray-900">{preview.total}</p>
@@ -184,6 +191,16 @@ export default function ListingUploadPage() {
               <p className="text-xs text-blue-500 mb-1">CS 직군 필터링</p>
               <p className="text-2xl font-semibold text-blue-700">{preview.filtered}</p>
               <p className="text-xs text-blue-400 mt-1">컴공 학생 맞춤</p>
+            </div>
+            <div className="rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
+              <p className="text-xs text-gray-400 mb-1">중복 예상</p>
+              <p className="text-2xl font-semibold text-gray-900">{preview.duplicateCount}</p>
+              <p className="text-xs text-gray-400 mt-1">기존 공고 기준</p>
+            </div>
+            <div className="rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
+              <p className="text-xs text-gray-400 mb-1">제외 행</p>
+              <p className="text-2xl font-semibold text-gray-900">{preview.invalidCount + preview.excludedCount}</p>
+              <p className="text-xs text-gray-400 mt-1">파싱 실패·비IT</p>
             </div>
           </div>
 
@@ -287,7 +304,7 @@ export default function ListingUploadPage() {
                   type="button"
                   onClick={handleRegister}
                   disabled={selected.size === 0 || registering}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   {registering ? '등록 중...' : `선택한 ${selected.size}개 공고 등록`}

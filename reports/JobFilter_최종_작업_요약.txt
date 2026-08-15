@@ -1,0 +1,301 @@
+JobFilter 최종 작업 요약: 어떻게 했고, 무엇을 해결했는지
+=====================================================================
+
+이 문서는 JobFilter 프로젝트를 정리하면서 한 작업과 해결한 일들을
+실제 프로젝트를 진행한 사람이 다른 사람에게 설명하듯이 기록한 것입니다.
+"어떻게 했는지"와 "왜 이렇게 했는지", "무엇이 해결되었는지"를 함께 담았습니다.
+
+
+0. 전체 방향
+------------
+JobFilter를 단순 공고 목록 서비스에서
+"지원 건 하나를 끝까지 준비할 수 있는 취업 준비 플랫폼"으로 발전시키는 것을
+목표로 했습니다.
+
+핵심 사용자는 학생이고, 핵심 가치는
+"맞춤 공고 발견 → 지원 목록 관리 → 자소서/면접/포트폴리오 준비 → 알림/일정"으로
+이어지는 하나의 흐름입니다.
+
+리크루터 기능은 사용자 흐름에서 제거했고,
+AI API 없이 rule 기반으로 핵심 기능을 구현했습니다.
+
+
+1. 디자인 시스템 정비
+---------------------
+### 어떻게 했는지
+- `app/globals.css`의 oklch 값을 HSL로 바꾸고 `tailwind.config.ts`와 매핑했습니다.
+- `#0f172a` 같은 하드코딩 색상을 `bg-primary`, `bg-slate-900` 같은
+  시맨틱 토큰으로 교체했습니다.
+- `text-[10px]`, `w-4.5`, `rounded-4xl` 같은 비표준 Tailwind 클래스를 정리했습니다.
+- `components/layout/Sidebar.tsx`의 이모지를 lucide 아이콘으로 통일했습니다.
+- 지원 상태 색상을 `lib/status-config.ts`에 모아 중앙 관리했습니다.
+
+### 해결된 것
+- Brand Zone(랜딩/인증)과 Work Zone(대시보드/관리자)의 시각적 구분이 생겼습니다.
+- 색상, 아이콘, 상태 표현이 토큰화되어 페이지를 추가하거나 리팩터링할 때
+  일관성을 깨뜨리지 않고 재사용할 수 있게 되었습니다.
+
+
+2. 랜딩·인증 페이지
+-------------------
+### 어떻게 했는지
+- `app/page.tsx`를 Brand Zone 다크 테마로 개선하고
+  반응형 히어로, 공고 미리보기, 학과 연결 배너, 핵심 기능 소개, CTA를 추가했습니다.
+- `app/(auth)/login`, `register`, `forgot-password`, `reset-password`에도
+  동일한 Brand Zone 디자인을 적용했습니다.
+- 좌측 브랜딩 패널과 우측 폼 패널의 색상, border, placeholder, 에러 메시지를
+  shadcn/ui 토큰으로 바꿨습니다.
+
+### 해결된 것
+- 비로그인 방문자도 서비스 가치를 바로 느끼고 행동으로 이어지도록
+  랜딩 페이지의 흐름이 개선되었습니다.
+- 로그인, 회원가입, 비밀번호 찾기의 디자인이 일관되고 브랜드 느낌이 생겼습니다.
+
+
+3. 학생 중심 기능 구현
+-----------------------
+### 3-1. 리크루터 기능 숨김
+- `next.config.js`에 `/register-recruiter`, `/recruit` → `/`,
+  `/recruiter` → `/dashboard` redirect를 추가했습니다.
+- 로그인/회원가입에서 기업 회원가입 링크를 제거했습니다.
+- Sidebar에서 RECRUITER 메뉴와 뱃지를 제거했습니다.
+- `app/(recruiter)/`, `app/recruit/`, `app/(auth)/register-recruiter/`,
+  `app/api/recruit/`, `app/api/recruiter/`, `app/api/auth/register-recruiter/`,
+  `lib/validations/recruiter.ts`, `lib/validations/recruiter.test.ts`,
+  `lib/visibility-config.ts`를 삭제했습니다.
+
+### 해결된 것
+- 학생 흐름에서 불필요한 리크루터 진입점이 막혔습니다.
+- DB 스키마와 기존 페이지는 그대로 두어 향후 다시 열릴 가능성을 열어뒀습니다.
+
+### 3-2. 공고 1클릭 지원
+- `components/jobs/ApplyButton.tsx`를 만들어
+  비로그인에서는 "로그인 후 지원", 로그인에서는 "지원하기"로 동작하게 했습니다.
+- 메인 랜딩, `/open/listings`, `/bookmarks`에 적용했습니다.
+- 중복(409) 또는 성공 시 "추가됨"으로 상태를 바꿉니다.
+
+### 해결된 것
+- 비로그인 사용자도 공고를 보고 지원 흐름으로 자연스럽게 들어갈 수 있게 되었습니다.
+- 여러 페이지에서 동일한 지원 동작을 재사용할 수 있게 되었습니다.
+
+### 3-3. 알림/공지/북마크 통합
+- `lib/notifications.ts`를 만들어 알림 생성 로직을 한곳에 모았습니다.
+- 대시보드 진입 시 마감 D-3, 면접 D-2, 지원 14일 후 팔로업 알림을 자동 생성합니다.
+- 관리자 수동/일괄 등록 시 신규 공고 알림을 보냅니다.
+- 공통 `EmptyState`, `SkeletonCard`, `SkeletonList`를 만들어
+  목록/공고/북마크/알림/자소서 등에 적용했습니다.
+- Sidebar에 알림 hover/click 패널, 공지사항 미확인 배지, 북마크 개수 배지를 추가했습니다.
+- `/notifications`에 탭(전체/마감/면접/팔로업/공지)과 모두 읽음 confirm을 추가했습니다.
+
+### 해결된 것
+- 알림이 수동 동기화에서 벗어나 대시보드/공고 등록 시 자동으로 생성됩니다.
+- 알림/공지/북마크의 빈 상태와 로딩 상태가 공통 컴포넌트로 일관되게 처리됩니다.
+- 사용자가 별도 페이지를 돌아다니지 않고도 알림과 공지 현황을 확인할 수 있습니다.
+
+
+4. 공고 탐색과 지원 관리
+--------------------------
+### 4-1. 공고 서버 필터·페이지네이션
+- `lib/server/listings.ts`를 만들어 search, career, employType, location,
+  tags, deadlineFrom/To, sort, page, pageSize를 서버에서 처리하도록 했습니다.
+- `/listings`, `/open/listings`의 URL query와 필터 상태를 동기화했습니다.
+- `FilterPanel`, `Pagination`, `ReasonTooltip` 컴포넌트를 추가했습니다.
+
+### 해결된 것
+- 클라이언트 필터의 한계를 벗어나 서버에서 검색/필터/정렬/페이지네이션을
+  처리할 수 있게 되었습니다.
+- 사용자에게 일치 기술, 부족 기술, 추천 사유를 툴팁으로 보여줄 수 있게 되었습니다.
+
+### 4-2. 칸반 드래그 상태 변경
+- `app/api/jobs/[id]/route.ts`의 PATCH/PUT 권한을
+  작성자 또는 ADMIN으로 확장했습니다.
+- `components/jobs/KanbanBoard.tsx`에 onStatusChange 연결,
+  낙관적 업데이트, 실패 시 롤백, 빈 컬럼 droppable 처리를 추가했습니다.
+- 상태 변경 시 `StatusHistory`가 자동 기록됩니다.
+
+### 해결된 것
+- 칸반 보드에서 드래그로 지원 상태를 변경할 수 있게 되었습니다.
+- 권한 없는 사용자의 상태 변경을 차단하고, 변경 이력이 남습니다.
+
+### 4-3. 지원 건 Command Center
+- `/jobs/[id]`에서 자소서 준비, 면접 연습, 포트폴리오, 일정 관리 이동을 추가했습니다.
+- 자소서 이동 시 company, position, jobId를 전달해
+  자소서가 특정 지원 건과 연결되도록 했습니다.
+- 준비율 1차를 계산해 자소서 연결, 체크리스트, 면접 일정, 팔로업 일정을
+  한눈에 볼 수 있게 했습니다.
+
+### 해결된 것
+- 지원 건에서 관련 준비 자료로 바로 이동할 수 있게 되었습니다.
+- 지원 건 중심의 준비 흐름이 시작되었습니다.
+
+
+5. 자기소개서 코칭
+-------------------
+### 어떻게 했는지
+- `lib/cover-letter-templates.ts`에 6개 직군 템플릿을 분리했습니다.
+- `components/cover-letter/TemplateSelector.tsx`로 직군별 템플릿 선택 UI를 만들었습니다.
+- `components/cover-letter/VersionList.tsx`에서
+  버전 목록, diff 비교 SlideOver, 복원 기능을 구현했습니다.
+- 자소서 분석 결과에서 문제 표현을 찾아 해당 문항으로 이동하고
+  `HighlightedAnswer`로 키워드를 강조합니다.
+- `prisma/schema.prisma`에 `Experience` 모델을 추가하고 CRUD API를 만들었습니다.
+- `ExperienceLibrary`에서 경험을 등록·삭제하고
+  첫 번째 자소서 문항에 STAR 형식으로 삽입할 수 있습니다.
+
+### 해결된 것
+- 템플릿 선택부터 문항 작성, 버전 비교, 복원, 분석 피드백까지
+  자소서 준비 흐름이 연결되었습니다.
+- 반복적으로 입력하는 경험을 저장소에 모아 자소서와 면접에서 재사용할 수 있습니다.
+- 분석 피드백이 실제 수정 행동으로 이어지도록 하이라이트와 문항 이동을 연결했습니다.
+
+
+6. 매칭 개선과 로드맵 연결
+----------------------------
+### 어떻게 했는지
+- `lib/matching.ts`에 순수 함수 `calculateMatching`을 만들어
+  공고 목록과 대시보드에서 동일한 매칭 로직을 사용하도록 했습니다.
+- `priorityScore` 가중치를
+  매칭 50%, 마감 25%, 인기 15%, 신선 10%로 조정했습니다.
+- `competitionScore`를 북마크 역수에서
+  `popularityScore + freshnessScore`로 재정의했습니다.
+- `components/dashboard/PriorityJobCard.tsx`에
+  점수 분해 행과 "부족한 기술을 로드맵에 추가" 버튼을 추가했습니다.
+- `app/api/roadmap/bulk/route.ts`와
+  `components/roadmap/AddToRoadmapButton.tsx`를 만들었습니다.
+
+### 해결된 것
+- 같은 공고가 화면마다 다른 점수로 보이는 문제가 해결되었습니다.
+- 매칭 점수뿐 아니라 일치 기술, 부족 기술, 추천 근거를 같이 보여줄 수 있게 되었습니다.
+- 부족한 기술을 클릭 한 번으로 로드맵에 추가할 수 있게 되었습니다.
+
+
+7. 관리자 기능
+--------------
+### 어떻게 했는지
+- `lib/admin-stats.ts`를 만들어 from/to 날짜 필터, `unstable_cache` 60초 캐싱,
+  CSV 변환 기능을 추가했습니다.
+- `app/api/admin/reports/route.ts`를 만들어
+  `format=csv|json`, UTF-8 BOM, `Content-Disposition` 다운로드를 처리했습니다.
+- `app/(admin)/admin/stats/page.tsx`에 날짜 범위, CSV 다운로드, 인쇄 버튼,
+  URL 동기화를 추가했습니다.
+- `app/admin/stats/print/page.tsx`를 만들어 사이드바 없는 인쇄 전용 리포트를
+  제공했습니다.
+- 관리자 공고 업로드에서 dry-run, CSV/XLSX 파싱, 직군별 통계, 중복 예상,
+  선택 행만 등록 기능을 구현했습니다.
+
+### 해결된 것
+- 관리자가 날짜 범위로 통계를 보고 CSV/인쇄로 추출할 수 있게 되었습니다.
+- 대량 공고 등록 전에 미리보기와 통계를 확인할 수 있게 되었습니다.
+
+
+8. DB 동기화
+------------
+### 어떻게 했는지
+- `/cover-letter` 로딩 중 `/api/experiences` 500 오류를 확인했습니다.
+- 원인은 `public.Experience` 테이블 누락이었습니다.
+- `npx prisma db push`로 스키마와 로컬 DB를 동기화했습니다.
+
+### 해결된 것
+- `Experience` 테이블이 생성되어 경험 저장소 기능이 정상 동작합니다.
+
+
+9. lint 경고 수정
+-----------------
+### 어떻게 했는지
+- Next.js TS plugin이 경고하는 server action prop 이름을 변경했습니다.
+  - `onPageChange` → `onPageChangeAction`
+  - `onChange` → `onChangeAction`, `onReset` → `onResetAction`
+  - `onStatusChange` → `onStatusChangeAction`, `onDelete` → `onDeleteAction`
+- `Button`, `AlertDialog`에서 발생한
+  `Function components cannot be given refs` 경고를 수정했습니다.
+  - `components/ui/button.tsx`: `React.forwardRef`
+  - `components/ui/alert-dialog.tsx`: Overlay/Content/Trigger/Header/Footer/
+    Media/Title/Description → `React.forwardRef`
+- `/interview` 질문 추가 Dialog의 `DialogDescription` 누락을 추가했습니다.
+
+### 해결된 것
+- `npx tsc --noEmit`, `npm run lint`, `npm run test`가 모두 통과합니다.
+- 브라우저 console에서 React ref/accessibility 경고가 사라졌습니다.
+
+
+10. 브라우저 기능 점검 (2026-08-11)
+------------------------------------
+### 확인한 주요 흐름
+- 인증/로그인/로그아웃
+- `/dashboard` 추천 공고, 가중치 슬라이더, 점수 분해
+- `/listings` 검색, 필터, 페이지네이션, 정렬, Empty State
+- `/jobs` 테이블/칸반 뷰, 공고 추가/저장, 삭제
+- `/notifications`, `/notices`, `/bookmarks`, `/calendar`
+- `/cover-letter` 템플릿, 항목 생성/수정/저장, 버전 히스토리/비교
+- `/cover-letter/export` 자소서 선택 UI
+- `/roadmap`, `/portfolio`, `/interview`
+- `/profile` 전공, 목표 직무, 기술 스택 저장
+- `/admin/stats`, `/admin/notices`, `/admin/stats/print`
+
+### 발견/해결한 console warning
+- `Button`, `AlertDialog` `forwardRef`
+- `/interview` `DialogDescription` 추가
+- 남은 메시지: `/favicon.ico` 404 뿐
+
+### 검증
+- `npx tsc --noEmit` 통과
+- `npm run lint` 통과
+- `npm run test` 통과 (2 files / 4 tests)
+
+
+11. 발표·보고서 자료 정리
+--------------------------
+### 어떻게 했는지
+- `changes_summary.txt`에 디자인, 기능, 검증, 수정 내역을 누적 기록했습니다.
+- `JobFilter_발표자료_전체모음/01_최종_보고서/JobFilter_디렉터리분석_발표.html`과
+  `weekly_progress_report.html`에
+  금주 진도, 차주 계획, 발표자 메모, 청중 안내를 추가했습니다.
+- `JobFilter_발표자료_전체모음/03_시각자료/JobFilter_Week_14_Progress_Report.html`과
+  PDF를 만들어 발표자 중심의 Technical Audit 형식 보고서를 제공했습니다.
+
+### 해결된 것
+- 제출용 상세 보고서, 발표용 HTML/PDF, 원고 자료를 구분해 정리했습니다.
+- 발표자가 설명하고 청중이 따라갈 수 있는 보고서 구조를 만들었습니다.
+
+
+12. 미해결·후속 확인 항목
+-------------------------
+아래는 UI는 정상이나, 실제 데이터 흐름을 더 쌓아서 재확인하면 좋은 부분입니다.
+- `/jobs` 칸반 보드의 실제 드래그 앤 드롭 상태 변경이 DB에 반영되는지
+- `/listings` 공고 상세에서 북마크/지원/로드맵 추가 흐름
+- `/cover-letter/export`의 실제 PDF/인쇄 다운로드
+- `/roadmap`, `/portfolio` 실제 저장
+- `/interview` 질문 답변 저장과 모의 면접
+- `/calendar` 월 이동 및 일정 상세
+- `/admin/listings`, `/admin/users`, `/admin/bulk-jobs` 등 관리자 CRUD
+
+### 차주(15주차) 권장 계획 (P0)
+1. Portfolio, InterviewAnswer, Experience에 `jobId` 추가 및
+   `/api/jobs/[id]`에서 연결 자료 조회
+2. `lib/auth.ts`로 권한 헬퍼 통일 및 DTO 반환 표준화
+3. User, JobPosting, Portfolio 응답에서 민감 필드 제외
+4. GitHub 외부 요청에 timeout, redirect, rate limit, 캐싱 적용
+5. 관리자 벌크 등록에 transaction과 실패 행 CSV 다운로드
+6. UserNotification에 type, referenceId, actionUrl, 중복 방지 기준 추가
+
+
+13. 핵심 정리
+--------------
+- 해결한 것: 디자인 토큰 정리, 학생 중심 흐름 구성, 공고 필터/페이지네이션,
+  칸반 상태 변경, 알림/공지/북마크 통합, 자소서 템플릿/버전/분석,
+  경험 저장소, 매칭 개선, 로드맵 연결, 관리자 통계/CSV/인쇄,
+  리크루터 제거, DB 동기화, lint/console warning 제거
+- 다음에 해야 할 것: 지원 건과 포트폴리오/면접/경험 직접 연결,
+  API 보안·권한 통일, 외부 요청 안정성, 운영 DB 마이그레이션 적용,
+  실제 사용자 E2E 검증
+
+
+14. 참고 자료
+-------------
+- `changes_summary.txt` — 프로젝트 전체 변경 누적 기록
+- `JobFilter_발표자료_전체모음/02_원고_및_분석/JobFilter_사람이쓴_상세기능분석_개선및발전계획.txt`
+- `JobFilter_발표자료_전체모음/02_원고_및_분석/JobFilter_디렉터리분석_웹조사_기반_구현방향_및_발표자료.txt`
+- `JobFilter_발표자료_전체모음/02_원고_및_분석/JobFilter_전체_개선_삭제_수정_통합계획서.txt`
+- `weekly_progress_report.html` — 발표자 관점 주간 보고서
+- `JobFilter_발표자료_전체모음/03_시각자료/JobFilter_Week_14_Progress_Report.html`
+- `JobFilter_발표자료_전체모음/03_시각자료/JobFilter_Week_14_Progress_Report.pdf`

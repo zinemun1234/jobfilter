@@ -26,12 +26,12 @@ export default async function ProfilePage() {
   };
 
   return (
-    <div className="min-h-full bg-gray-50/50">
+    <div className="min-h-full">
       <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
-        <div className="border-b border-gray-200 pb-5">
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-1">Settings</p>
-          <h1 className="text-xl font-semibold text-gray-900">프로필 설정</h1>
-          <p className="text-sm text-gray-400 mt-1">전공, 목표 직무, 기술 스택을 설정하면 맞춤 공고와 코칭에 활용됩니다</p>
+        <div className="border-b border-gray-200 pb-6">
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Settings</p>
+          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">프로필 설정</h1>
+          <p className="text-sm text-gray-500 mt-1.5">전공, 목표 직무, 기술 스택을 설정하면 맞춤 공고와 코칭에 활용됩니다</p>
         </div>
         <ProfileForm user={user} />
       </div>

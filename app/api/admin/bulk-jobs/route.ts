@@ -3,18 +3,13 @@
 // 관리자 bulk route와 분리 — 구인자 전용
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/api';
+import { handleApiError } from '@/lib/errors';
 import * as XLSX from 'xlsx';
 
 export const dynamic = 'force-dynamic';
 
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== 'ADMIN') return null;
-  return session;
-}
 
 type JobRow = {
   company: string;
@@ -78,8 +73,11 @@ function parseRow(row: Record<string, unknown>): JobRow | null {
 
 // POST /api/admin/bulk-jobs — 엑셀 파일 업로드 (파싱 + 미리보기)
 export async function POST(req: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const contentType = req.headers.get('content-type') ?? '';
 
@@ -166,8 +164,11 @@ export async function POST(req: NextRequest) {
 
 // GET /api/admin/bulk-jobs — 구인자 직접등록 공고 목록
 export async function GET() {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const listings = await prisma.jobListing.findMany({
     where: { source: '구인자 직접등록' },

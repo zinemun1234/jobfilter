@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, CheckCircle } from 'lucide-react';
-import { InterviewQuestion, InterviewAnswer } from '@/lib/generated/prisma';
+import { InterviewQuestion, InterviewAnswer, JobPosting } from '@/lib/generated/prisma';
 import { toast } from 'sonner';
 
 interface AnswerSlideOverProps {
@@ -17,11 +17,17 @@ const categoryConfig: Record<string, { label: string; dot: string }> = {
   SITUATIONAL: { label: '상황',  dot: 'bg-amber-500' },
 };
 
-async function saveAnswer(questionId: string, answer: string, questionText?: string, questionCategory?: string) {
+async function saveAnswer(
+  questionId: string,
+  answer: string,
+  questionText?: string,
+  questionCategory?: string,
+  jobId?: string,
+) {
   const res = await fetch('/api/interview/answers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ questionId, answer, questionText, questionCategory }),
+    body: JSON.stringify({ questionId, answer, questionText, questionCategory, jobId }),
   });
   if (!res.ok) throw new Error('Failed to save answer');
   return (await res.json()).data;
@@ -29,13 +35,24 @@ async function saveAnswer(questionId: string, answer: string, questionText?: str
 
 export function AnswerSlideOver({ question, onClose }: AnswerSlideOverProps) {
   const [answer, setAnswer] = useState('');
+  const [jobId, setJobId] = useState('');
   const [visible, setVisible] = useState(false);
   const queryClient = useQueryClient();
+
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery<JobPosting[]>({
+    queryKey: ['jobs'],
+    queryFn: async () => {
+      const response = await fetch('/api/jobs');
+      if (!response.ok) throw new Error('Failed to fetch jobs');
+      return (await response.json()).data;
+    },
+  });
 
   // Animate in when question changes
   useEffect(() => {
     if (question) {
       setAnswer(question.answers?.[0]?.answer || '');
+      setJobId(question.answers?.[0]?.jobId ?? '');
       // Small delay so CSS transition fires
       requestAnimationFrame(() => setVisible(true));
     } else {
@@ -55,9 +72,11 @@ export function AnswerSlideOver({ question, onClose }: AnswerSlideOverProps) {
       answer,
       question!.question,
       question!.category,
+      jobId,
     ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interview-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['job'] });
       toast.success('답변이 저장되었습니다');
       handleClose();
     },
@@ -89,7 +108,7 @@ export function AnswerSlideOver({ question, onClose }: AnswerSlideOverProps) {
             <span className={`h-2 w-2 rounded-full ${cat.dot}`} />
             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{cat.label}</span>
             {question.jobType && (
-              <span className="rounded-full border border-gray-200 px-2 py-0.5 text-[10px] text-gray-500">
+              <span className="rounded-full border border-gray-200 px-2 py-0.5 text-xs text-gray-500">
                 {question.jobType}
               </span>
             )}
@@ -114,6 +133,24 @@ export function AnswerSlideOver({ question, onClose }: AnswerSlideOverProps) {
 
           {/* Answer */}
           <div>
+            <div className="mb-2">
+              <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">
+                연결된 공고 (선택)
+              </label>
+              <select
+                value={jobId}
+                onChange={e => setJobId(e.target.value)}
+                disabled={jobsLoading}
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none transition-colors disabled:opacity-50"
+              >
+                <option value="">공고 연결 안 함</option>
+                {jobs.map(job => (
+                  <option key={job.id} value={job.id}>
+                    {job.company} - {job.position}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">
                 나의 답변
@@ -152,7 +189,7 @@ export function AnswerSlideOver({ question, onClose }: AnswerSlideOverProps) {
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || !answer.trim()}
-            className="flex-1 rounded-lg bg-[#0f172a] py-2.5 text-sm font-medium text-white hover:bg-[#1e293b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 rounded-lg bg-primary py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {saveMutation.isPending ? '저장 중...' : '저장'}
           </button>

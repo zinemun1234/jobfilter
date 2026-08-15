@@ -3,21 +3,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Plus, Trash2, ChevronDown, ChevronUp, Edit2, FileText, Download, Link2, Zap, RefreshCw, TrendingUp, BarChart2, History, RotateCcw } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Edit2, FileText, Download, Link2, Zap, RefreshCw, TrendingUp, BarChart2, History, Target, Copy } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { SlideOver } from '@/components/ui/slide-over';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import EmptyState from '@/components/ui/EmptyState';
+import SkeletonList from '@/components/ui/SkeletonList';
 import CoachingGuide from '@/components/cover-letter/CoachingGuide';
+import KeywordHeatmap from '@/components/cover-letter/KeywordHeatmap';
+import DuplicateCheckPanel from '@/components/cover-letter/DuplicateCheckPanel';
+import ExperienceLibrary from '@/components/cover-letter/ExperienceLibrary';
+import PortfolioLibrary from '@/components/cover-letter/PortfolioLibrary';
+import { TemplateSelector } from '@/components/cover-letter/TemplateSelector';
+import { VersionList } from '@/components/cover-letter/VersionList';
 import type { FeedbackItem } from '@/lib/cover-letter-analysis';
+import type { CLItem } from '@/lib/cover-letter-templates';
 
-type CLItem = { question: string; answer: string };
-type CoverLetterVersion = {
-  id: string;
-  version: number;
-  items: CLItem[];
-  savedAt: string;
-};
 type CoverLetter = {
   id: string;
   company: string;
@@ -31,64 +33,7 @@ type CoverLetter = {
   job?: { company: string; position: string; status: string } | null;
 };
 type Job = { id: string; company: string; position: string };
-
-// 직군별 자소서 템플릿
-const COVER_LETTER_TEMPLATES: Record<string, { label: string; items: CLItem[] }> = {
-  frontend: {
-    label: '프론트엔드 개발자',
-    items: [
-      { question: '지원 동기 및 해당 직무에 관심을 갖게 된 계기를 작성해주세요.', answer: '' },
-      { question: '본인이 보유한 프론트엔드 기술 스택과 주요 프로젝트 경험을 서술해주세요.', answer: '' },
-      { question: '협업 과정에서 어려움을 극복한 경험을 구체적으로 작성해주세요.', answer: '' },
-      { question: '입사 후 3년 내 이루고 싶은 목표를 작성해주세요.', answer: '' },
-    ],
-  },
-  backend: {
-    label: '백엔드 개발자',
-    items: [
-      { question: '지원 동기 및 해당 직무에 관심을 갖게 된 계기를 작성해주세요.', answer: '' },
-      { question: '본인이 설계하거나 개발한 서버/API 경험을 구체적으로 서술해주세요.', answer: '' },
-      { question: '성능 문제나 장애를 해결한 경험이 있다면 작성해주세요.', answer: '' },
-      { question: '입사 후 기여하고 싶은 부분과 성장 계획을 작성해주세요.', answer: '' },
-    ],
-  },
-  fullstack: {
-    label: '풀스택 개발자',
-    items: [
-      { question: '지원 동기 및 풀스택 개발자를 목표로 하게 된 계기를 작성해주세요.', answer: '' },
-      { question: '프론트엔드와 백엔드를 모두 담당한 프로젝트 경험을 서술해주세요.', answer: '' },
-      { question: '기술적 의사결정을 직접 내린 경험과 그 결과를 작성해주세요.', answer: '' },
-      { question: '입사 후 목표와 기여 방향을 작성해주세요.', answer: '' },
-    ],
-  },
-  data: {
-    label: '데이터 엔지니어/분석가',
-    items: [
-      { question: '데이터 직무에 지원하는 동기를 작성해주세요.', answer: '' },
-      { question: '데이터 수집·처리·분석 경험을 구체적으로 서술해주세요.', answer: '' },
-      { question: '데이터를 활용해 문제를 해결한 사례를 작성해주세요.', answer: '' },
-      { question: '입사 후 데이터 관련 기여 계획을 작성해주세요.', answer: '' },
-    ],
-  },
-  pm: {
-    label: 'IT 기획/PM',
-    items: [
-      { question: 'IT 기획 또는 PM 직무에 지원하는 동기를 작성해주세요.', answer: '' },
-      { question: '서비스 기획 또는 프로젝트 관리 경험을 구체적으로 서술해주세요.', answer: '' },
-      { question: '이해관계자와 소통하며 문제를 해결한 경험을 작성해주세요.', answer: '' },
-      { question: '입사 후 기여하고 싶은 서비스나 방향을 작성해주세요.', answer: '' },
-    ],
-  },
-  general: {
-    label: '공통 (직군 무관)',
-    items: [
-      { question: '지원 동기를 작성해주세요.', answer: '' },
-      { question: '본인의 강점과 관련 경험을 서술해주세요.', answer: '' },
-      { question: '어려운 상황을 극복한 경험을 작성해주세요.', answer: '' },
-      { question: '입사 후 목표를 작성해주세요.', answer: '' },
-    ],
-  },
-};
+type Listing = { id: string; company: string; position: string; tags?: string[] };
 
 const empty = (): CLItem => ({ question: '', answer: '' });
 
@@ -100,6 +45,12 @@ async function fetchLetters(): Promise<CoverLetter[]> {
 
 async function fetchJobs(): Promise<Job[]> {
   const res = await fetch('/api/jobs');
+  if (!res.ok) throw new Error('Failed');
+  return (await res.json()).data;
+}
+
+async function fetchListings(): Promise<Listing[]> {
+  const res = await fetch('/api/listings');
   if (!res.ok) throw new Error('Failed');
   return (await res.json()).data;
 }
@@ -173,66 +124,126 @@ function SkillReadiness({ targetJob, skills }: { targetJob?: string | null; skil
   const missingMust = req.must.filter(s => !userSkillsLower.some(u => u.includes(s.toLowerCase()) || s.toLowerCase().includes(u)));
   const hasGood = req.good.filter(s => userSkillsLower.some(u => u.includes(s.toLowerCase()) || s.toLowerCase().includes(u)));
   const missingGood = req.good.filter(s => !userSkillsLower.some(u => u.includes(s.toLowerCase()) || s.toLowerCase().includes(u)));
+  const readinessRate = Math.round((hasMust.length / req.must.length) * 100);
 
   return (
-    <div className="rounded-xl border border-violet-200 bg-violet-50/50 p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <span className="text-sm">🎯</span>
-        <p className="text-xs font-semibold text-violet-800">{targetJob} 준비 현황</p>
-        <span className="text-[10px] text-violet-400 bg-violet-100 px-2 py-0.5 rounded-full ml-auto">
-          필수 {hasMust.length}/{req.must.length}
-        </span>
+    <div className="rounded-2xl border border-violet-200/60 bg-gradient-to-br from-violet-50/80 to-indigo-50/60 p-5 shadow-sm">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+          <TrendingUp className="w-5 h-5 text-violet-600" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-violet-900">{targetJob} 준비 현황</p>
+          <p className="text-xs text-violet-500 mt-0.5">현재 보유 기술 vs 직무 필수 스택</p>
+        </div>
+        <div className="text-right">
+          <span className={`text-lg font-bold ${
+            readinessRate >= 80 ? 'text-emerald-600' :
+            readinessRate >= 50 ? 'text-amber-600' :
+            'text-red-500'
+          }`}>
+            {readinessRate}%
+          </span>
+          <p className="text-xs text-violet-400">준비도</p>
+        </div>
       </div>
+      
       {missingMust.length > 0 && (
-        <div>
-          <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1.5">반드시 준비하세요</p>
+        <div className="mb-3">
+          <p className="text-xs font-bold text-red-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+            반드시 준비하세요
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {missingMust.map(s => (
-              <span key={s} className="text-xs bg-red-50 text-red-600 border border-red-200 px-2.5 py-1 rounded-full font-medium">
-                ✗ {s}
+              <span key={s} className="text-xs bg-white text-red-600 border border-red-200 px-3 py-1.5 rounded-lg font-medium shadow-sm">
+                {s}
               </span>
             ))}
           </div>
         </div>
       )}
+      
       {hasMust.length > 0 && (
-        <div>
-          <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1.5">보유 중 (필수)</p>
+        <div className="mb-3">
+          <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            보유 중 (필수)
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {hasMust.map(s => (
-              <span key={s} className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-medium">
-                ✓ {s}
+              <span key={s} className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-medium">
+                {s}
               </span>
             ))}
           </div>
         </div>
       )}
+      
       {missingGood.length > 0 && (
-        <div>
-          <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1.5">추가로 준비하면 좋아요</p>
+        <div className="mb-3">
+          <p className="text-xs font-bold text-amber-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            추가로 준비하면 좋아요
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {missingGood.slice(0, 4).map(s => (
-              <span key={s} className="text-xs bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full">
-                + {s}
+              <span key={s} className="text-xs bg-amber-50 text-amber-600 border border-amber-200 px-3 py-1.5 rounded-lg">
+                {s}
               </span>
             ))}
           </div>
         </div>
       )}
+      
       {hasGood.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {hasGood.map(s => (
-            <span key={s} className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">
-              ✓ {s}
+            <span key={s} className="text-xs bg-white text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg">
+              {s}
             </span>
           ))}
         </div>
       )}
-      <p className="text-[10px] text-violet-400 pt-1 border-t border-violet-100">
-        프로필 → 기술 스택에서 보유 기술을 업데이트하면 현황이 바뀝니다
-      </p>
+      
+      <div className="mt-4 pt-3 border-t border-violet-200/50 flex items-center gap-2">
+        <span className="text-xs text-violet-400">프로필 → 기술 스택에서 보유 기술을 업데이트하면 현황이 바뀝니다</span>
+      </div>
     </div>
   );
+}
+
+// 히트맵에서 선택한 키워드를 답변 텍스트에서 강조 표시
+function HighlightedAnswer({ answer, keyword }: { answer: string; keyword?: string }) {
+  if (!keyword || !answer) return <>{answer || '(답변 없음)'}</>;
+  const parts = answer.split(keyword);
+  return (
+    <>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part}
+          {i < parts.length - 1 && (
+            <mark className="bg-amber-200 text-amber-900 rounded px-0.5">{keyword}</mark>
+          )}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function findFeedbackKeyword(feedback: FeedbackItem, items: CLItem[]): { itemIndex: number; keyword?: string } {
+  const message = feedback.message;
+  const quoted = message.match(/["“”「」]([^"“”「」]+)["“”「」]/)?.[1];
+  const candidates = quoted ? [quoted] : [];
+  if (feedback.category === '첫 문장') candidates.push('저는');
+  if (feedback.category === '수동태') candidates.push('되었습니다', '받았습니다', '되어');
+  if (feedback.category === '접속사') candidates.push('그리고', '또한', '하지만', '그러나');
+  if (feedback.category === '추상적 표현') candidates.push('다양한', '여러', '많은', '수많은');
+  for (let itemIndex = 0; itemIndex < items.length; itemIndex += 1) {
+    const keyword = candidates.find(candidate => items[itemIndex].answer.includes(candidate));
+    if (keyword) return { itemIndex, keyword };
+  }
+  return { itemIndex: items.findIndex(item => item.answer.trim().length > 0) };
 }
 
 // targetJob 문자열 → 분석 카테고리 매핑
@@ -255,88 +266,8 @@ type AnalysisResult = {
     new: string[];
     score: number;
   } | null;
-  listingMatchRate: number | null;
   analyzedAt: string;
 };
-
-// 버전 히스토리 패널
-function VersionHistoryPanel({ letterId, onClose }: { letterId: string; onClose: () => void }) {
-  const qc = useQueryClient();
-
-  const { data: versions = [], isLoading } = useQuery<CoverLetterVersion[]>({
-    queryKey: ['cover-letter-versions', letterId],
-    queryFn: async () => {
-      const res = await fetch(`/api/cover-letter/${letterId}/versions`);
-      if (!res.ok) throw new Error('Failed');
-      return (await res.json()).data;
-    },
-  });
-
-  const restore = useMutation({
-    mutationFn: async (versionId: string) => {
-      const res = await fetch(`/api/cover-letter/${letterId}/versions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ versionId }),
-      });
-      if (!res.ok) throw new Error('Failed');
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['cover-letters'] });
-      qc.invalidateQueries({ queryKey: ['cover-letter-versions', letterId] });
-      toast.success('이전 버전으로 복원했습니다');
-      onClose();
-    },
-    onError: () => toast.error('복원에 실패했습니다'),
-  });
-
-  return (
-    <div className="border-t border-violet-100 bg-violet-50/30 px-5 py-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <History className="w-3.5 h-3.5 text-violet-500" />
-        <span className="text-xs font-semibold text-violet-700">버전 히스토리</span>
-        <span className="text-[10px] text-violet-400 bg-violet-100 px-2 py-0.5 rounded-full ml-auto">
-          수정 시 자동 저장 (최대 10개)
-        </span>
-      </div>
-
-      {isLoading ? (
-        <div className="space-y-2 animate-pulse">
-          {[...Array(3)].map((_, i) => <div key={i} className="h-10 bg-violet-100/50 rounded-lg" />)}
-        </div>
-      ) : versions.length === 0 ? (
-        <p className="text-xs text-violet-400 text-center py-4">저장된 버전이 없습니다. 자소서를 수정하면 이전 버전이 여기에 쌓입니다.</p>
-      ) : (
-        <ul className="space-y-2">
-          {versions.map(v => (
-            <li key={v.id} className="flex items-center gap-3 bg-white rounded-lg border border-violet-100 px-4 py-2.5">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-violet-700">v{v.version}</span>
-                  <span className="text-[11px] text-gray-400">
-                    {new Date(v.savedAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}{' '}
-                    {new Date(v.savedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-400 mt-0.5 truncate">
-                  항목 {v.items.length}개 · 총 {v.items.reduce((s, it) => s + it.answer.length, 0).toLocaleString()}자
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => restore.mutate(v.id)}
-                disabled={restore.isPending}
-                className="flex items-center gap-1 text-[11px] font-medium text-violet-600 hover:text-violet-800 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-2.5 py-1 rounded-lg transition-colors disabled:opacity-50"
-              >
-                <RotateCcw className="w-3 h-3" /> 복원
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
 
 // 점수 히스토리 그래프
 type HistoryEntry = { version: number; score: number; date: string; goodCount: number; warnCount: number; badCount: number };
@@ -395,20 +326,15 @@ function InlineAnalysis({
   letter,
   targetJob,
   skills,
+  onFocus,
 }: {
   letter: CoverLetter;
   targetJob?: string | null;
   skills?: string[];
+  onFocus: (focus: { letterId: string; itemIndex: number; keyword: string }) => void;
 }) {
   const category = detectCategory(letter.position, targetJob);
   const combined = letter.items.map(it => it.answer).filter(Boolean).join('\n\n');
-
-  // 공고 정보 추출 (연결된 job이 있으면 tags도 포함)
-  const listingInfo = letter.job
-    ? { company: letter.job.company, position: letter.job.position }
-    : letter.company
-    ? { company: letter.company, position: letter.position }
-    : null;
 
   const qc = useQueryClient();
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -417,12 +343,12 @@ function InlineAnalysis({
 
   // 최초 마운트 시 자동 분석
   useEffect(() => {
-    if (combined.trim().length >= 50) runAnalysis(null);
+    if (combined.trim().length >= 30) runAnalysis(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function runAnalysis(previous: FeedbackItem[] | null) {
-    if (combined.trim().length < 50) return;
+    if (combined.trim().length < 30) return;
     setLoading(true);
     try {
       const res = await fetch('/api/cover-letter/analyze', {
@@ -434,7 +360,6 @@ function InlineAnalysis({
           targetJob,
           skills: skills ?? [],
           previousFeedback: previous,
-          listingInfo,
           coverLetterId: letter.id,
         }),
       });
@@ -456,10 +381,10 @@ function InlineAnalysis({
     }
   }
 
-  if (combined.trim().length < 50) {
+  if (combined.trim().length < 30) {
     return (
       <div className="px-5 py-4 bg-amber-50/50 border-t border-amber-100 text-center">
-        <p className="text-xs text-amber-500">답변을 50자 이상 작성하면 분석이 시작됩니다</p>
+        <p className="text-xs text-amber-500">답변을 30자 이상 작성하면 분석이 시작됩니다</p>
       </div>
     );
   }
@@ -476,7 +401,7 @@ function InlineAnalysis({
 
   if (!result) return null;
 
-  const { feedback, overallScore, comparison, listingMatchRate } = result;
+  const { feedback, overallScore, comparison } = result;
   const good = feedback.filter(f => f.level === 'good');
   const warn = feedback.filter(f => f.level === 'warn');
   const bad = feedback.filter(f => f.level === 'bad');
@@ -487,25 +412,15 @@ function InlineAnalysis({
       <div className="flex items-center gap-2 flex-wrap">
         <Zap className="w-3.5 h-3.5 text-amber-500" />
         <span className="text-xs font-semibold text-amber-700">코칭 분석 결과</span>
-        <span className="text-[10px] text-amber-400 bg-amber-100 px-2 py-0.5 rounded-full">{category || '공통'}</span>
-        {/* 공고 매칭률 배지 */}
-        {listingMatchRate !== null && (
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-            listingMatchRate >= 60 ? 'bg-blue-100 text-blue-700' :
-            listingMatchRate >= 30 ? 'bg-amber-100 text-amber-700' :
-            'bg-red-50 text-red-600'
-          }`}>
-            공고 매칭 {listingMatchRate}%
-          </span>
-        )}
+        <span className="text-xs text-amber-400 bg-amber-100 px-2 py-0.5 rounded-full">{category || '공통'}</span>
         <div className="ml-auto flex items-center gap-2">
           <div className="flex items-center gap-1.5">
-            {good.length > 0 && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">✓ {good.length}</span>}
-            {warn.length > 0 && <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">⚠ {warn.length}</span>}
-            {bad.length > 0 && <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">✗ {bad.length}</span>}
+            {good.length > 0 && <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">✓ {good.length}</span>}
+            {warn.length > 0 && <span className="text-xs font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">⚠ {warn.length}</span>}
+            {bad.length > 0 && <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">✗ {bad.length}</span>}
           </div>
           {/* 종합 점수 */}
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
             overallScore >= 70 ? 'bg-emerald-100 text-emerald-700' :
             overallScore >= 40 ? 'bg-amber-100 text-amber-700' :
             'bg-red-50 text-red-600'
@@ -550,11 +465,19 @@ function InlineAnalysis({
       {/* 피드백 목록 — 교수님 피드백: "1번은 이렇게 고치면 좋겠네요" 지도형 형식 */}
       <ul className="space-y-2">
         {feedback.filter(f => f.level !== 'good').map((f, i) => (
-          <li key={i} className={`rounded-lg px-4 py-3 ${
-            f.level === 'warn' ? 'bg-amber-50 border border-amber-100' : 'bg-red-50 border border-red-100'
-          }`}>
+          <li
+            key={i}
+            onClick={() => {
+              const focus = findFeedbackKeyword(f, letter.items);
+              if (focus.itemIndex >= 0 && focus.keyword) onFocus({ letterId: letter.id, itemIndex: focus.itemIndex, keyword: focus.keyword });
+            }}
+            className={`rounded-lg px-4 py-3 ${
+              f.level === 'warn' ? 'bg-amber-50 border border-amber-100' : 'bg-red-50 border border-red-100'
+            } ${findFeedbackKeyword(f, letter.items).keyword ? 'cursor-pointer hover:ring-2 hover:ring-amber-300' : ''}`}
+            title={findFeedbackKeyword(f, letter.items).keyword ? '클릭하면 문제 문장으로 이동합니다' : undefined}
+          >
             <div className="flex items-start gap-2.5">
-              <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5 ${
+              <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${
                 f.level === 'warn' ? 'bg-amber-200 text-amber-800' : 'bg-red-200 text-red-800'
               }`}>{i + 1}</span>
               <div className="flex-1">
@@ -588,7 +511,7 @@ function InlineAnalysis({
       </ul>
 
       <div className="flex items-center justify-between pt-1 border-t border-amber-100">
-        <p className="text-[10px] text-amber-400">피드백을 참고해서 직접 수정하세요. AI가 대신 써주지 않습니다.</p>
+        <p className="text-xs text-amber-400">피드백을 참고해서 직접 수정하세요. AI가 대신 써주지 않습니다.</p>
         <button
           type="button"
           onClick={handleReanalyze}
@@ -607,18 +530,23 @@ export default function CoverLetterPage() {
   const searchParams = useSearchParams();
   const { data: letters = [], isLoading } = useQuery({ queryKey: ['cover-letters'], queryFn: fetchLetters });
   const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: fetchJobs });
+  const { data: listings = [] } = useQuery({ queryKey: ['listings'], queryFn: fetchListings });
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CoverLetter | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [heatmapId, setHeatmapId] = useState<string | null>(null);
+  const [duplicateId, setDuplicateId] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [showVersions, setShowVersions] = useState<string | null>(null);
+  const [highlighted, setHighlighted] = useState<{ letterId: string; itemIndex: number; keyword: string } | null>(null);
 
   const [company, setCompany] = useState('');
   const [position, setPosition] = useState('');
   const [jobId, setJobId] = useState('');
   const [items, setItems] = useState<CLItem[]>([empty()]);
+  const [templateKey, setTemplateKey] = useState<string | null>(null);
 
   // 공고 상세에서 넘어온 경우 자동으로 폼 열기 + 공고 정보 자동 채우기
   useEffect(() => {
@@ -626,11 +554,13 @@ export default function CoverLetterPage() {
     const fromPosition = searchParams.get('position');
     const fromDescription = searchParams.get('description');
     const fromTags = searchParams.get('tags');
+    const fromJobId = searchParams.get('jobId');
     if (fromCompany && fromPosition) {
       setEditing(null);
+      setTemplateKey(null);
       setCompany(fromCompany);
       setPosition(fromPosition);
-      setJobId('');
+      setJobId(fromJobId ?? '');
       // 공고 설명/태그 기반으로 첫 항목 질문 자동 생성
       const autoQuestion = fromDescription
         ? `${fromPosition} 직무에 지원하는 이유와 본인의 역량을 서술해주세요.`
@@ -645,13 +575,24 @@ export default function CoverLetterPage() {
     }
   }, [searchParams]);
 
+  // 히트맵 셀 클릭 시 해당 문항으로 스크롤 이동
+  useEffect(() => {
+    if (!highlighted) return;
+    const el = document.getElementById(`cl-item-${highlighted.letterId}-${highlighted.itemIndex}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlighted]);
+
   function openNew() {
     setEditing(null);
+    setTemplateKey(null);
     setCompany(''); setPosition(''); setJobId(''); setItems([empty()]);
     setOpen(true);
   }
   function openEdit(l: CoverLetter) {
     setEditing(l);
+    setTemplateKey(null);
     setCompany(l.company); setPosition(l.position);
     setJobId(l.jobId ?? '');
     setItems(l.items.length ? l.items : [empty()]);
@@ -687,24 +628,50 @@ export default function CoverLetterPage() {
     setItems(prev => prev.map((it, idx) => idx === i ? { ...it, [field]: val } : it));
   }
 
+  function insertExperience(experience: { situation: string; action: string; result: string; technologies: string[]; metrics?: string | null }) {
+    const experienceText = [
+      `상황: ${experience.situation}`,
+      `행동: ${experience.action}`,
+      `결과: ${experience.result}`,
+      experience.technologies.length > 0 ? `사용 기술: ${experience.technologies.join(', ')}` : '',
+      experience.metrics ? `성과: ${experience.metrics}` : '',
+    ].filter(Boolean).join('\n');
+    setItems(prev => prev.map((item, index) => index === 0 ? { ...item, answer: item.answer ? `${item.answer}\n\n${experienceText}` : experienceText } : item));
+    toast.success('첫 번째 문항에 경험을 삽입했습니다');
+  }
+
+  function insertPortfolio(portfolio: { title: string; description: string; techStack: string[]; githubUrl?: string | null; deployUrl?: string | null }) {
+    const portfolioText = [
+      `프로젝트: ${portfolio.title}`,
+      portfolio.description,
+      portfolio.techStack.length > 0 ? `사용 기술: ${portfolio.techStack.join(', ')}` : '',
+      portfolio.githubUrl ? `GitHub: ${portfolio.githubUrl}` : '',
+      portfolio.deployUrl ? `배포 링크: ${portfolio.deployUrl}` : '',
+    ].filter(Boolean).join('\n');
+    setItems(prev => prev.map((item, index) => index === 0 ? { ...item, answer: item.answer ? `${item.answer}\n\n${portfolioText}` : portfolioText } : item));
+    toast.success('첫 번째 문항에 포트폴리오를 삽입했습니다');
+  }
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-      <div className="flex items-end justify-between border-b border-gray-200 pb-5">
+    <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+      <div className="flex items-end justify-between">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-100 px-3 py-1 mb-3">
-            <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">핵심 기능</span>
-            <span className="text-[10px] text-amber-400">빨간펜 코칭</span>
+          <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 mb-3">
+            <span className="text-xs font-bold text-amber-600 uppercase tracking-widest">핵심 기능</span>
+            <span className="text-xs text-amber-500">빨간펜 코칭</span>
           </div>
-          <h1 className="text-xl font-semibold text-gray-900">자기소개서 코칭</h1>
-          <p className="text-xs text-gray-400 mt-1">AI가 대신 써주지 않습니다. 직무에 맞는 수정 방향만 가이드합니다.</p>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">자기소개서 코칭</h1>
+          <p className="text-sm text-muted-foreground mt-1.5">AI가 대신 써주지 않습니다. 직무에 맞는 수정 방향만 가이드합니다.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/cover-letter/export"
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+          <Link
+            href="/cover-letter/export"
+            className="flex items-center gap-2 px-4 py-2.5 border border-border bg-background text-foreground text-sm font-medium rounded-xl hover:bg-muted transition-colors"
+          >
             <Download className="w-4 h-4" /> PDF 내보내기
           </Link>
           <button type="button" onClick={openNew}
-            className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] transition-colors">
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-slate-900/10">
             <Plus className="w-4 h-4" /> 새 자기소개서
           </button>
         </div>
@@ -714,13 +681,14 @@ export default function CoverLetterPage() {
       {profile && <SkillReadiness targetJob={profile.targetJob} skills={profile.skills} />}
 
       {isLoading ? (
-        <div className="space-y-3 animate-pulse">{[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-xl" />)}</div>
+        <SkeletonList count={3} cardClassName="h-28" />
       ) : letters.length === 0 ? (
-        <div className="rounded-xl border border-gray-100 bg-white py-20 text-center shadow-sm">
-          <FileText className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">자기소개서가 없습니다</p>
-          <button type="button" onClick={openNew} className="mt-4 text-sm text-[#0f172a] font-medium hover:underline">첫 자기소개서 작성하기</button>
-        </div>
+        <EmptyState
+          icon={FileText}
+          title="자기소개서가 없습니다"
+          description="첫 자기소개서를 작성하고 AI 코칭을 받아보세요"
+          action={{ label: '첫 자기소개서 작성하기', onClick: openNew }}
+        />
       ) : (
         <div className="space-y-3">
           {letters.map(l => {
@@ -728,20 +696,20 @@ export default function CoverLetterPage() {
             const isAnalyzing = analyzing === l.id;
             const totalChars = l.items.reduce((s, it) => s + it.answer.length, 0);
             return (
-              <div key={l.id} className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
-                <div className="flex items-center gap-3 px-5 py-4">
+              <div key={l.id} className="rounded-2xl border border-border bg-background shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-4 px-6 py-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-gray-900">{l.company}</p>
-                      <span className="text-xs text-gray-400">·</span>
-                      <p className="text-sm text-gray-600">{l.position}</p>
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <p className="font-semibold text-foreground">{l.company}</p>
+                      <span className="text-xs text-muted-foreground/50">·</span>
+                      <p className="text-sm text-muted-foreground">{l.position}</p>
                       {l.job && (
-                        <span className="flex items-center gap-1 text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
                           <Link2 className="w-2.5 h-2.5" /> 공고 연결됨
                         </span>
                       )}
                       {l.analysisScore != null && (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                           l.analysisScore >= 70 ? 'bg-emerald-100 text-emerald-700' :
                           l.analysisScore >= 40 ? 'bg-amber-100 text-amber-700' :
                           'bg-red-50 text-red-600'
@@ -750,7 +718,7 @@ export default function CoverLetterPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-1.5">
                       항목 {l.items.length}개 · 총 {totalChars.toLocaleString()}자 ·{' '}
                       {new Date(l.updatedAt).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} 수정
                     </p>
@@ -768,6 +736,32 @@ export default function CoverLetterPage() {
                     >
                       <Zap className="w-3.5 h-3.5" />
                       {isAnalyzing ? '분석 닫기' : '코칭 분석'}
+                    </button>
+                    {/* JD 키워드 매칭 히트맵 */}
+                    <button
+                      type="button"
+                      onClick={() => setHeatmapId(heatmapId === l.id ? null : l.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        heatmapId === l.id
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200'
+                      }`}
+                    >
+                      <Target className="w-3.5 h-3.5" />
+                      {heatmapId === l.id ? '히트맵 닫기' : 'JD 매칭'}
+                    </button>
+                    {/* 중복/자기표절 검사 */}
+                    <button
+                      type="button"
+                      onClick={() => setDuplicateId(duplicateId === l.id ? null : l.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        duplicateId === l.id
+                          ? 'bg-violet-500 text-white'
+                          : 'bg-violet-50 text-violet-600 hover:bg-violet-100 border border-violet-200'
+                      }`}
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      {duplicateId === l.id ? '중복 닫기' : '중복 검사'}
                     </button>
                     {/* 버전 히스토리 버튼 */}
                     <button
@@ -795,25 +789,61 @@ export default function CoverLetterPage() {
                 </div>
 
                 {/* 코칭 분석 결과 — 카드 바로 아래 인라인 표시 */}
-                {isAnalyzing && <InlineAnalysis letter={l} targetJob={profile?.targetJob} skills={profile?.skills} />}
+                {isAnalyzing && (
+                  <InlineAnalysis
+                    letter={l}
+                    targetJob={profile?.targetJob}
+                    skills={profile?.skills}
+                    onFocus={focus => {
+                      setExpanded(l.id);
+                      setHighlighted(focus);
+                    }}
+                  />
+                )}
 
                 {/* 버전 히스토리 패널 */}
-                {showVersions === l.id && <VersionHistoryPanel letterId={l.id} onClose={() => setShowVersions(null)} />}
+                {showVersions === l.id && (
+                  <VersionList
+                    letterId={l.id}
+                    currentVersion={l.version}
+                    currentItems={l.items}
+                    onClose={() => setShowVersions(null)}
+                  />
+                )}
 
                 {/* 점수 히스토리 그래프 — 분석 이력이 2개 이상일 때 표시 */}
                 {!isAnalyzing && <ScoreHistoryChart historyJson={l.analysisHistory} />}
 
                 {isOpen && (
                   <div className="border-t border-gray-50 divide-y divide-gray-50">
-                    {l.items.map((it, i) => (
-                      <div key={i} className="px-5 py-4">
-                        <p className="text-xs font-medium text-gray-500 mb-1.5">Q{i + 1}. {it.question || '(질문 없음)'}</p>
-                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg px-4 py-3">
-                          {it.answer || '(답변 없음)'}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1.5 text-right">{it.answer.length}자</p>
+                    {heatmapId === l.id && (
+                      <div className="px-5 py-4 bg-gray-50/50">
+                        <KeywordHeatmap
+                          coverLetterId={l.id}
+                          items={l.items}
+                          listings={listings.map((listing) => ({ id: listing.id, company: listing.company, position: listing.position }))}
+                          onHighlight={(itemIndex, keyword) => setHighlighted({ letterId: l.id, itemIndex, keyword })}
+                        />
                       </div>
-                    ))}
+                    )}
+                    {duplicateId === l.id && (
+                      <DuplicateCheckPanel letterId={l.id} />
+                    )}
+                    {l.items.map((it, i) => {
+                      const isHighlighted = highlighted?.letterId === l.id && highlighted?.itemIndex === i;
+                      return (
+                        <div key={i} className="px-5 py-4" id={`cl-item-${l.id}-${i}`}>
+                          <p className="text-xs font-medium text-gray-500 mb-1.5">Q{i + 1}. {it.question || '(질문 없음)'}</p>
+                          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg px-4 py-3">
+                            <HighlightedAnswer
+                              answer={it.answer}
+                              keyword={isHighlighted ? highlighted.keyword : undefined}
+                            />
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1.5 text-right">{it.answer.length}자</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -825,6 +855,10 @@ export default function CoverLetterPage() {
       {/* SlideOver — 작성/수정 폼 + 가이드 탭 */}
       <SlideOver open={open} onClose={() => setOpen(false)} title={editing ? '자기소개서 수정' : '새 자기소개서'}>
         <div className="space-y-5">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <ExperienceLibrary onInsertAction={insertExperience} />
+            <PortfolioLibrary onInsertAction={insertPortfolio} />
+          </div>
           <CoachingGuide
             defaultCategory={detectCategory(position, profile?.targetJob)}
             analysisTexts={items.map(it => it.answer).filter(Boolean)}
@@ -832,22 +866,14 @@ export default function CoverLetterPage() {
 
           {/* 템플릿 선택 — 새 작성 시에만 표시 */}
           {!editing && (
-            <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 space-y-2">
-              <p className="text-xs font-semibold text-blue-700">직군별 템플릿으로 시작하기</p>
-              <p className="text-[11px] text-blue-400">선택하면 질문 항목이 자동으로 채워집니다. 이후 자유롭게 수정하세요.</p>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {Object.entries(COVER_LETTER_TEMPLATES).map(([key, tpl]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setItems(tpl.items.map(it => ({ ...it })))}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-blue-200 bg-white text-blue-700 hover:bg-blue-100 transition-colors font-medium"
-                  >
-                    {tpl.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <TemplateSelector
+              value={templateKey ?? undefined}
+              onSelect={selection => {
+                setTemplateKey(selection.key);
+                setItems(selection.items.map(it => ({ ...it })));
+                setPosition(selection.label);
+              }}
+            />
           )}
 
           {jobs.length > 0 && (
@@ -855,7 +881,7 @@ export default function CoverLetterPage() {
               <label className="block text-xs font-medium text-gray-500 mb-1">채용공고 연결 (선택)</label>
               <select value={jobId} onChange={e => handleJobSelect(e.target.value)}
                 aria-label="채용공고 선택"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 bg-white">
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
                 <option value="">연결 안 함</option>
                 {jobs.map(j => (
                   <option key={j.id} value={j.id}>{j.company} · {j.position}</option>
@@ -868,13 +894,13 @@ export default function CoverLetterPage() {
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">회사명</label>
               <input value={company} onChange={e => setCompany(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="회사명" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">지원 직무</label>
               <input value={position} onChange={e => setPosition(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="직무명 (예: 백엔드 개발자)" />
             </div>
           </div>
@@ -883,7 +909,7 @@ export default function CoverLetterPage() {
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">항목</p>
               <button type="button" onClick={() => setItems(p => [...p, empty()])}
-                className="text-xs text-[#0f172a] font-medium hover:underline flex items-center gap-1">
+                className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
                 <Plus className="w-3 h-3" /> 항목 추가
               </button>
             </div>
@@ -897,12 +923,12 @@ export default function CoverLetterPage() {
                   )}
                 </div>
                 <input value={it.question} onChange={e => updateItem(i, 'question', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="질문 (예: 지원 동기를 작성해주세요)" />
                 <div>
                   <textarea value={it.answer} onChange={e => updateItem(i, 'answer', e.target.value)}
                     rows={6}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 resize-none"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                     placeholder="답변을 작성하세요..." />
                   <p className="text-xs text-gray-400 text-right mt-0.5">{it.answer.length}자</p>
                 </div>
@@ -911,7 +937,7 @@ export default function CoverLetterPage() {
           </div>
 
           <button type="button" onClick={() => save.mutate()} disabled={!company || !position || save.isPending}
-            className="w-full py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors">
+            className="w-full py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors">
             {save.isPending ? '저장 중...' : '저장'}
           </button>
         </div>

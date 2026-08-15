@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/api';
+import { handleApiError } from '@/lib/errors';
 
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return null;
-  if (session.user.role !== 'ADMIN') return null;
-  return session;
-}
+export const dynamic = 'force-dynamic';
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const body = await req.json();
   const { company, position, location, career, education, employType, salary, deadline, url, description, tags, isActive } = body;
@@ -38,8 +36,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   await prisma.jobListing.delete({ where: { id: params.id } });
   return NextResponse.json({ data: { success: true } });

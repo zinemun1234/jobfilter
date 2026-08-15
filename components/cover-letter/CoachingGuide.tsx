@@ -285,7 +285,7 @@ export default function CoachingGuide({ defaultCategory = '', analysisTexts = []
                   ))}
                 </ul>
               </div>
-              <p className="text-[10px] text-amber-400 pt-1 border-t border-amber-100">
+              <p className="text-xs text-amber-400 pt-1 border-t border-amber-100">
                 이 가이드는 참고용입니다. 자소서는 반드시 본인이 직접 작성하세요.
               </p>
             </div>
@@ -314,7 +314,7 @@ export default function CoachingGuide({ defaultCategory = '', analysisTexts = []
                   className="w-full px-3 py-2 text-sm border border-amber-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
                 />
                 <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-[10px] text-amber-400">{analyzeInput.length}자</span>
+                  <span className="text-xs text-amber-400">{analyzeInput.length}자</span>
                   <button
                     type="button"
                     onClick={() => runAnalysis(analyzeInput)}
@@ -333,7 +333,7 @@ export default function CoachingGuide({ defaultCategory = '', analysisTexts = []
                     <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">✓ {goodCount}</span>
                     <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">⚠ {warnCount}</span>
                     {badCount > 0 && <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">✗ {badCount}</span>}
-                    <span className="text-[10px] text-gray-400 ml-auto">키워드 기반 분석</span>
+                    <span className="text-xs text-gray-400 ml-auto">키워드 기반 분석</span>
                   </div>
                   <ul className="space-y-2">
                     {feedback.map((f, i) => <FeedbackBadge key={i} item={f} />)}

@@ -7,8 +7,7 @@
  * - roadmapItemSchema: 로드맵 항목
  * - interviewQuestionSchema: 면접 질문
  * - interviewAnswerSchema: 면접 답변
- * - profileSchema: 프로필 수정 (lib/validations/profile.ts에도 동일 스키마 존재)
- *
+
  * 타입 별칭도 함께 export (ApplicationStatus, SkillStatus, QuestionCategory)
  */
 import { z } from 'zod';
@@ -21,6 +20,7 @@ export const portfolioSchema = z.object({
   endDate: z.string().optional(),
   githubUrl: z.string().url('유효한 GitHub URL을 입력해주세요').optional().or(z.literal('')),
   deployUrl: z.string().url('유효한 배포 URL을 입력해주세요').optional().or(z.literal('')),
+  jobId: z.string().optional(),
 });
 
 export const jobPostingSchema = z.object({
@@ -59,14 +59,10 @@ export const interviewQuestionSchema = z.object({
 export const interviewAnswerSchema = z.object({
   questionId: z.string(),
   answer: z.string().min(1, '답변은 필수입니다'),
+  jobId: z.string().optional(),
 });
 
-export const profileSchema = z.object({
-  name: z.string().optional(),
-  major: z.string().optional(),
-  targetJob: z.string().optional(),
-  skills: z.array(z.string()).optional(),
-});
+export { profileSchema, type ProfileInput } from '@/lib/validations/profile';
 
 // SQLite compatibility types
 export type ApplicationStatus = 'PREPARING' | 'APPLIED' | 'DOCUMENT_PASS' | 'INTERVIEW' | 'FINAL_PASS' | 'REJECTED';

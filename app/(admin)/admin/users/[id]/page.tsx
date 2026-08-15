@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Briefcase, FolderOpen, Map } from 'lucide-react';
+import { STATUS_CONFIG } from '@/lib/status-config';
 
 type UserDetail = {
   id: string; email: string; name: string | null; major: string | null;
@@ -12,14 +13,6 @@ type UserDetail = {
   roadmapItems: { id: string; jobCategory: string; skill: string; status: string }[];
 };
 
-const statusLabels: Record<string, string> = {
-  PREPARING: '서류 준비 중', APPLIED: '지원 완료', DOCUMENT_PASS: '서류 합격',
-  INTERVIEW: '면접 예정', FINAL_PASS: '최종 합격', REJECTED: '불합격',
-};
-const statusDots: Record<string, string> = {
-  PREPARING: 'bg-slate-400', APPLIED: 'bg-blue-500', DOCUMENT_PASS: 'bg-emerald-500',
-  INTERVIEW: 'bg-amber-500', FINAL_PASS: 'bg-violet-500', REJECTED: 'bg-red-400',
-};
 const skillStatusDots: Record<string, string> = {
   NOT_STARTED: 'bg-gray-300', IN_PROGRESS: 'bg-blue-500', COMPLETED: 'bg-emerald-500',
 };
@@ -98,10 +91,15 @@ export default function AdminUserDetailPage() {
                   <p className="text-sm font-medium text-gray-900">{j.company}</p>
                   <p className="text-xs text-gray-400">{j.position}</p>
                 </div>
-                <span className={`inline-flex items-center gap-1.5 text-xs text-gray-500`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${statusDots[j.status] ?? 'bg-gray-400'}`} />
-                  {statusLabels[j.status] ?? j.status}
-                </span>
+                {(() => {
+                  const cfg = STATUS_CONFIG[j.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.PREPARING;
+                  return (
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${cfg.bg} ${cfg.text}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
+                      {cfg.label}
+                    </span>
+                  );
+                })()}
               </div>
             ))}
           </div>

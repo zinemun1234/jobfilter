@@ -24,6 +24,11 @@ export type User = $Result.DefaultSelection<Prisma.$UserPayload>
  */
 export type Portfolio = $Result.DefaultSelection<Prisma.$PortfolioPayload>
 /**
+ * Model Experience
+ * 
+ */
+export type Experience = $Result.DefaultSelection<Prisma.$ExperiencePayload>
+/**
  * Model JobPosting
  * 
  */
@@ -231,6 +236,16 @@ export class PrismaClient<
     * ```
     */
   get portfolio(): Prisma.PortfolioDelegate<ExtArgs>;
+
+  /**
+   * `prisma.experience`: Exposes CRUD operations for the **Experience** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Experiences
+    * const experiences = await prisma.experience.findMany()
+    * ```
+    */
+  get experience(): Prisma.ExperienceDelegate<ExtArgs>;
 
   /**
    * `prisma.jobPosting`: Exposes CRUD operations for the **JobPosting** model.
@@ -804,6 +819,7 @@ export namespace Prisma {
   export const ModelName: {
     User: 'User',
     Portfolio: 'Portfolio',
+    Experience: 'Experience',
     JobPosting: 'JobPosting',
     StatusHistory: 'StatusHistory',
     RoadmapItem: 'RoadmapItem',
@@ -832,7 +848,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "portfolio" | "jobPosting" | "statusHistory" | "roadmapItem" | "interviewQuestion" | "interviewAnswer" | "coverLetter" | "coverLetterVersion" | "jobListing" | "jobBookmark" | "employmentRecord" | "notice" | "userNotification" | "passwordResetToken"
+      modelProps: "user" | "portfolio" | "experience" | "jobPosting" | "statusHistory" | "roadmapItem" | "interviewQuestion" | "interviewAnswer" | "coverLetter" | "coverLetterVersion" | "jobListing" | "jobBookmark" | "employmentRecord" | "notice" | "userNotification" | "passwordResetToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -973,6 +989,76 @@ export namespace Prisma {
           count: {
             args: Prisma.PortfolioCountArgs<ExtArgs>
             result: $Utils.Optional<PortfolioCountAggregateOutputType> | number
+          }
+        }
+      }
+      Experience: {
+        payload: Prisma.$ExperiencePayload<ExtArgs>
+        fields: Prisma.ExperienceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExperienceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExperienceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload>
+          }
+          findFirst: {
+            args: Prisma.ExperienceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExperienceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload>
+          }
+          findMany: {
+            args: Prisma.ExperienceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload>[]
+          }
+          create: {
+            args: Prisma.ExperienceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload>
+          }
+          createMany: {
+            args: Prisma.ExperienceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExperienceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload>[]
+          }
+          delete: {
+            args: Prisma.ExperienceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload>
+          }
+          update: {
+            args: Prisma.ExperienceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload>
+          }
+          deleteMany: {
+            args: Prisma.ExperienceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExperienceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.ExperienceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExperiencePayload>
+          }
+          aggregate: {
+            args: Prisma.ExperienceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExperience>
+          }
+          groupBy: {
+            args: Prisma.ExperienceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExperienceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExperienceCountArgs<ExtArgs>
+            result: $Utils.Optional<ExperienceCountAggregateOutputType> | number
           }
         }
       }
@@ -2053,6 +2139,7 @@ export namespace Prisma {
     interviewAnswers: number
     customQuestions: number
     coverLetters: number
+    experiences: number
     notifications: number
     bookmarks: number
     recruitListings: number
@@ -2065,6 +2152,7 @@ export namespace Prisma {
     interviewAnswers?: boolean | UserCountOutputTypeCountInterviewAnswersArgs
     customQuestions?: boolean | UserCountOutputTypeCountCustomQuestionsArgs
     coverLetters?: boolean | UserCountOutputTypeCountCoverLettersArgs
+    experiences?: boolean | UserCountOutputTypeCountExperiencesArgs
     notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
     bookmarks?: boolean | UserCountOutputTypeCountBookmarksArgs
     recruitListings?: boolean | UserCountOutputTypeCountRecruitListingsArgs
@@ -2126,6 +2214,13 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountExperiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExperienceWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserNotificationWhereInput
   }
@@ -2152,11 +2247,17 @@ export namespace Prisma {
   export type JobPostingCountOutputType = {
     statusHistory: number
     coverLetters: number
+    portfolios: number
+    experiences: number
+    interviewAnswers: number
   }
 
   export type JobPostingCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     statusHistory?: boolean | JobPostingCountOutputTypeCountStatusHistoryArgs
     coverLetters?: boolean | JobPostingCountOutputTypeCountCoverLettersArgs
+    portfolios?: boolean | JobPostingCountOutputTypeCountPortfoliosArgs
+    experiences?: boolean | JobPostingCountOutputTypeCountExperiencesArgs
+    interviewAnswers?: boolean | JobPostingCountOutputTypeCountInterviewAnswersArgs
   }
 
   // Custom InputTypes
@@ -2182,6 +2283,27 @@ export namespace Prisma {
    */
   export type JobPostingCountOutputTypeCountCoverLettersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CoverLetterWhereInput
+  }
+
+  /**
+   * JobPostingCountOutputType without action
+   */
+  export type JobPostingCountOutputTypeCountPortfoliosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PortfolioWhereInput
+  }
+
+  /**
+   * JobPostingCountOutputType without action
+   */
+  export type JobPostingCountOutputTypeCountExperiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExperienceWhereInput
+  }
+
+  /**
+   * JobPostingCountOutputType without action
+   */
+  export type JobPostingCountOutputTypeCountInterviewAnswersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InterviewAnswerWhereInput
   }
 
 
@@ -2516,6 +2638,7 @@ export namespace Prisma {
     interviewAnswers?: boolean | User$interviewAnswersArgs<ExtArgs>
     customQuestions?: boolean | User$customQuestionsArgs<ExtArgs>
     coverLetters?: boolean | User$coverLettersArgs<ExtArgs>
+    experiences?: boolean | User$experiencesArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     bookmarks?: boolean | User$bookmarksArgs<ExtArgs>
     recruitListings?: boolean | User$recruitListingsArgs<ExtArgs>
@@ -2561,6 +2684,7 @@ export namespace Prisma {
     interviewAnswers?: boolean | User$interviewAnswersArgs<ExtArgs>
     customQuestions?: boolean | User$customQuestionsArgs<ExtArgs>
     coverLetters?: boolean | User$coverLettersArgs<ExtArgs>
+    experiences?: boolean | User$experiencesArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     bookmarks?: boolean | User$bookmarksArgs<ExtArgs>
     recruitListings?: boolean | User$recruitListingsArgs<ExtArgs>
@@ -2577,6 +2701,7 @@ export namespace Prisma {
       interviewAnswers: Prisma.$InterviewAnswerPayload<ExtArgs>[]
       customQuestions: Prisma.$InterviewQuestionPayload<ExtArgs>[]
       coverLetters: Prisma.$CoverLetterPayload<ExtArgs>[]
+      experiences: Prisma.$ExperiencePayload<ExtArgs>[]
       notifications: Prisma.$UserNotificationPayload<ExtArgs>[]
       bookmarks: Prisma.$JobBookmarkPayload<ExtArgs>[]
       recruitListings: Prisma.$JobListingPayload<ExtArgs>[]
@@ -2965,6 +3090,7 @@ export namespace Prisma {
     interviewAnswers<T extends User$interviewAnswersArgs<ExtArgs> = {}>(args?: Subset<T, User$interviewAnswersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InterviewAnswerPayload<ExtArgs>, T, "findMany"> | Null>
     customQuestions<T extends User$customQuestionsArgs<ExtArgs> = {}>(args?: Subset<T, User$customQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InterviewQuestionPayload<ExtArgs>, T, "findMany"> | Null>
     coverLetters<T extends User$coverLettersArgs<ExtArgs> = {}>(args?: Subset<T, User$coverLettersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CoverLetterPayload<ExtArgs>, T, "findMany"> | Null>
+    experiences<T extends User$experiencesArgs<ExtArgs> = {}>(args?: Subset<T, User$experiencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findMany"> | Null>
     notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserNotificationPayload<ExtArgs>, T, "findMany"> | Null>
     bookmarks<T extends User$bookmarksArgs<ExtArgs> = {}>(args?: Subset<T, User$bookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobBookmarkPayload<ExtArgs>, T, "findMany"> | Null>
     recruitListings<T extends User$recruitListingsArgs<ExtArgs> = {}>(args?: Subset<T, User$recruitListingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobListingPayload<ExtArgs>, T, "findMany"> | Null>
@@ -3444,6 +3570,26 @@ export namespace Prisma {
   }
 
   /**
+   * User.experiences
+   */
+  export type User$experiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    where?: ExperienceWhereInput
+    orderBy?: ExperienceOrderByWithRelationInput | ExperienceOrderByWithRelationInput[]
+    cursor?: ExperienceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExperienceScalarFieldEnum | ExperienceScalarFieldEnum[]
+  }
+
+  /**
    * User.notifications
    */
   export type User$notificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3531,6 +3677,7 @@ export namespace Prisma {
   export type PortfolioMinAggregateOutputType = {
     id: string | null
     userId: string | null
+    jobId: string | null
     title: string | null
     description: string | null
     techStack: string | null
@@ -3538,6 +3685,8 @@ export namespace Prisma {
     endDate: Date | null
     githubUrl: string | null
     deployUrl: string | null
+    githubAnalysis: string | null
+    githubAnalysisFetchedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3545,6 +3694,7 @@ export namespace Prisma {
   export type PortfolioMaxAggregateOutputType = {
     id: string | null
     userId: string | null
+    jobId: string | null
     title: string | null
     description: string | null
     techStack: string | null
@@ -3552,6 +3702,8 @@ export namespace Prisma {
     endDate: Date | null
     githubUrl: string | null
     deployUrl: string | null
+    githubAnalysis: string | null
+    githubAnalysisFetchedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3559,6 +3711,7 @@ export namespace Prisma {
   export type PortfolioCountAggregateOutputType = {
     id: number
     userId: number
+    jobId: number
     title: number
     description: number
     techStack: number
@@ -3566,6 +3719,8 @@ export namespace Prisma {
     endDate: number
     githubUrl: number
     deployUrl: number
+    githubAnalysis: number
+    githubAnalysisFetchedAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -3575,6 +3730,7 @@ export namespace Prisma {
   export type PortfolioMinAggregateInputType = {
     id?: true
     userId?: true
+    jobId?: true
     title?: true
     description?: true
     techStack?: true
@@ -3582,6 +3738,8 @@ export namespace Prisma {
     endDate?: true
     githubUrl?: true
     deployUrl?: true
+    githubAnalysis?: true
+    githubAnalysisFetchedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3589,6 +3747,7 @@ export namespace Prisma {
   export type PortfolioMaxAggregateInputType = {
     id?: true
     userId?: true
+    jobId?: true
     title?: true
     description?: true
     techStack?: true
@@ -3596,6 +3755,8 @@ export namespace Prisma {
     endDate?: true
     githubUrl?: true
     deployUrl?: true
+    githubAnalysis?: true
+    githubAnalysisFetchedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3603,6 +3764,7 @@ export namespace Prisma {
   export type PortfolioCountAggregateInputType = {
     id?: true
     userId?: true
+    jobId?: true
     title?: true
     description?: true
     techStack?: true
@@ -3610,6 +3772,8 @@ export namespace Prisma {
     endDate?: true
     githubUrl?: true
     deployUrl?: true
+    githubAnalysis?: true
+    githubAnalysisFetchedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -3690,6 +3854,7 @@ export namespace Prisma {
   export type PortfolioGroupByOutputType = {
     id: string
     userId: string
+    jobId: string | null
     title: string
     description: string
     techStack: string
@@ -3697,6 +3862,8 @@ export namespace Prisma {
     endDate: Date | null
     githubUrl: string | null
     deployUrl: string | null
+    githubAnalysis: string | null
+    githubAnalysisFetchedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: PortfolioCountAggregateOutputType | null
@@ -3721,6 +3888,7 @@ export namespace Prisma {
   export type PortfolioSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    jobId?: boolean
     title?: boolean
     description?: boolean
     techStack?: boolean
@@ -3728,14 +3896,18 @@ export namespace Prisma {
     endDate?: boolean
     githubUrl?: boolean
     deployUrl?: boolean
+    githubAnalysis?: boolean
+    githubAnalysisFetchedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | Portfolio$jobArgs<ExtArgs>
   }, ExtArgs["result"]["portfolio"]>
 
   export type PortfolioSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    jobId?: boolean
     title?: boolean
     description?: boolean
     techStack?: boolean
@@ -3743,14 +3915,18 @@ export namespace Prisma {
     endDate?: boolean
     githubUrl?: boolean
     deployUrl?: boolean
+    githubAnalysis?: boolean
+    githubAnalysisFetchedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | Portfolio$jobArgs<ExtArgs>
   }, ExtArgs["result"]["portfolio"]>
 
   export type PortfolioSelectScalar = {
     id?: boolean
     userId?: boolean
+    jobId?: boolean
     title?: boolean
     description?: boolean
     techStack?: boolean
@@ -3758,25 +3934,31 @@ export namespace Prisma {
     endDate?: boolean
     githubUrl?: boolean
     deployUrl?: boolean
+    githubAnalysis?: boolean
+    githubAnalysisFetchedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
   export type PortfolioInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | Portfolio$jobArgs<ExtArgs>
   }
   export type PortfolioIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | Portfolio$jobArgs<ExtArgs>
   }
 
   export type $PortfolioPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Portfolio"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      job: Prisma.$JobPostingPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
+      jobId: string | null
       title: string
       description: string
       techStack: string
@@ -3784,6 +3966,8 @@ export namespace Prisma {
       endDate: Date | null
       githubUrl: string | null
       deployUrl: string | null
+      githubAnalysis: string | null
+      githubAnalysisFetchedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["portfolio"]>
@@ -4151,6 +4335,7 @@ export namespace Prisma {
   export interface Prisma__PortfolioClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    job<T extends Portfolio$jobArgs<ExtArgs> = {}>(args?: Subset<T, Portfolio$jobArgs<ExtArgs>>): Prisma__JobPostingClient<$Result.GetResult<Prisma.$JobPostingPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4182,6 +4367,7 @@ export namespace Prisma {
   interface PortfolioFieldRefs {
     readonly id: FieldRef<"Portfolio", 'String'>
     readonly userId: FieldRef<"Portfolio", 'String'>
+    readonly jobId: FieldRef<"Portfolio", 'String'>
     readonly title: FieldRef<"Portfolio", 'String'>
     readonly description: FieldRef<"Portfolio", 'String'>
     readonly techStack: FieldRef<"Portfolio", 'String'>
@@ -4189,6 +4375,8 @@ export namespace Prisma {
     readonly endDate: FieldRef<"Portfolio", 'DateTime'>
     readonly githubUrl: FieldRef<"Portfolio", 'String'>
     readonly deployUrl: FieldRef<"Portfolio", 'String'>
+    readonly githubAnalysis: FieldRef<"Portfolio", 'String'>
+    readonly githubAnalysisFetchedAt: FieldRef<"Portfolio", 'DateTime'>
     readonly createdAt: FieldRef<"Portfolio", 'DateTime'>
     readonly updatedAt: FieldRef<"Portfolio", 'DateTime'>
   }
@@ -4509,6 +4697,21 @@ export namespace Prisma {
   }
 
   /**
+   * Portfolio.job
+   */
+  export type Portfolio$jobArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobPosting
+     */
+    select?: JobPostingSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobPostingInclude<ExtArgs> | null
+    where?: JobPostingWhereInput
+  }
+
+  /**
    * Portfolio without action
    */
   export type PortfolioDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4520,6 +4723,1032 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: PortfolioInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Experience
+   */
+
+  export type AggregateExperience = {
+    _count: ExperienceCountAggregateOutputType | null
+    _min: ExperienceMinAggregateOutputType | null
+    _max: ExperienceMaxAggregateOutputType | null
+  }
+
+  export type ExperienceMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    jobId: string | null
+    title: string | null
+    situation: string | null
+    action: string | null
+    result: string | null
+    technologies: string | null
+    metrics: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExperienceMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    jobId: string | null
+    title: string | null
+    situation: string | null
+    action: string | null
+    result: string | null
+    technologies: string | null
+    metrics: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ExperienceCountAggregateOutputType = {
+    id: number
+    userId: number
+    jobId: number
+    title: number
+    situation: number
+    action: number
+    result: number
+    technologies: number
+    metrics: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ExperienceMinAggregateInputType = {
+    id?: true
+    userId?: true
+    jobId?: true
+    title?: true
+    situation?: true
+    action?: true
+    result?: true
+    technologies?: true
+    metrics?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExperienceMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    jobId?: true
+    title?: true
+    situation?: true
+    action?: true
+    result?: true
+    technologies?: true
+    metrics?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ExperienceCountAggregateInputType = {
+    id?: true
+    userId?: true
+    jobId?: true
+    title?: true
+    situation?: true
+    action?: true
+    result?: true
+    technologies?: true
+    metrics?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ExperienceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Experience to aggregate.
+     */
+    where?: ExperienceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Experiences to fetch.
+     */
+    orderBy?: ExperienceOrderByWithRelationInput | ExperienceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ExperienceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Experiences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Experiences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Experiences
+    **/
+    _count?: true | ExperienceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExperienceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExperienceMaxAggregateInputType
+  }
+
+  export type GetExperienceAggregateType<T extends ExperienceAggregateArgs> = {
+        [P in keyof T & keyof AggregateExperience]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExperience[P]>
+      : GetScalarType<T[P], AggregateExperience[P]>
+  }
+
+
+
+
+  export type ExperienceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExperienceWhereInput
+    orderBy?: ExperienceOrderByWithAggregationInput | ExperienceOrderByWithAggregationInput[]
+    by: ExperienceScalarFieldEnum[] | ExperienceScalarFieldEnum
+    having?: ExperienceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExperienceCountAggregateInputType | true
+    _min?: ExperienceMinAggregateInputType
+    _max?: ExperienceMaxAggregateInputType
+  }
+
+  export type ExperienceGroupByOutputType = {
+    id: string
+    userId: string
+    jobId: string | null
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ExperienceCountAggregateOutputType | null
+    _min: ExperienceMinAggregateOutputType | null
+    _max: ExperienceMaxAggregateOutputType | null
+  }
+
+  type GetExperienceGroupByPayload<T extends ExperienceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExperienceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExperienceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExperienceGroupByOutputType[P]>
+            : GetScalarType<T[P], ExperienceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExperienceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    jobId?: boolean
+    title?: boolean
+    situation?: boolean
+    action?: boolean
+    result?: boolean
+    technologies?: boolean
+    metrics?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | Experience$jobArgs<ExtArgs>
+  }, ExtArgs["result"]["experience"]>
+
+  export type ExperienceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    jobId?: boolean
+    title?: boolean
+    situation?: boolean
+    action?: boolean
+    result?: boolean
+    technologies?: boolean
+    metrics?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | Experience$jobArgs<ExtArgs>
+  }, ExtArgs["result"]["experience"]>
+
+  export type ExperienceSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    jobId?: boolean
+    title?: boolean
+    situation?: boolean
+    action?: boolean
+    result?: boolean
+    technologies?: boolean
+    metrics?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ExperienceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | Experience$jobArgs<ExtArgs>
+  }
+  export type ExperienceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | Experience$jobArgs<ExtArgs>
+  }
+
+  export type $ExperiencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Experience"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      job: Prisma.$JobPostingPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      jobId: string | null
+      title: string
+      situation: string
+      action: string
+      result: string
+      technologies: string
+      metrics: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["experience"]>
+    composites: {}
+  }
+
+  type ExperienceGetPayload<S extends boolean | null | undefined | ExperienceDefaultArgs> = $Result.GetResult<Prisma.$ExperiencePayload, S>
+
+  type ExperienceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ExperienceFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: ExperienceCountAggregateInputType | true
+    }
+
+  export interface ExperienceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Experience'], meta: { name: 'Experience' } }
+    /**
+     * Find zero or one Experience that matches the filter.
+     * @param {ExperienceFindUniqueArgs} args - Arguments to find a Experience
+     * @example
+     * // Get one Experience
+     * const experience = await prisma.experience.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExperienceFindUniqueArgs>(args: SelectSubset<T, ExperienceFindUniqueArgs<ExtArgs>>): Prisma__ExperienceClient<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Experience that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {ExperienceFindUniqueOrThrowArgs} args - Arguments to find a Experience
+     * @example
+     * // Get one Experience
+     * const experience = await prisma.experience.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExperienceFindUniqueOrThrowArgs>(args: SelectSubset<T, ExperienceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExperienceClient<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Experience that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExperienceFindFirstArgs} args - Arguments to find a Experience
+     * @example
+     * // Get one Experience
+     * const experience = await prisma.experience.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExperienceFindFirstArgs>(args?: SelectSubset<T, ExperienceFindFirstArgs<ExtArgs>>): Prisma__ExperienceClient<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Experience that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExperienceFindFirstOrThrowArgs} args - Arguments to find a Experience
+     * @example
+     * // Get one Experience
+     * const experience = await prisma.experience.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExperienceFindFirstOrThrowArgs>(args?: SelectSubset<T, ExperienceFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExperienceClient<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Experiences that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExperienceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Experiences
+     * const experiences = await prisma.experience.findMany()
+     * 
+     * // Get first 10 Experiences
+     * const experiences = await prisma.experience.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const experienceWithIdOnly = await prisma.experience.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ExperienceFindManyArgs>(args?: SelectSubset<T, ExperienceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Experience.
+     * @param {ExperienceCreateArgs} args - Arguments to create a Experience.
+     * @example
+     * // Create one Experience
+     * const Experience = await prisma.experience.create({
+     *   data: {
+     *     // ... data to create a Experience
+     *   }
+     * })
+     * 
+     */
+    create<T extends ExperienceCreateArgs>(args: SelectSubset<T, ExperienceCreateArgs<ExtArgs>>): Prisma__ExperienceClient<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Experiences.
+     * @param {ExperienceCreateManyArgs} args - Arguments to create many Experiences.
+     * @example
+     * // Create many Experiences
+     * const experience = await prisma.experience.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ExperienceCreateManyArgs>(args?: SelectSubset<T, ExperienceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Experiences and returns the data saved in the database.
+     * @param {ExperienceCreateManyAndReturnArgs} args - Arguments to create many Experiences.
+     * @example
+     * // Create many Experiences
+     * const experience = await prisma.experience.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Experiences and only return the `id`
+     * const experienceWithIdOnly = await prisma.experience.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ExperienceCreateManyAndReturnArgs>(args?: SelectSubset<T, ExperienceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Experience.
+     * @param {ExperienceDeleteArgs} args - Arguments to delete one Experience.
+     * @example
+     * // Delete one Experience
+     * const Experience = await prisma.experience.delete({
+     *   where: {
+     *     // ... filter to delete one Experience
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ExperienceDeleteArgs>(args: SelectSubset<T, ExperienceDeleteArgs<ExtArgs>>): Prisma__ExperienceClient<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Experience.
+     * @param {ExperienceUpdateArgs} args - Arguments to update one Experience.
+     * @example
+     * // Update one Experience
+     * const experience = await prisma.experience.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ExperienceUpdateArgs>(args: SelectSubset<T, ExperienceUpdateArgs<ExtArgs>>): Prisma__ExperienceClient<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Experiences.
+     * @param {ExperienceDeleteManyArgs} args - Arguments to filter Experiences to delete.
+     * @example
+     * // Delete a few Experiences
+     * const { count } = await prisma.experience.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ExperienceDeleteManyArgs>(args?: SelectSubset<T, ExperienceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Experiences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExperienceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Experiences
+     * const experience = await prisma.experience.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ExperienceUpdateManyArgs>(args: SelectSubset<T, ExperienceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Experience.
+     * @param {ExperienceUpsertArgs} args - Arguments to update or create a Experience.
+     * @example
+     * // Update or create a Experience
+     * const experience = await prisma.experience.upsert({
+     *   create: {
+     *     // ... data to create a Experience
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Experience we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExperienceUpsertArgs>(args: SelectSubset<T, ExperienceUpsertArgs<ExtArgs>>): Prisma__ExperienceClient<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Experiences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExperienceCountArgs} args - Arguments to filter Experiences to count.
+     * @example
+     * // Count the number of Experiences
+     * const count = await prisma.experience.count({
+     *   where: {
+     *     // ... the filter for the Experiences we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExperienceCountArgs>(
+      args?: Subset<T, ExperienceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExperienceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Experience.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExperienceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExperienceAggregateArgs>(args: Subset<T, ExperienceAggregateArgs>): Prisma.PrismaPromise<GetExperienceAggregateType<T>>
+
+    /**
+     * Group by Experience.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExperienceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ExperienceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExperienceGroupByArgs['orderBy'] }
+        : { orderBy?: ExperienceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExperienceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExperienceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Experience model
+   */
+  readonly fields: ExperienceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Experience.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExperienceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    job<T extends Experience$jobArgs<ExtArgs> = {}>(args?: Subset<T, Experience$jobArgs<ExtArgs>>): Prisma__JobPostingClient<$Result.GetResult<Prisma.$JobPostingPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Experience model
+   */ 
+  interface ExperienceFieldRefs {
+    readonly id: FieldRef<"Experience", 'String'>
+    readonly userId: FieldRef<"Experience", 'String'>
+    readonly jobId: FieldRef<"Experience", 'String'>
+    readonly title: FieldRef<"Experience", 'String'>
+    readonly situation: FieldRef<"Experience", 'String'>
+    readonly action: FieldRef<"Experience", 'String'>
+    readonly result: FieldRef<"Experience", 'String'>
+    readonly technologies: FieldRef<"Experience", 'String'>
+    readonly metrics: FieldRef<"Experience", 'String'>
+    readonly createdAt: FieldRef<"Experience", 'DateTime'>
+    readonly updatedAt: FieldRef<"Experience", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Experience findUnique
+   */
+  export type ExperienceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which Experience to fetch.
+     */
+    where: ExperienceWhereUniqueInput
+  }
+
+  /**
+   * Experience findUniqueOrThrow
+   */
+  export type ExperienceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which Experience to fetch.
+     */
+    where: ExperienceWhereUniqueInput
+  }
+
+  /**
+   * Experience findFirst
+   */
+  export type ExperienceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which Experience to fetch.
+     */
+    where?: ExperienceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Experiences to fetch.
+     */
+    orderBy?: ExperienceOrderByWithRelationInput | ExperienceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Experiences.
+     */
+    cursor?: ExperienceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Experiences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Experiences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Experiences.
+     */
+    distinct?: ExperienceScalarFieldEnum | ExperienceScalarFieldEnum[]
+  }
+
+  /**
+   * Experience findFirstOrThrow
+   */
+  export type ExperienceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which Experience to fetch.
+     */
+    where?: ExperienceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Experiences to fetch.
+     */
+    orderBy?: ExperienceOrderByWithRelationInput | ExperienceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Experiences.
+     */
+    cursor?: ExperienceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Experiences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Experiences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Experiences.
+     */
+    distinct?: ExperienceScalarFieldEnum | ExperienceScalarFieldEnum[]
+  }
+
+  /**
+   * Experience findMany
+   */
+  export type ExperienceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * Filter, which Experiences to fetch.
+     */
+    where?: ExperienceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Experiences to fetch.
+     */
+    orderBy?: ExperienceOrderByWithRelationInput | ExperienceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Experiences.
+     */
+    cursor?: ExperienceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Experiences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Experiences.
+     */
+    skip?: number
+    distinct?: ExperienceScalarFieldEnum | ExperienceScalarFieldEnum[]
+  }
+
+  /**
+   * Experience create
+   */
+  export type ExperienceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Experience.
+     */
+    data: XOR<ExperienceCreateInput, ExperienceUncheckedCreateInput>
+  }
+
+  /**
+   * Experience createMany
+   */
+  export type ExperienceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Experiences.
+     */
+    data: ExperienceCreateManyInput | ExperienceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Experience createManyAndReturn
+   */
+  export type ExperienceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Experiences.
+     */
+    data: ExperienceCreateManyInput | ExperienceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Experience update
+   */
+  export type ExperienceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Experience.
+     */
+    data: XOR<ExperienceUpdateInput, ExperienceUncheckedUpdateInput>
+    /**
+     * Choose, which Experience to update.
+     */
+    where: ExperienceWhereUniqueInput
+  }
+
+  /**
+   * Experience updateMany
+   */
+  export type ExperienceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Experiences.
+     */
+    data: XOR<ExperienceUpdateManyMutationInput, ExperienceUncheckedUpdateManyInput>
+    /**
+     * Filter which Experiences to update
+     */
+    where?: ExperienceWhereInput
+  }
+
+  /**
+   * Experience upsert
+   */
+  export type ExperienceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Experience to update in case it exists.
+     */
+    where: ExperienceWhereUniqueInput
+    /**
+     * In case the Experience found by the `where` argument doesn't exist, create a new Experience with this data.
+     */
+    create: XOR<ExperienceCreateInput, ExperienceUncheckedCreateInput>
+    /**
+     * In case the Experience was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExperienceUpdateInput, ExperienceUncheckedUpdateInput>
+  }
+
+  /**
+   * Experience delete
+   */
+  export type ExperienceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    /**
+     * Filter which Experience to delete.
+     */
+    where: ExperienceWhereUniqueInput
+  }
+
+  /**
+   * Experience deleteMany
+   */
+  export type ExperienceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Experiences to delete
+     */
+    where?: ExperienceWhereInput
+  }
+
+  /**
+   * Experience.job
+   */
+  export type Experience$jobArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobPosting
+     */
+    select?: JobPostingSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobPostingInclude<ExtArgs> | null
+    where?: JobPostingWhereInput
+  }
+
+  /**
+   * Experience without action
+   */
+  export type ExperienceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
   }
 
 
@@ -4543,6 +5772,7 @@ export namespace Prisma {
     interviewAt: Date | null
     status: string | null
     contacts: string | null
+    checklist: string | null
     followUpAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -4558,6 +5788,7 @@ export namespace Prisma {
     interviewAt: Date | null
     status: string | null
     contacts: string | null
+    checklist: string | null
     followUpAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -4573,6 +5804,7 @@ export namespace Prisma {
     interviewAt: number
     status: number
     contacts: number
+    checklist: number
     followUpAt: number
     createdAt: number
     updatedAt: number
@@ -4590,6 +5822,7 @@ export namespace Prisma {
     interviewAt?: true
     status?: true
     contacts?: true
+    checklist?: true
     followUpAt?: true
     createdAt?: true
     updatedAt?: true
@@ -4605,6 +5838,7 @@ export namespace Prisma {
     interviewAt?: true
     status?: true
     contacts?: true
+    checklist?: true
     followUpAt?: true
     createdAt?: true
     updatedAt?: true
@@ -4620,6 +5854,7 @@ export namespace Prisma {
     interviewAt?: true
     status?: true
     contacts?: true
+    checklist?: true
     followUpAt?: true
     createdAt?: true
     updatedAt?: true
@@ -4708,6 +5943,7 @@ export namespace Prisma {
     interviewAt: Date | null
     status: string
     contacts: string | null
+    checklist: string | null
     followUpAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -4740,12 +5976,16 @@ export namespace Prisma {
     interviewAt?: boolean
     status?: boolean
     contacts?: boolean
+    checklist?: boolean
     followUpAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     statusHistory?: boolean | JobPosting$statusHistoryArgs<ExtArgs>
     coverLetters?: boolean | JobPosting$coverLettersArgs<ExtArgs>
+    portfolios?: boolean | JobPosting$portfoliosArgs<ExtArgs>
+    experiences?: boolean | JobPosting$experiencesArgs<ExtArgs>
+    interviewAnswers?: boolean | JobPosting$interviewAnswersArgs<ExtArgs>
     _count?: boolean | JobPostingCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["jobPosting"]>
 
@@ -4759,6 +5999,7 @@ export namespace Prisma {
     interviewAt?: boolean
     status?: boolean
     contacts?: boolean
+    checklist?: boolean
     followUpAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4775,6 +6016,7 @@ export namespace Prisma {
     interviewAt?: boolean
     status?: boolean
     contacts?: boolean
+    checklist?: boolean
     followUpAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -4784,6 +6026,9 @@ export namespace Prisma {
     user?: boolean | UserDefaultArgs<ExtArgs>
     statusHistory?: boolean | JobPosting$statusHistoryArgs<ExtArgs>
     coverLetters?: boolean | JobPosting$coverLettersArgs<ExtArgs>
+    portfolios?: boolean | JobPosting$portfoliosArgs<ExtArgs>
+    experiences?: boolean | JobPosting$experiencesArgs<ExtArgs>
+    interviewAnswers?: boolean | JobPosting$interviewAnswersArgs<ExtArgs>
     _count?: boolean | JobPostingCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type JobPostingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4796,6 +6041,9 @@ export namespace Prisma {
       user: Prisma.$UserPayload<ExtArgs>
       statusHistory: Prisma.$StatusHistoryPayload<ExtArgs>[]
       coverLetters: Prisma.$CoverLetterPayload<ExtArgs>[]
+      portfolios: Prisma.$PortfolioPayload<ExtArgs>[]
+      experiences: Prisma.$ExperiencePayload<ExtArgs>[]
+      interviewAnswers: Prisma.$InterviewAnswerPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4807,6 +6055,7 @@ export namespace Prisma {
       interviewAt: Date | null
       status: string
       contacts: string | null
+      checklist: string | null
       followUpAt: Date | null
       createdAt: Date
       updatedAt: Date
@@ -5177,6 +6426,9 @@ export namespace Prisma {
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     statusHistory<T extends JobPosting$statusHistoryArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$statusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StatusHistoryPayload<ExtArgs>, T, "findMany"> | Null>
     coverLetters<T extends JobPosting$coverLettersArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$coverLettersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CoverLetterPayload<ExtArgs>, T, "findMany"> | Null>
+    portfolios<T extends JobPosting$portfoliosArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$portfoliosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PortfolioPayload<ExtArgs>, T, "findMany"> | Null>
+    experiences<T extends JobPosting$experiencesArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$experiencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findMany"> | Null>
+    interviewAnswers<T extends JobPosting$interviewAnswersArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$interviewAnswersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InterviewAnswerPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5215,6 +6467,7 @@ export namespace Prisma {
     readonly interviewAt: FieldRef<"JobPosting", 'DateTime'>
     readonly status: FieldRef<"JobPosting", 'String'>
     readonly contacts: FieldRef<"JobPosting", 'String'>
+    readonly checklist: FieldRef<"JobPosting", 'String'>
     readonly followUpAt: FieldRef<"JobPosting", 'DateTime'>
     readonly createdAt: FieldRef<"JobPosting", 'DateTime'>
     readonly updatedAt: FieldRef<"JobPosting", 'DateTime'>
@@ -5573,6 +6826,66 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CoverLetterScalarFieldEnum | CoverLetterScalarFieldEnum[]
+  }
+
+  /**
+   * JobPosting.portfolios
+   */
+  export type JobPosting$portfoliosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Portfolio
+     */
+    select?: PortfolioSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PortfolioInclude<ExtArgs> | null
+    where?: PortfolioWhereInput
+    orderBy?: PortfolioOrderByWithRelationInput | PortfolioOrderByWithRelationInput[]
+    cursor?: PortfolioWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PortfolioScalarFieldEnum | PortfolioScalarFieldEnum[]
+  }
+
+  /**
+   * JobPosting.experiences
+   */
+  export type JobPosting$experiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    where?: ExperienceWhereInput
+    orderBy?: ExperienceOrderByWithRelationInput | ExperienceOrderByWithRelationInput[]
+    cursor?: ExperienceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExperienceScalarFieldEnum | ExperienceScalarFieldEnum[]
+  }
+
+  /**
+   * JobPosting.interviewAnswers
+   */
+  export type JobPosting$interviewAnswersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InterviewAnswer
+     */
+    select?: InterviewAnswerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InterviewAnswerInclude<ExtArgs> | null
+    where?: InterviewAnswerWhereInput
+    orderBy?: InterviewAnswerOrderByWithRelationInput | InterviewAnswerOrderByWithRelationInput[]
+    cursor?: InterviewAnswerWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InterviewAnswerScalarFieldEnum | InterviewAnswerScalarFieldEnum[]
   }
 
   /**
@@ -8549,6 +9862,7 @@ export namespace Prisma {
   export type InterviewAnswerMinAggregateOutputType = {
     id: string | null
     userId: string | null
+    jobId: string | null
     questionId: string | null
     answer: string | null
     createdAt: Date | null
@@ -8558,6 +9872,7 @@ export namespace Prisma {
   export type InterviewAnswerMaxAggregateOutputType = {
     id: string | null
     userId: string | null
+    jobId: string | null
     questionId: string | null
     answer: string | null
     createdAt: Date | null
@@ -8567,6 +9882,7 @@ export namespace Prisma {
   export type InterviewAnswerCountAggregateOutputType = {
     id: number
     userId: number
+    jobId: number
     questionId: number
     answer: number
     createdAt: number
@@ -8578,6 +9894,7 @@ export namespace Prisma {
   export type InterviewAnswerMinAggregateInputType = {
     id?: true
     userId?: true
+    jobId?: true
     questionId?: true
     answer?: true
     createdAt?: true
@@ -8587,6 +9904,7 @@ export namespace Prisma {
   export type InterviewAnswerMaxAggregateInputType = {
     id?: true
     userId?: true
+    jobId?: true
     questionId?: true
     answer?: true
     createdAt?: true
@@ -8596,6 +9914,7 @@ export namespace Prisma {
   export type InterviewAnswerCountAggregateInputType = {
     id?: true
     userId?: true
+    jobId?: true
     questionId?: true
     answer?: true
     createdAt?: true
@@ -8678,6 +9997,7 @@ export namespace Prisma {
   export type InterviewAnswerGroupByOutputType = {
     id: string
     userId: string
+    jobId: string | null
     questionId: string
     answer: string
     createdAt: Date
@@ -8704,28 +10024,33 @@ export namespace Prisma {
   export type InterviewAnswerSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    jobId?: boolean
     questionId?: boolean
     answer?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | InterviewAnswer$jobArgs<ExtArgs>
     question?: boolean | InterviewQuestionDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["interviewAnswer"]>
 
   export type InterviewAnswerSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    jobId?: boolean
     questionId?: boolean
     answer?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | InterviewAnswer$jobArgs<ExtArgs>
     question?: boolean | InterviewQuestionDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["interviewAnswer"]>
 
   export type InterviewAnswerSelectScalar = {
     id?: boolean
     userId?: boolean
+    jobId?: boolean
     questionId?: boolean
     answer?: boolean
     createdAt?: boolean
@@ -8734,10 +10059,12 @@ export namespace Prisma {
 
   export type InterviewAnswerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | InterviewAnswer$jobArgs<ExtArgs>
     question?: boolean | InterviewQuestionDefaultArgs<ExtArgs>
   }
   export type InterviewAnswerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    job?: boolean | InterviewAnswer$jobArgs<ExtArgs>
     question?: boolean | InterviewQuestionDefaultArgs<ExtArgs>
   }
 
@@ -8745,11 +10072,13 @@ export namespace Prisma {
     name: "InterviewAnswer"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      job: Prisma.$JobPostingPayload<ExtArgs> | null
       question: Prisma.$InterviewQuestionPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
+      jobId: string | null
       questionId: string
       answer: string
       createdAt: Date
@@ -9119,6 +10448,7 @@ export namespace Prisma {
   export interface Prisma__InterviewAnswerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    job<T extends InterviewAnswer$jobArgs<ExtArgs> = {}>(args?: Subset<T, InterviewAnswer$jobArgs<ExtArgs>>): Prisma__JobPostingClient<$Result.GetResult<Prisma.$JobPostingPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     question<T extends InterviewQuestionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, InterviewQuestionDefaultArgs<ExtArgs>>): Prisma__InterviewQuestionClient<$Result.GetResult<Prisma.$InterviewQuestionPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -9151,6 +10481,7 @@ export namespace Prisma {
   interface InterviewAnswerFieldRefs {
     readonly id: FieldRef<"InterviewAnswer", 'String'>
     readonly userId: FieldRef<"InterviewAnswer", 'String'>
+    readonly jobId: FieldRef<"InterviewAnswer", 'String'>
     readonly questionId: FieldRef<"InterviewAnswer", 'String'>
     readonly answer: FieldRef<"InterviewAnswer", 'String'>
     readonly createdAt: FieldRef<"InterviewAnswer", 'DateTime'>
@@ -9470,6 +10801,21 @@ export namespace Prisma {
      * Filter which InterviewAnswers to delete
      */
     where?: InterviewAnswerWhereInput
+  }
+
+  /**
+   * InterviewAnswer.job
+   */
+  export type InterviewAnswer$jobArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobPosting
+     */
+    select?: JobPostingSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobPostingInclude<ExtArgs> | null
+    where?: JobPostingWhereInput
   }
 
   /**
@@ -15430,6 +16776,9 @@ export namespace Prisma {
   export type UserNotificationMinAggregateOutputType = {
     id: string | null
     userId: string | null
+    type: string | null
+    referenceId: string | null
+    actionUrl: string | null
     title: string | null
     body: string | null
     isRead: boolean | null
@@ -15439,6 +16788,9 @@ export namespace Prisma {
   export type UserNotificationMaxAggregateOutputType = {
     id: string | null
     userId: string | null
+    type: string | null
+    referenceId: string | null
+    actionUrl: string | null
     title: string | null
     body: string | null
     isRead: boolean | null
@@ -15448,6 +16800,9 @@ export namespace Prisma {
   export type UserNotificationCountAggregateOutputType = {
     id: number
     userId: number
+    type: number
+    referenceId: number
+    actionUrl: number
     title: number
     body: number
     isRead: number
@@ -15459,6 +16814,9 @@ export namespace Prisma {
   export type UserNotificationMinAggregateInputType = {
     id?: true
     userId?: true
+    type?: true
+    referenceId?: true
+    actionUrl?: true
     title?: true
     body?: true
     isRead?: true
@@ -15468,6 +16826,9 @@ export namespace Prisma {
   export type UserNotificationMaxAggregateInputType = {
     id?: true
     userId?: true
+    type?: true
+    referenceId?: true
+    actionUrl?: true
     title?: true
     body?: true
     isRead?: true
@@ -15477,6 +16838,9 @@ export namespace Prisma {
   export type UserNotificationCountAggregateInputType = {
     id?: true
     userId?: true
+    type?: true
+    referenceId?: true
+    actionUrl?: true
     title?: true
     body?: true
     isRead?: true
@@ -15559,6 +16923,9 @@ export namespace Prisma {
   export type UserNotificationGroupByOutputType = {
     id: string
     userId: string
+    type: string
+    referenceId: string | null
+    actionUrl: string | null
     title: string
     body: string
     isRead: boolean
@@ -15585,6 +16952,9 @@ export namespace Prisma {
   export type UserNotificationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    type?: boolean
+    referenceId?: boolean
+    actionUrl?: boolean
     title?: boolean
     body?: boolean
     isRead?: boolean
@@ -15595,6 +16965,9 @@ export namespace Prisma {
   export type UserNotificationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    type?: boolean
+    referenceId?: boolean
+    actionUrl?: boolean
     title?: boolean
     body?: boolean
     isRead?: boolean
@@ -15605,6 +16978,9 @@ export namespace Prisma {
   export type UserNotificationSelectScalar = {
     id?: boolean
     userId?: boolean
+    type?: boolean
+    referenceId?: boolean
+    actionUrl?: boolean
     title?: boolean
     body?: boolean
     isRead?: boolean
@@ -15626,6 +17002,9 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
+      type: string
+      referenceId: string | null
+      actionUrl: string | null
       title: string
       body: string
       isRead: boolean
@@ -16026,6 +17405,9 @@ export namespace Prisma {
   interface UserNotificationFieldRefs {
     readonly id: FieldRef<"UserNotification", 'String'>
     readonly userId: FieldRef<"UserNotification", 'String'>
+    readonly type: FieldRef<"UserNotification", 'String'>
+    readonly referenceId: FieldRef<"UserNotification", 'String'>
+    readonly actionUrl: FieldRef<"UserNotification", 'String'>
     readonly title: FieldRef<"UserNotification", 'String'>
     readonly body: FieldRef<"UserNotification", 'String'>
     readonly isRead: FieldRef<"UserNotification", 'Boolean'>
@@ -17288,6 +18670,7 @@ export namespace Prisma {
   export const PortfolioScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
+    jobId: 'jobId',
     title: 'title',
     description: 'description',
     techStack: 'techStack',
@@ -17295,11 +18678,30 @@ export namespace Prisma {
     endDate: 'endDate',
     githubUrl: 'githubUrl',
     deployUrl: 'deployUrl',
+    githubAnalysis: 'githubAnalysis',
+    githubAnalysisFetchedAt: 'githubAnalysisFetchedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type PortfolioScalarFieldEnum = (typeof PortfolioScalarFieldEnum)[keyof typeof PortfolioScalarFieldEnum]
+
+
+  export const ExperienceScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    jobId: 'jobId',
+    title: 'title',
+    situation: 'situation',
+    action: 'action',
+    result: 'result',
+    technologies: 'technologies',
+    metrics: 'metrics',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ExperienceScalarFieldEnum = (typeof ExperienceScalarFieldEnum)[keyof typeof ExperienceScalarFieldEnum]
 
 
   export const JobPostingScalarFieldEnum: {
@@ -17312,6 +18714,7 @@ export namespace Prisma {
     interviewAt: 'interviewAt',
     status: 'status',
     contacts: 'contacts',
+    checklist: 'checklist',
     followUpAt: 'followUpAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -17362,6 +18765,7 @@ export namespace Prisma {
   export const InterviewAnswerScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
+    jobId: 'jobId',
     questionId: 'questionId',
     answer: 'answer',
     createdAt: 'createdAt',
@@ -17463,6 +18867,9 @@ export namespace Prisma {
   export const UserNotificationScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
+    type: 'type',
+    referenceId: 'referenceId',
+    actionUrl: 'actionUrl',
     title: 'title',
     body: 'body',
     isRead: 'isRead',
@@ -17602,6 +19009,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerListRelationFilter
     customQuestions?: InterviewQuestionListRelationFilter
     coverLetters?: CoverLetterListRelationFilter
+    experiences?: ExperienceListRelationFilter
     notifications?: UserNotificationListRelationFilter
     bookmarks?: JobBookmarkListRelationFilter
     recruitListings?: JobListingListRelationFilter
@@ -17627,6 +19035,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerOrderByRelationAggregateInput
     customQuestions?: InterviewQuestionOrderByRelationAggregateInput
     coverLetters?: CoverLetterOrderByRelationAggregateInput
+    experiences?: ExperienceOrderByRelationAggregateInput
     notifications?: UserNotificationOrderByRelationAggregateInput
     bookmarks?: JobBookmarkOrderByRelationAggregateInput
     recruitListings?: JobListingOrderByRelationAggregateInput
@@ -17655,6 +19064,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerListRelationFilter
     customQuestions?: InterviewQuestionListRelationFilter
     coverLetters?: CoverLetterListRelationFilter
+    experiences?: ExperienceListRelationFilter
     notifications?: UserNotificationListRelationFilter
     bookmarks?: JobBookmarkListRelationFilter
     recruitListings?: JobListingListRelationFilter
@@ -17704,6 +19114,7 @@ export namespace Prisma {
     NOT?: PortfolioWhereInput | PortfolioWhereInput[]
     id?: StringFilter<"Portfolio"> | string
     userId?: StringFilter<"Portfolio"> | string
+    jobId?: StringNullableFilter<"Portfolio"> | string | null
     title?: StringFilter<"Portfolio"> | string
     description?: StringFilter<"Portfolio"> | string
     techStack?: StringFilter<"Portfolio"> | string
@@ -17711,14 +19122,18 @@ export namespace Prisma {
     endDate?: DateTimeNullableFilter<"Portfolio"> | Date | string | null
     githubUrl?: StringNullableFilter<"Portfolio"> | string | null
     deployUrl?: StringNullableFilter<"Portfolio"> | string | null
+    githubAnalysis?: StringNullableFilter<"Portfolio"> | string | null
+    githubAnalysisFetchedAt?: DateTimeNullableFilter<"Portfolio"> | Date | string | null
     createdAt?: DateTimeFilter<"Portfolio"> | Date | string
     updatedAt?: DateTimeFilter<"Portfolio"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
+    job?: XOR<JobPostingNullableRelationFilter, JobPostingWhereInput> | null
   }
 
   export type PortfolioOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrderInput | SortOrder
     title?: SortOrder
     description?: SortOrder
     techStack?: SortOrder
@@ -17726,9 +19141,12 @@ export namespace Prisma {
     endDate?: SortOrderInput | SortOrder
     githubUrl?: SortOrderInput | SortOrder
     deployUrl?: SortOrderInput | SortOrder
+    githubAnalysis?: SortOrderInput | SortOrder
+    githubAnalysisFetchedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    job?: JobPostingOrderByWithRelationInput
   }
 
   export type PortfolioWhereUniqueInput = Prisma.AtLeast<{
@@ -17737,6 +19155,7 @@ export namespace Prisma {
     OR?: PortfolioWhereInput[]
     NOT?: PortfolioWhereInput | PortfolioWhereInput[]
     userId?: StringFilter<"Portfolio"> | string
+    jobId?: StringNullableFilter<"Portfolio"> | string | null
     title?: StringFilter<"Portfolio"> | string
     description?: StringFilter<"Portfolio"> | string
     techStack?: StringFilter<"Portfolio"> | string
@@ -17744,14 +19163,18 @@ export namespace Prisma {
     endDate?: DateTimeNullableFilter<"Portfolio"> | Date | string | null
     githubUrl?: StringNullableFilter<"Portfolio"> | string | null
     deployUrl?: StringNullableFilter<"Portfolio"> | string | null
+    githubAnalysis?: StringNullableFilter<"Portfolio"> | string | null
+    githubAnalysisFetchedAt?: DateTimeNullableFilter<"Portfolio"> | Date | string | null
     createdAt?: DateTimeFilter<"Portfolio"> | Date | string
     updatedAt?: DateTimeFilter<"Portfolio"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
+    job?: XOR<JobPostingNullableRelationFilter, JobPostingWhereInput> | null
   }, "id">
 
   export type PortfolioOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrderInput | SortOrder
     title?: SortOrder
     description?: SortOrder
     techStack?: SortOrder
@@ -17759,6 +19182,8 @@ export namespace Prisma {
     endDate?: SortOrderInput | SortOrder
     githubUrl?: SortOrderInput | SortOrder
     deployUrl?: SortOrderInput | SortOrder
+    githubAnalysis?: SortOrderInput | SortOrder
+    githubAnalysisFetchedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: PortfolioCountOrderByAggregateInput
@@ -17772,6 +19197,7 @@ export namespace Prisma {
     NOT?: PortfolioScalarWhereWithAggregatesInput | PortfolioScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Portfolio"> | string
     userId?: StringWithAggregatesFilter<"Portfolio"> | string
+    jobId?: StringNullableWithAggregatesFilter<"Portfolio"> | string | null
     title?: StringWithAggregatesFilter<"Portfolio"> | string
     description?: StringWithAggregatesFilter<"Portfolio"> | string
     techStack?: StringWithAggregatesFilter<"Portfolio"> | string
@@ -17779,8 +19205,98 @@ export namespace Prisma {
     endDate?: DateTimeNullableWithAggregatesFilter<"Portfolio"> | Date | string | null
     githubUrl?: StringNullableWithAggregatesFilter<"Portfolio"> | string | null
     deployUrl?: StringNullableWithAggregatesFilter<"Portfolio"> | string | null
+    githubAnalysis?: StringNullableWithAggregatesFilter<"Portfolio"> | string | null
+    githubAnalysisFetchedAt?: DateTimeNullableWithAggregatesFilter<"Portfolio"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Portfolio"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Portfolio"> | Date | string
+  }
+
+  export type ExperienceWhereInput = {
+    AND?: ExperienceWhereInput | ExperienceWhereInput[]
+    OR?: ExperienceWhereInput[]
+    NOT?: ExperienceWhereInput | ExperienceWhereInput[]
+    id?: StringFilter<"Experience"> | string
+    userId?: StringFilter<"Experience"> | string
+    jobId?: StringNullableFilter<"Experience"> | string | null
+    title?: StringFilter<"Experience"> | string
+    situation?: StringFilter<"Experience"> | string
+    action?: StringFilter<"Experience"> | string
+    result?: StringFilter<"Experience"> | string
+    technologies?: StringFilter<"Experience"> | string
+    metrics?: StringNullableFilter<"Experience"> | string | null
+    createdAt?: DateTimeFilter<"Experience"> | Date | string
+    updatedAt?: DateTimeFilter<"Experience"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+    job?: XOR<JobPostingNullableRelationFilter, JobPostingWhereInput> | null
+  }
+
+  export type ExperienceOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    jobId?: SortOrderInput | SortOrder
+    title?: SortOrder
+    situation?: SortOrder
+    action?: SortOrder
+    result?: SortOrder
+    technologies?: SortOrder
+    metrics?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    job?: JobPostingOrderByWithRelationInput
+  }
+
+  export type ExperienceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ExperienceWhereInput | ExperienceWhereInput[]
+    OR?: ExperienceWhereInput[]
+    NOT?: ExperienceWhereInput | ExperienceWhereInput[]
+    userId?: StringFilter<"Experience"> | string
+    jobId?: StringNullableFilter<"Experience"> | string | null
+    title?: StringFilter<"Experience"> | string
+    situation?: StringFilter<"Experience"> | string
+    action?: StringFilter<"Experience"> | string
+    result?: StringFilter<"Experience"> | string
+    technologies?: StringFilter<"Experience"> | string
+    metrics?: StringNullableFilter<"Experience"> | string | null
+    createdAt?: DateTimeFilter<"Experience"> | Date | string
+    updatedAt?: DateTimeFilter<"Experience"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+    job?: XOR<JobPostingNullableRelationFilter, JobPostingWhereInput> | null
+  }, "id">
+
+  export type ExperienceOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    jobId?: SortOrderInput | SortOrder
+    title?: SortOrder
+    situation?: SortOrder
+    action?: SortOrder
+    result?: SortOrder
+    technologies?: SortOrder
+    metrics?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ExperienceCountOrderByAggregateInput
+    _max?: ExperienceMaxOrderByAggregateInput
+    _min?: ExperienceMinOrderByAggregateInput
+  }
+
+  export type ExperienceScalarWhereWithAggregatesInput = {
+    AND?: ExperienceScalarWhereWithAggregatesInput | ExperienceScalarWhereWithAggregatesInput[]
+    OR?: ExperienceScalarWhereWithAggregatesInput[]
+    NOT?: ExperienceScalarWhereWithAggregatesInput | ExperienceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Experience"> | string
+    userId?: StringWithAggregatesFilter<"Experience"> | string
+    jobId?: StringNullableWithAggregatesFilter<"Experience"> | string | null
+    title?: StringWithAggregatesFilter<"Experience"> | string
+    situation?: StringWithAggregatesFilter<"Experience"> | string
+    action?: StringWithAggregatesFilter<"Experience"> | string
+    result?: StringWithAggregatesFilter<"Experience"> | string
+    technologies?: StringWithAggregatesFilter<"Experience"> | string
+    metrics?: StringNullableWithAggregatesFilter<"Experience"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Experience"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Experience"> | Date | string
   }
 
   export type JobPostingWhereInput = {
@@ -17796,12 +19312,16 @@ export namespace Prisma {
     interviewAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     status?: StringFilter<"JobPosting"> | string
     contacts?: StringNullableFilter<"JobPosting"> | string | null
+    checklist?: StringNullableFilter<"JobPosting"> | string | null
     followUpAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     createdAt?: DateTimeFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeFilter<"JobPosting"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
     statusHistory?: StatusHistoryListRelationFilter
     coverLetters?: CoverLetterListRelationFilter
+    portfolios?: PortfolioListRelationFilter
+    experiences?: ExperienceListRelationFilter
+    interviewAnswers?: InterviewAnswerListRelationFilter
   }
 
   export type JobPostingOrderByWithRelationInput = {
@@ -17814,12 +19334,16 @@ export namespace Prisma {
     interviewAt?: SortOrderInput | SortOrder
     status?: SortOrder
     contacts?: SortOrderInput | SortOrder
+    checklist?: SortOrderInput | SortOrder
     followUpAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     statusHistory?: StatusHistoryOrderByRelationAggregateInput
     coverLetters?: CoverLetterOrderByRelationAggregateInput
+    portfolios?: PortfolioOrderByRelationAggregateInput
+    experiences?: ExperienceOrderByRelationAggregateInput
+    interviewAnswers?: InterviewAnswerOrderByRelationAggregateInput
   }
 
   export type JobPostingWhereUniqueInput = Prisma.AtLeast<{
@@ -17835,12 +19359,16 @@ export namespace Prisma {
     interviewAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     status?: StringFilter<"JobPosting"> | string
     contacts?: StringNullableFilter<"JobPosting"> | string | null
+    checklist?: StringNullableFilter<"JobPosting"> | string | null
     followUpAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     createdAt?: DateTimeFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeFilter<"JobPosting"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
     statusHistory?: StatusHistoryListRelationFilter
     coverLetters?: CoverLetterListRelationFilter
+    portfolios?: PortfolioListRelationFilter
+    experiences?: ExperienceListRelationFilter
+    interviewAnswers?: InterviewAnswerListRelationFilter
   }, "id">
 
   export type JobPostingOrderByWithAggregationInput = {
@@ -17853,6 +19381,7 @@ export namespace Prisma {
     interviewAt?: SortOrderInput | SortOrder
     status?: SortOrder
     contacts?: SortOrderInput | SortOrder
+    checklist?: SortOrderInput | SortOrder
     followUpAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -17874,6 +19403,7 @@ export namespace Prisma {
     interviewAt?: DateTimeNullableWithAggregatesFilter<"JobPosting"> | Date | string | null
     status?: StringWithAggregatesFilter<"JobPosting"> | string
     contacts?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
+    checklist?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
     followUpAt?: DateTimeNullableWithAggregatesFilter<"JobPosting"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"JobPosting"> | Date | string
@@ -18085,22 +19615,26 @@ export namespace Prisma {
     NOT?: InterviewAnswerWhereInput | InterviewAnswerWhereInput[]
     id?: StringFilter<"InterviewAnswer"> | string
     userId?: StringFilter<"InterviewAnswer"> | string
+    jobId?: StringNullableFilter<"InterviewAnswer"> | string | null
     questionId?: StringFilter<"InterviewAnswer"> | string
     answer?: StringFilter<"InterviewAnswer"> | string
     createdAt?: DateTimeFilter<"InterviewAnswer"> | Date | string
     updatedAt?: DateTimeFilter<"InterviewAnswer"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
+    job?: XOR<JobPostingNullableRelationFilter, JobPostingWhereInput> | null
     question?: XOR<InterviewQuestionRelationFilter, InterviewQuestionWhereInput>
   }
 
   export type InterviewAnswerOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrderInput | SortOrder
     questionId?: SortOrder
     answer?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    job?: JobPostingOrderByWithRelationInput
     question?: InterviewQuestionOrderByWithRelationInput
   }
 
@@ -18111,17 +19645,20 @@ export namespace Prisma {
     OR?: InterviewAnswerWhereInput[]
     NOT?: InterviewAnswerWhereInput | InterviewAnswerWhereInput[]
     userId?: StringFilter<"InterviewAnswer"> | string
+    jobId?: StringNullableFilter<"InterviewAnswer"> | string | null
     questionId?: StringFilter<"InterviewAnswer"> | string
     answer?: StringFilter<"InterviewAnswer"> | string
     createdAt?: DateTimeFilter<"InterviewAnswer"> | Date | string
     updatedAt?: DateTimeFilter<"InterviewAnswer"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
+    job?: XOR<JobPostingNullableRelationFilter, JobPostingWhereInput> | null
     question?: XOR<InterviewQuestionRelationFilter, InterviewQuestionWhereInput>
   }, "id" | "userId_questionId">
 
   export type InterviewAnswerOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrderInput | SortOrder
     questionId?: SortOrder
     answer?: SortOrder
     createdAt?: SortOrder
@@ -18137,6 +19674,7 @@ export namespace Prisma {
     NOT?: InterviewAnswerScalarWhereWithAggregatesInput | InterviewAnswerScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"InterviewAnswer"> | string
     userId?: StringWithAggregatesFilter<"InterviewAnswer"> | string
+    jobId?: StringNullableWithAggregatesFilter<"InterviewAnswer"> | string | null
     questionId?: StringWithAggregatesFilter<"InterviewAnswer"> | string
     answer?: StringWithAggregatesFilter<"InterviewAnswer"> | string
     createdAt?: DateTimeWithAggregatesFilter<"InterviewAnswer"> | Date | string
@@ -18605,6 +20143,9 @@ export namespace Prisma {
     NOT?: UserNotificationWhereInput | UserNotificationWhereInput[]
     id?: StringFilter<"UserNotification"> | string
     userId?: StringFilter<"UserNotification"> | string
+    type?: StringFilter<"UserNotification"> | string
+    referenceId?: StringNullableFilter<"UserNotification"> | string | null
+    actionUrl?: StringNullableFilter<"UserNotification"> | string | null
     title?: StringFilter<"UserNotification"> | string
     body?: StringFilter<"UserNotification"> | string
     isRead?: BoolFilter<"UserNotification"> | boolean
@@ -18615,6 +20156,9 @@ export namespace Prisma {
   export type UserNotificationOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    actionUrl?: SortOrderInput | SortOrder
     title?: SortOrder
     body?: SortOrder
     isRead?: SortOrder
@@ -18624,20 +20168,27 @@ export namespace Prisma {
 
   export type UserNotificationWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    userId_type_referenceId?: UserNotificationUserIdTypeReferenceIdCompoundUniqueInput
     AND?: UserNotificationWhereInput | UserNotificationWhereInput[]
     OR?: UserNotificationWhereInput[]
     NOT?: UserNotificationWhereInput | UserNotificationWhereInput[]
     userId?: StringFilter<"UserNotification"> | string
+    type?: StringFilter<"UserNotification"> | string
+    referenceId?: StringNullableFilter<"UserNotification"> | string | null
+    actionUrl?: StringNullableFilter<"UserNotification"> | string | null
     title?: StringFilter<"UserNotification"> | string
     body?: StringFilter<"UserNotification"> | string
     isRead?: BoolFilter<"UserNotification"> | boolean
     createdAt?: DateTimeFilter<"UserNotification"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
-  }, "id">
+  }, "id" | "userId_type_referenceId">
 
   export type UserNotificationOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    actionUrl?: SortOrderInput | SortOrder
     title?: SortOrder
     body?: SortOrder
     isRead?: SortOrder
@@ -18653,6 +20204,9 @@ export namespace Prisma {
     NOT?: UserNotificationScalarWhereWithAggregatesInput | UserNotificationScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"UserNotification"> | string
     userId?: StringWithAggregatesFilter<"UserNotification"> | string
+    type?: StringWithAggregatesFilter<"UserNotification"> | string
+    referenceId?: StringNullableWithAggregatesFilter<"UserNotification"> | string | null
+    actionUrl?: StringNullableWithAggregatesFilter<"UserNotification"> | string | null
     title?: StringWithAggregatesFilter<"UserNotification"> | string
     body?: StringWithAggregatesFilter<"UserNotification"> | string
     isRead?: BoolWithAggregatesFilter<"UserNotification"> | boolean
@@ -18736,6 +20290,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
@@ -18761,6 +20316,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
@@ -18786,6 +20342,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
@@ -18811,6 +20368,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
@@ -18873,14 +20431,18 @@ export namespace Prisma {
     endDate?: Date | string | null
     githubUrl?: string | null
     deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutPortfoliosInput
+    job?: JobPostingCreateNestedOneWithoutPortfoliosInput
   }
 
   export type PortfolioUncheckedCreateInput = {
     id?: string
     userId: string
+    jobId?: string | null
     title: string
     description: string
     techStack: string
@@ -18888,6 +20450,8 @@ export namespace Prisma {
     endDate?: Date | string | null
     githubUrl?: string | null
     deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -18901,14 +20465,18 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
     deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutPortfoliosNestedInput
+    job?: JobPostingUpdateOneWithoutPortfoliosNestedInput
   }
 
   export type PortfolioUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     techStack?: StringFieldUpdateOperationsInput | string
@@ -18916,6 +20484,8 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
     deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18923,6 +20493,7 @@ export namespace Prisma {
   export type PortfolioCreateManyInput = {
     id?: string
     userId: string
+    jobId?: string | null
     title: string
     description: string
     techStack: string
@@ -18930,6 +20501,8 @@ export namespace Prisma {
     endDate?: Date | string | null
     githubUrl?: string | null
     deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -18943,6 +20516,8 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
     deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18950,6 +20525,7 @@ export namespace Prisma {
   export type PortfolioUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     techStack?: StringFieldUpdateOperationsInput | string
@@ -18957,6 +20533,104 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
     deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExperienceCreateInput = {
+    id?: string
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutExperiencesInput
+    job?: JobPostingCreateNestedOneWithoutExperiencesInput
+  }
+
+  export type ExperienceUncheckedCreateInput = {
+    id?: string
+    userId: string
+    jobId?: string | null
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExperienceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutExperiencesNestedInput
+    job?: JobPostingUpdateOneWithoutExperiencesNestedInput
+  }
+
+  export type ExperienceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExperienceCreateManyInput = {
+    id?: string
+    userId: string
+    jobId?: string | null
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExperienceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExperienceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18970,12 +20644,16 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutJobPostingsInput
     statusHistory?: StatusHistoryCreateNestedManyWithoutJobInput
     coverLetters?: CoverLetterCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioCreateNestedManyWithoutJobInput
+    experiences?: ExperienceCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerCreateNestedManyWithoutJobInput
   }
 
   export type JobPostingUncheckedCreateInput = {
@@ -18988,11 +20666,15 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     statusHistory?: StatusHistoryUncheckedCreateNestedManyWithoutJobInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioUncheckedCreateNestedManyWithoutJobInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutJobInput
   }
 
   export type JobPostingUpdateInput = {
@@ -19004,12 +20686,16 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutJobPostingsNestedInput
     statusHistory?: StatusHistoryUpdateManyWithoutJobNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUpdateManyWithoutJobNestedInput
   }
 
   export type JobPostingUncheckedUpdateInput = {
@@ -19022,11 +20708,15 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     statusHistory?: StatusHistoryUncheckedUpdateManyWithoutJobNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUncheckedUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type JobPostingCreateManyInput = {
@@ -19039,6 +20729,7 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -19053,6 +20744,7 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19068,6 +20760,7 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19290,12 +20983,14 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutInterviewAnswersInput
+    job?: JobPostingCreateNestedOneWithoutInterviewAnswersInput
     question: InterviewQuestionCreateNestedOneWithoutAnswersInput
   }
 
   export type InterviewAnswerUncheckedCreateInput = {
     id?: string
     userId: string
+    jobId?: string | null
     questionId: string
     answer: string
     createdAt?: Date | string
@@ -19308,12 +21003,14 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutInterviewAnswersNestedInput
+    job?: JobPostingUpdateOneWithoutInterviewAnswersNestedInput
     question?: InterviewQuestionUpdateOneRequiredWithoutAnswersNestedInput
   }
 
   export type InterviewAnswerUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     questionId?: StringFieldUpdateOperationsInput | string
     answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19323,6 +21020,7 @@ export namespace Prisma {
   export type InterviewAnswerCreateManyInput = {
     id?: string
     userId: string
+    jobId?: string | null
     questionId: string
     answer: string
     createdAt?: Date | string
@@ -19339,6 +21037,7 @@ export namespace Prisma {
   export type InterviewAnswerUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     questionId?: StringFieldUpdateOperationsInput | string
     answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19846,6 +21545,9 @@ export namespace Prisma {
 
   export type UserNotificationCreateInput = {
     id?: string
+    type?: string
+    referenceId?: string | null
+    actionUrl?: string | null
     title: string
     body: string
     isRead?: boolean
@@ -19856,6 +21558,9 @@ export namespace Prisma {
   export type UserNotificationUncheckedCreateInput = {
     id?: string
     userId: string
+    type?: string
+    referenceId?: string | null
+    actionUrl?: string | null
     title: string
     body: string
     isRead?: boolean
@@ -19864,6 +21569,9 @@ export namespace Prisma {
 
   export type UserNotificationUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     body?: StringFieldUpdateOperationsInput | string
     isRead?: BoolFieldUpdateOperationsInput | boolean
@@ -19874,6 +21582,9 @@ export namespace Prisma {
   export type UserNotificationUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     body?: StringFieldUpdateOperationsInput | string
     isRead?: BoolFieldUpdateOperationsInput | boolean
@@ -19883,6 +21594,9 @@ export namespace Prisma {
   export type UserNotificationCreateManyInput = {
     id?: string
     userId: string
+    type?: string
+    referenceId?: string | null
+    actionUrl?: string | null
     title: string
     body: string
     isRead?: boolean
@@ -19891,6 +21605,9 @@ export namespace Prisma {
 
   export type UserNotificationUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     body?: StringFieldUpdateOperationsInput | string
     isRead?: BoolFieldUpdateOperationsInput | boolean
@@ -19900,6 +21617,9 @@ export namespace Prisma {
   export type UserNotificationUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     body?: StringFieldUpdateOperationsInput | string
     isRead?: BoolFieldUpdateOperationsInput | boolean
@@ -20051,6 +21771,12 @@ export namespace Prisma {
     none?: CoverLetterWhereInput
   }
 
+  export type ExperienceListRelationFilter = {
+    every?: ExperienceWhereInput
+    some?: ExperienceWhereInput
+    none?: ExperienceWhereInput
+  }
+
   export type UserNotificationListRelationFilter = {
     every?: UserNotificationWhereInput
     some?: UserNotificationWhereInput
@@ -20095,6 +21821,10 @@ export namespace Prisma {
   }
 
   export type CoverLetterOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ExperienceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -20232,9 +21962,15 @@ export namespace Prisma {
     isNot?: UserWhereInput
   }
 
+  export type JobPostingNullableRelationFilter = {
+    is?: JobPostingWhereInput | null
+    isNot?: JobPostingWhereInput | null
+  }
+
   export type PortfolioCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrder
     title?: SortOrder
     description?: SortOrder
     techStack?: SortOrder
@@ -20242,6 +21978,8 @@ export namespace Prisma {
     endDate?: SortOrder
     githubUrl?: SortOrder
     deployUrl?: SortOrder
+    githubAnalysis?: SortOrder
+    githubAnalysisFetchedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -20249,6 +21987,7 @@ export namespace Prisma {
   export type PortfolioMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrder
     title?: SortOrder
     description?: SortOrder
     techStack?: SortOrder
@@ -20256,6 +21995,8 @@ export namespace Prisma {
     endDate?: SortOrder
     githubUrl?: SortOrder
     deployUrl?: SortOrder
+    githubAnalysis?: SortOrder
+    githubAnalysisFetchedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -20263,6 +22004,7 @@ export namespace Prisma {
   export type PortfolioMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrder
     title?: SortOrder
     description?: SortOrder
     techStack?: SortOrder
@@ -20270,6 +22012,8 @@ export namespace Prisma {
     endDate?: SortOrder
     githubUrl?: SortOrder
     deployUrl?: SortOrder
+    githubAnalysis?: SortOrder
+    githubAnalysisFetchedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -20286,6 +22030,48 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type ExperienceCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    jobId?: SortOrder
+    title?: SortOrder
+    situation?: SortOrder
+    action?: SortOrder
+    result?: SortOrder
+    technologies?: SortOrder
+    metrics?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExperienceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    jobId?: SortOrder
+    title?: SortOrder
+    situation?: SortOrder
+    action?: SortOrder
+    result?: SortOrder
+    technologies?: SortOrder
+    metrics?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ExperienceMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    jobId?: SortOrder
+    title?: SortOrder
+    situation?: SortOrder
+    action?: SortOrder
+    result?: SortOrder
+    technologies?: SortOrder
+    metrics?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type StatusHistoryListRelationFilter = {
@@ -20308,6 +22094,7 @@ export namespace Prisma {
     interviewAt?: SortOrder
     status?: SortOrder
     contacts?: SortOrder
+    checklist?: SortOrder
     followUpAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20323,6 +22110,7 @@ export namespace Prisma {
     interviewAt?: SortOrder
     status?: SortOrder
     contacts?: SortOrder
+    checklist?: SortOrder
     followUpAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20338,6 +22126,7 @@ export namespace Prisma {
     interviewAt?: SortOrder
     status?: SortOrder
     contacts?: SortOrder
+    checklist?: SortOrder
     followUpAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20491,6 +22280,7 @@ export namespace Prisma {
   export type InterviewAnswerCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrder
     questionId?: SortOrder
     answer?: SortOrder
     createdAt?: SortOrder
@@ -20500,6 +22290,7 @@ export namespace Prisma {
   export type InterviewAnswerMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrder
     questionId?: SortOrder
     answer?: SortOrder
     createdAt?: SortOrder
@@ -20509,6 +22300,7 @@ export namespace Prisma {
   export type InterviewAnswerMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    jobId?: SortOrder
     questionId?: SortOrder
     answer?: SortOrder
     createdAt?: SortOrder
@@ -20524,11 +22316,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type JobPostingNullableRelationFilter = {
-    is?: JobPostingWhereInput | null
-    isNot?: JobPostingWhereInput | null
   }
 
   export type CoverLetterVersionListRelationFilter = {
@@ -20803,9 +22590,18 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type UserNotificationUserIdTypeReferenceIdCompoundUniqueInput = {
+    userId: string
+    type: string
+    referenceId: string
+  }
+
   export type UserNotificationCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
+    referenceId?: SortOrder
+    actionUrl?: SortOrder
     title?: SortOrder
     body?: SortOrder
     isRead?: SortOrder
@@ -20815,6 +22611,9 @@ export namespace Prisma {
   export type UserNotificationMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
+    referenceId?: SortOrder
+    actionUrl?: SortOrder
     title?: SortOrder
     body?: SortOrder
     isRead?: SortOrder
@@ -20824,6 +22623,9 @@ export namespace Prisma {
   export type UserNotificationMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
+    referenceId?: SortOrder
+    actionUrl?: SortOrder
     title?: SortOrder
     body?: SortOrder
     isRead?: SortOrder
@@ -20899,6 +22701,13 @@ export namespace Prisma {
     connect?: CoverLetterWhereUniqueInput | CoverLetterWhereUniqueInput[]
   }
 
+  export type ExperienceCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExperienceCreateWithoutUserInput, ExperienceUncheckedCreateWithoutUserInput> | ExperienceCreateWithoutUserInput[] | ExperienceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutUserInput | ExperienceCreateOrConnectWithoutUserInput[]
+    createMany?: ExperienceCreateManyUserInputEnvelope
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+  }
+
   export type UserNotificationCreateNestedManyWithoutUserInput = {
     create?: XOR<UserNotificationCreateWithoutUserInput, UserNotificationUncheckedCreateWithoutUserInput> | UserNotificationCreateWithoutUserInput[] | UserNotificationUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserNotificationCreateOrConnectWithoutUserInput | UserNotificationCreateOrConnectWithoutUserInput[]
@@ -20960,6 +22769,13 @@ export namespace Prisma {
     connectOrCreate?: CoverLetterCreateOrConnectWithoutUserInput | CoverLetterCreateOrConnectWithoutUserInput[]
     createMany?: CoverLetterCreateManyUserInputEnvelope
     connect?: CoverLetterWhereUniqueInput | CoverLetterWhereUniqueInput[]
+  }
+
+  export type ExperienceUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExperienceCreateWithoutUserInput, ExperienceUncheckedCreateWithoutUserInput> | ExperienceCreateWithoutUserInput[] | ExperienceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutUserInput | ExperienceCreateOrConnectWithoutUserInput[]
+    createMany?: ExperienceCreateManyUserInputEnvelope
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
   }
 
   export type UserNotificationUncheckedCreateNestedManyWithoutUserInput = {
@@ -21081,6 +22897,20 @@ export namespace Prisma {
     update?: CoverLetterUpdateWithWhereUniqueWithoutUserInput | CoverLetterUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: CoverLetterUpdateManyWithWhereWithoutUserInput | CoverLetterUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: CoverLetterScalarWhereInput | CoverLetterScalarWhereInput[]
+  }
+
+  export type ExperienceUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExperienceCreateWithoutUserInput, ExperienceUncheckedCreateWithoutUserInput> | ExperienceCreateWithoutUserInput[] | ExperienceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutUserInput | ExperienceCreateOrConnectWithoutUserInput[]
+    upsert?: ExperienceUpsertWithWhereUniqueWithoutUserInput | ExperienceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExperienceCreateManyUserInputEnvelope
+    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    update?: ExperienceUpdateWithWhereUniqueWithoutUserInput | ExperienceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExperienceUpdateManyWithWhereWithoutUserInput | ExperienceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
   }
 
   export type UserNotificationUpdateManyWithoutUserNestedInput = {
@@ -21209,6 +23039,20 @@ export namespace Prisma {
     deleteMany?: CoverLetterScalarWhereInput | CoverLetterScalarWhereInput[]
   }
 
+  export type ExperienceUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExperienceCreateWithoutUserInput, ExperienceUncheckedCreateWithoutUserInput> | ExperienceCreateWithoutUserInput[] | ExperienceUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutUserInput | ExperienceCreateOrConnectWithoutUserInput[]
+    upsert?: ExperienceUpsertWithWhereUniqueWithoutUserInput | ExperienceUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExperienceCreateManyUserInputEnvelope
+    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    update?: ExperienceUpdateWithWhereUniqueWithoutUserInput | ExperienceUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExperienceUpdateManyWithWhereWithoutUserInput | ExperienceUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
+  }
+
   export type UserNotificationUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<UserNotificationCreateWithoutUserInput, UserNotificationUncheckedCreateWithoutUserInput> | UserNotificationCreateWithoutUserInput[] | UserNotificationUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserNotificationCreateOrConnectWithoutUserInput | UserNotificationCreateOrConnectWithoutUserInput[]
@@ -21257,6 +23101,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type JobPostingCreateNestedOneWithoutPortfoliosInput = {
+    create?: XOR<JobPostingCreateWithoutPortfoliosInput, JobPostingUncheckedCreateWithoutPortfoliosInput>
+    connectOrCreate?: JobPostingCreateOrConnectWithoutPortfoliosInput
+    connect?: JobPostingWhereUniqueInput
+  }
+
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
   }
@@ -21267,6 +23117,46 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutPortfoliosInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPortfoliosInput, UserUpdateWithoutPortfoliosInput>, UserUncheckedUpdateWithoutPortfoliosInput>
+  }
+
+  export type JobPostingUpdateOneWithoutPortfoliosNestedInput = {
+    create?: XOR<JobPostingCreateWithoutPortfoliosInput, JobPostingUncheckedCreateWithoutPortfoliosInput>
+    connectOrCreate?: JobPostingCreateOrConnectWithoutPortfoliosInput
+    upsert?: JobPostingUpsertWithoutPortfoliosInput
+    disconnect?: JobPostingWhereInput | boolean
+    delete?: JobPostingWhereInput | boolean
+    connect?: JobPostingWhereUniqueInput
+    update?: XOR<XOR<JobPostingUpdateToOneWithWhereWithoutPortfoliosInput, JobPostingUpdateWithoutPortfoliosInput>, JobPostingUncheckedUpdateWithoutPortfoliosInput>
+  }
+
+  export type UserCreateNestedOneWithoutExperiencesInput = {
+    create?: XOR<UserCreateWithoutExperiencesInput, UserUncheckedCreateWithoutExperiencesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutExperiencesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type JobPostingCreateNestedOneWithoutExperiencesInput = {
+    create?: XOR<JobPostingCreateWithoutExperiencesInput, JobPostingUncheckedCreateWithoutExperiencesInput>
+    connectOrCreate?: JobPostingCreateOrConnectWithoutExperiencesInput
+    connect?: JobPostingWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutExperiencesNestedInput = {
+    create?: XOR<UserCreateWithoutExperiencesInput, UserUncheckedCreateWithoutExperiencesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutExperiencesInput
+    upsert?: UserUpsertWithoutExperiencesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutExperiencesInput, UserUpdateWithoutExperiencesInput>, UserUncheckedUpdateWithoutExperiencesInput>
+  }
+
+  export type JobPostingUpdateOneWithoutExperiencesNestedInput = {
+    create?: XOR<JobPostingCreateWithoutExperiencesInput, JobPostingUncheckedCreateWithoutExperiencesInput>
+    connectOrCreate?: JobPostingCreateOrConnectWithoutExperiencesInput
+    upsert?: JobPostingUpsertWithoutExperiencesInput
+    disconnect?: JobPostingWhereInput | boolean
+    delete?: JobPostingWhereInput | boolean
+    connect?: JobPostingWhereUniqueInput
+    update?: XOR<XOR<JobPostingUpdateToOneWithWhereWithoutExperiencesInput, JobPostingUpdateWithoutExperiencesInput>, JobPostingUncheckedUpdateWithoutExperiencesInput>
   }
 
   export type UserCreateNestedOneWithoutJobPostingsInput = {
@@ -21289,6 +23179,27 @@ export namespace Prisma {
     connect?: CoverLetterWhereUniqueInput | CoverLetterWhereUniqueInput[]
   }
 
+  export type PortfolioCreateNestedManyWithoutJobInput = {
+    create?: XOR<PortfolioCreateWithoutJobInput, PortfolioUncheckedCreateWithoutJobInput> | PortfolioCreateWithoutJobInput[] | PortfolioUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: PortfolioCreateOrConnectWithoutJobInput | PortfolioCreateOrConnectWithoutJobInput[]
+    createMany?: PortfolioCreateManyJobInputEnvelope
+    connect?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+  }
+
+  export type ExperienceCreateNestedManyWithoutJobInput = {
+    create?: XOR<ExperienceCreateWithoutJobInput, ExperienceUncheckedCreateWithoutJobInput> | ExperienceCreateWithoutJobInput[] | ExperienceUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutJobInput | ExperienceCreateOrConnectWithoutJobInput[]
+    createMany?: ExperienceCreateManyJobInputEnvelope
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+  }
+
+  export type InterviewAnswerCreateNestedManyWithoutJobInput = {
+    create?: XOR<InterviewAnswerCreateWithoutJobInput, InterviewAnswerUncheckedCreateWithoutJobInput> | InterviewAnswerCreateWithoutJobInput[] | InterviewAnswerUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: InterviewAnswerCreateOrConnectWithoutJobInput | InterviewAnswerCreateOrConnectWithoutJobInput[]
+    createMany?: InterviewAnswerCreateManyJobInputEnvelope
+    connect?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+  }
+
   export type StatusHistoryUncheckedCreateNestedManyWithoutJobInput = {
     create?: XOR<StatusHistoryCreateWithoutJobInput, StatusHistoryUncheckedCreateWithoutJobInput> | StatusHistoryCreateWithoutJobInput[] | StatusHistoryUncheckedCreateWithoutJobInput[]
     connectOrCreate?: StatusHistoryCreateOrConnectWithoutJobInput | StatusHistoryCreateOrConnectWithoutJobInput[]
@@ -21301,6 +23212,27 @@ export namespace Prisma {
     connectOrCreate?: CoverLetterCreateOrConnectWithoutJobInput | CoverLetterCreateOrConnectWithoutJobInput[]
     createMany?: CoverLetterCreateManyJobInputEnvelope
     connect?: CoverLetterWhereUniqueInput | CoverLetterWhereUniqueInput[]
+  }
+
+  export type PortfolioUncheckedCreateNestedManyWithoutJobInput = {
+    create?: XOR<PortfolioCreateWithoutJobInput, PortfolioUncheckedCreateWithoutJobInput> | PortfolioCreateWithoutJobInput[] | PortfolioUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: PortfolioCreateOrConnectWithoutJobInput | PortfolioCreateOrConnectWithoutJobInput[]
+    createMany?: PortfolioCreateManyJobInputEnvelope
+    connect?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+  }
+
+  export type ExperienceUncheckedCreateNestedManyWithoutJobInput = {
+    create?: XOR<ExperienceCreateWithoutJobInput, ExperienceUncheckedCreateWithoutJobInput> | ExperienceCreateWithoutJobInput[] | ExperienceUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutJobInput | ExperienceCreateOrConnectWithoutJobInput[]
+    createMany?: ExperienceCreateManyJobInputEnvelope
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+  }
+
+  export type InterviewAnswerUncheckedCreateNestedManyWithoutJobInput = {
+    create?: XOR<InterviewAnswerCreateWithoutJobInput, InterviewAnswerUncheckedCreateWithoutJobInput> | InterviewAnswerCreateWithoutJobInput[] | InterviewAnswerUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: InterviewAnswerCreateOrConnectWithoutJobInput | InterviewAnswerCreateOrConnectWithoutJobInput[]
+    createMany?: InterviewAnswerCreateManyJobInputEnvelope
+    connect?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
   }
 
   export type UserUpdateOneRequiredWithoutJobPostingsNestedInput = {
@@ -21339,6 +23271,48 @@ export namespace Prisma {
     deleteMany?: CoverLetterScalarWhereInput | CoverLetterScalarWhereInput[]
   }
 
+  export type PortfolioUpdateManyWithoutJobNestedInput = {
+    create?: XOR<PortfolioCreateWithoutJobInput, PortfolioUncheckedCreateWithoutJobInput> | PortfolioCreateWithoutJobInput[] | PortfolioUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: PortfolioCreateOrConnectWithoutJobInput | PortfolioCreateOrConnectWithoutJobInput[]
+    upsert?: PortfolioUpsertWithWhereUniqueWithoutJobInput | PortfolioUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: PortfolioCreateManyJobInputEnvelope
+    set?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+    disconnect?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+    delete?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+    connect?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+    update?: PortfolioUpdateWithWhereUniqueWithoutJobInput | PortfolioUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: PortfolioUpdateManyWithWhereWithoutJobInput | PortfolioUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: PortfolioScalarWhereInput | PortfolioScalarWhereInput[]
+  }
+
+  export type ExperienceUpdateManyWithoutJobNestedInput = {
+    create?: XOR<ExperienceCreateWithoutJobInput, ExperienceUncheckedCreateWithoutJobInput> | ExperienceCreateWithoutJobInput[] | ExperienceUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutJobInput | ExperienceCreateOrConnectWithoutJobInput[]
+    upsert?: ExperienceUpsertWithWhereUniqueWithoutJobInput | ExperienceUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: ExperienceCreateManyJobInputEnvelope
+    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    update?: ExperienceUpdateWithWhereUniqueWithoutJobInput | ExperienceUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: ExperienceUpdateManyWithWhereWithoutJobInput | ExperienceUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
+  }
+
+  export type InterviewAnswerUpdateManyWithoutJobNestedInput = {
+    create?: XOR<InterviewAnswerCreateWithoutJobInput, InterviewAnswerUncheckedCreateWithoutJobInput> | InterviewAnswerCreateWithoutJobInput[] | InterviewAnswerUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: InterviewAnswerCreateOrConnectWithoutJobInput | InterviewAnswerCreateOrConnectWithoutJobInput[]
+    upsert?: InterviewAnswerUpsertWithWhereUniqueWithoutJobInput | InterviewAnswerUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: InterviewAnswerCreateManyJobInputEnvelope
+    set?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+    disconnect?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+    delete?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+    connect?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+    update?: InterviewAnswerUpdateWithWhereUniqueWithoutJobInput | InterviewAnswerUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: InterviewAnswerUpdateManyWithWhereWithoutJobInput | InterviewAnswerUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: InterviewAnswerScalarWhereInput | InterviewAnswerScalarWhereInput[]
+  }
+
   export type StatusHistoryUncheckedUpdateManyWithoutJobNestedInput = {
     create?: XOR<StatusHistoryCreateWithoutJobInput, StatusHistoryUncheckedCreateWithoutJobInput> | StatusHistoryCreateWithoutJobInput[] | StatusHistoryUncheckedCreateWithoutJobInput[]
     connectOrCreate?: StatusHistoryCreateOrConnectWithoutJobInput | StatusHistoryCreateOrConnectWithoutJobInput[]
@@ -21365,6 +23339,48 @@ export namespace Prisma {
     update?: CoverLetterUpdateWithWhereUniqueWithoutJobInput | CoverLetterUpdateWithWhereUniqueWithoutJobInput[]
     updateMany?: CoverLetterUpdateManyWithWhereWithoutJobInput | CoverLetterUpdateManyWithWhereWithoutJobInput[]
     deleteMany?: CoverLetterScalarWhereInput | CoverLetterScalarWhereInput[]
+  }
+
+  export type PortfolioUncheckedUpdateManyWithoutJobNestedInput = {
+    create?: XOR<PortfolioCreateWithoutJobInput, PortfolioUncheckedCreateWithoutJobInput> | PortfolioCreateWithoutJobInput[] | PortfolioUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: PortfolioCreateOrConnectWithoutJobInput | PortfolioCreateOrConnectWithoutJobInput[]
+    upsert?: PortfolioUpsertWithWhereUniqueWithoutJobInput | PortfolioUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: PortfolioCreateManyJobInputEnvelope
+    set?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+    disconnect?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+    delete?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+    connect?: PortfolioWhereUniqueInput | PortfolioWhereUniqueInput[]
+    update?: PortfolioUpdateWithWhereUniqueWithoutJobInput | PortfolioUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: PortfolioUpdateManyWithWhereWithoutJobInput | PortfolioUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: PortfolioScalarWhereInput | PortfolioScalarWhereInput[]
+  }
+
+  export type ExperienceUncheckedUpdateManyWithoutJobNestedInput = {
+    create?: XOR<ExperienceCreateWithoutJobInput, ExperienceUncheckedCreateWithoutJobInput> | ExperienceCreateWithoutJobInput[] | ExperienceUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutJobInput | ExperienceCreateOrConnectWithoutJobInput[]
+    upsert?: ExperienceUpsertWithWhereUniqueWithoutJobInput | ExperienceUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: ExperienceCreateManyJobInputEnvelope
+    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    update?: ExperienceUpdateWithWhereUniqueWithoutJobInput | ExperienceUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: ExperienceUpdateManyWithWhereWithoutJobInput | ExperienceUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
+  }
+
+  export type InterviewAnswerUncheckedUpdateManyWithoutJobNestedInput = {
+    create?: XOR<InterviewAnswerCreateWithoutJobInput, InterviewAnswerUncheckedCreateWithoutJobInput> | InterviewAnswerCreateWithoutJobInput[] | InterviewAnswerUncheckedCreateWithoutJobInput[]
+    connectOrCreate?: InterviewAnswerCreateOrConnectWithoutJobInput | InterviewAnswerCreateOrConnectWithoutJobInput[]
+    upsert?: InterviewAnswerUpsertWithWhereUniqueWithoutJobInput | InterviewAnswerUpsertWithWhereUniqueWithoutJobInput[]
+    createMany?: InterviewAnswerCreateManyJobInputEnvelope
+    set?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+    disconnect?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+    delete?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+    connect?: InterviewAnswerWhereUniqueInput | InterviewAnswerWhereUniqueInput[]
+    update?: InterviewAnswerUpdateWithWhereUniqueWithoutJobInput | InterviewAnswerUpdateWithWhereUniqueWithoutJobInput[]
+    updateMany?: InterviewAnswerUpdateManyWithWhereWithoutJobInput | InterviewAnswerUpdateManyWithWhereWithoutJobInput[]
+    deleteMany?: InterviewAnswerScalarWhereInput | InterviewAnswerScalarWhereInput[]
   }
 
   export type JobPostingCreateNestedOneWithoutStatusHistoryInput = {
@@ -21467,6 +23483,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type JobPostingCreateNestedOneWithoutInterviewAnswersInput = {
+    create?: XOR<JobPostingCreateWithoutInterviewAnswersInput, JobPostingUncheckedCreateWithoutInterviewAnswersInput>
+    connectOrCreate?: JobPostingCreateOrConnectWithoutInterviewAnswersInput
+    connect?: JobPostingWhereUniqueInput
+  }
+
   export type InterviewQuestionCreateNestedOneWithoutAnswersInput = {
     create?: XOR<InterviewQuestionCreateWithoutAnswersInput, InterviewQuestionUncheckedCreateWithoutAnswersInput>
     connectOrCreate?: InterviewQuestionCreateOrConnectWithoutAnswersInput
@@ -21479,6 +23501,16 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutInterviewAnswersInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutInterviewAnswersInput, UserUpdateWithoutInterviewAnswersInput>, UserUncheckedUpdateWithoutInterviewAnswersInput>
+  }
+
+  export type JobPostingUpdateOneWithoutInterviewAnswersNestedInput = {
+    create?: XOR<JobPostingCreateWithoutInterviewAnswersInput, JobPostingUncheckedCreateWithoutInterviewAnswersInput>
+    connectOrCreate?: JobPostingCreateOrConnectWithoutInterviewAnswersInput
+    upsert?: JobPostingUpsertWithoutInterviewAnswersInput
+    disconnect?: JobPostingWhereInput | boolean
+    delete?: JobPostingWhereInput | boolean
+    connect?: JobPostingWhereUniqueInput
+    update?: XOR<XOR<JobPostingUpdateToOneWithWhereWithoutInterviewAnswersInput, JobPostingUpdateWithoutInterviewAnswersInput>, JobPostingUncheckedUpdateWithoutInterviewAnswersInput>
   }
 
   export type InterviewQuestionUpdateOneRequiredWithoutAnswersNestedInput = {
@@ -21893,12 +23925,16 @@ export namespace Prisma {
     endDate?: Date | string | null
     githubUrl?: string | null
     deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    job?: JobPostingCreateNestedOneWithoutPortfoliosInput
   }
 
   export type PortfolioUncheckedCreateWithoutUserInput = {
     id?: string
+    jobId?: string | null
     title: string
     description: string
     techStack: string
@@ -21906,6 +23942,8 @@ export namespace Prisma {
     endDate?: Date | string | null
     githubUrl?: string | null
     deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21929,11 +23967,15 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     statusHistory?: StatusHistoryCreateNestedManyWithoutJobInput
     coverLetters?: CoverLetterCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioCreateNestedManyWithoutJobInput
+    experiences?: ExperienceCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerCreateNestedManyWithoutJobInput
   }
 
   export type JobPostingUncheckedCreateWithoutUserInput = {
@@ -21945,11 +23987,15 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     statusHistory?: StatusHistoryUncheckedCreateNestedManyWithoutJobInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioUncheckedCreateNestedManyWithoutJobInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutJobInput
   }
 
   export type JobPostingCreateOrConnectWithoutUserInput = {
@@ -22001,11 +24047,13 @@ export namespace Prisma {
     answer: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    job?: JobPostingCreateNestedOneWithoutInterviewAnswersInput
     question: InterviewQuestionCreateNestedOneWithoutAnswersInput
   }
 
   export type InterviewAnswerUncheckedCreateWithoutUserInput = {
     id?: string
+    jobId?: string | null
     questionId: string
     answer: string
     createdAt?: Date | string
@@ -22088,8 +24136,47 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ExperienceCreateWithoutUserInput = {
+    id?: string
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    job?: JobPostingCreateNestedOneWithoutExperiencesInput
+  }
+
+  export type ExperienceUncheckedCreateWithoutUserInput = {
+    id?: string
+    jobId?: string | null
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExperienceCreateOrConnectWithoutUserInput = {
+    where: ExperienceWhereUniqueInput
+    create: XOR<ExperienceCreateWithoutUserInput, ExperienceUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExperienceCreateManyUserInputEnvelope = {
+    data: ExperienceCreateManyUserInput | ExperienceCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserNotificationCreateWithoutUserInput = {
     id?: string
+    type?: string
+    referenceId?: string | null
+    actionUrl?: string | null
     title: string
     body: string
     isRead?: boolean
@@ -22098,6 +24185,9 @@ export namespace Prisma {
 
   export type UserNotificationUncheckedCreateWithoutUserInput = {
     id?: string
+    type?: string
+    referenceId?: string | null
+    actionUrl?: string | null
     title: string
     body: string
     isRead?: boolean
@@ -22208,6 +24298,7 @@ export namespace Prisma {
     NOT?: PortfolioScalarWhereInput | PortfolioScalarWhereInput[]
     id?: StringFilter<"Portfolio"> | string
     userId?: StringFilter<"Portfolio"> | string
+    jobId?: StringNullableFilter<"Portfolio"> | string | null
     title?: StringFilter<"Portfolio"> | string
     description?: StringFilter<"Portfolio"> | string
     techStack?: StringFilter<"Portfolio"> | string
@@ -22215,6 +24306,8 @@ export namespace Prisma {
     endDate?: DateTimeNullableFilter<"Portfolio"> | Date | string | null
     githubUrl?: StringNullableFilter<"Portfolio"> | string | null
     deployUrl?: StringNullableFilter<"Portfolio"> | string | null
+    githubAnalysis?: StringNullableFilter<"Portfolio"> | string | null
+    githubAnalysisFetchedAt?: DateTimeNullableFilter<"Portfolio"> | Date | string | null
     createdAt?: DateTimeFilter<"Portfolio"> | Date | string
     updatedAt?: DateTimeFilter<"Portfolio"> | Date | string
   }
@@ -22248,6 +24341,7 @@ export namespace Prisma {
     interviewAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     status?: StringFilter<"JobPosting"> | string
     contacts?: StringNullableFilter<"JobPosting"> | string | null
+    checklist?: StringNullableFilter<"JobPosting"> | string | null
     followUpAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     createdAt?: DateTimeFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeFilter<"JobPosting"> | Date | string
@@ -22307,6 +24401,7 @@ export namespace Prisma {
     NOT?: InterviewAnswerScalarWhereInput | InterviewAnswerScalarWhereInput[]
     id?: StringFilter<"InterviewAnswer"> | string
     userId?: StringFilter<"InterviewAnswer"> | string
+    jobId?: StringNullableFilter<"InterviewAnswer"> | string | null
     questionId?: StringFilter<"InterviewAnswer"> | string
     answer?: StringFilter<"InterviewAnswer"> | string
     createdAt?: DateTimeFilter<"InterviewAnswer"> | Date | string
@@ -22374,6 +24469,39 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CoverLetter"> | Date | string
   }
 
+  export type ExperienceUpsertWithWhereUniqueWithoutUserInput = {
+    where: ExperienceWhereUniqueInput
+    update: XOR<ExperienceUpdateWithoutUserInput, ExperienceUncheckedUpdateWithoutUserInput>
+    create: XOR<ExperienceCreateWithoutUserInput, ExperienceUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExperienceUpdateWithWhereUniqueWithoutUserInput = {
+    where: ExperienceWhereUniqueInput
+    data: XOR<ExperienceUpdateWithoutUserInput, ExperienceUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ExperienceUpdateManyWithWhereWithoutUserInput = {
+    where: ExperienceScalarWhereInput
+    data: XOR<ExperienceUpdateManyMutationInput, ExperienceUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ExperienceScalarWhereInput = {
+    AND?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
+    OR?: ExperienceScalarWhereInput[]
+    NOT?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
+    id?: StringFilter<"Experience"> | string
+    userId?: StringFilter<"Experience"> | string
+    jobId?: StringNullableFilter<"Experience"> | string | null
+    title?: StringFilter<"Experience"> | string
+    situation?: StringFilter<"Experience"> | string
+    action?: StringFilter<"Experience"> | string
+    result?: StringFilter<"Experience"> | string
+    technologies?: StringFilter<"Experience"> | string
+    metrics?: StringNullableFilter<"Experience"> | string | null
+    createdAt?: DateTimeFilter<"Experience"> | Date | string
+    updatedAt?: DateTimeFilter<"Experience"> | Date | string
+  }
+
   export type UserNotificationUpsertWithWhereUniqueWithoutUserInput = {
     where: UserNotificationWhereUniqueInput
     update: XOR<UserNotificationUpdateWithoutUserInput, UserNotificationUncheckedUpdateWithoutUserInput>
@@ -22396,6 +24524,9 @@ export namespace Prisma {
     NOT?: UserNotificationScalarWhereInput | UserNotificationScalarWhereInput[]
     id?: StringFilter<"UserNotification"> | string
     userId?: StringFilter<"UserNotification"> | string
+    type?: StringFilter<"UserNotification"> | string
+    referenceId?: StringNullableFilter<"UserNotification"> | string | null
+    actionUrl?: StringNullableFilter<"UserNotification"> | string | null
     title?: StringFilter<"UserNotification"> | string
     body?: StringFilter<"UserNotification"> | string
     isRead?: BoolFilter<"UserNotification"> | boolean
@@ -22486,6 +24617,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
@@ -22510,6 +24642,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
@@ -22518,6 +24651,51 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutPortfoliosInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutPortfoliosInput, UserUncheckedCreateWithoutPortfoliosInput>
+  }
+
+  export type JobPostingCreateWithoutPortfoliosInput = {
+    id?: string
+    company: string
+    position: string
+    url?: string | null
+    deadline?: Date | string | null
+    interviewAt?: Date | string | null
+    status?: string
+    contacts?: string | null
+    checklist?: string | null
+    followUpAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutJobPostingsInput
+    statusHistory?: StatusHistoryCreateNestedManyWithoutJobInput
+    coverLetters?: CoverLetterCreateNestedManyWithoutJobInput
+    experiences?: ExperienceCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerCreateNestedManyWithoutJobInput
+  }
+
+  export type JobPostingUncheckedCreateWithoutPortfoliosInput = {
+    id?: string
+    userId: string
+    company: string
+    position: string
+    url?: string | null
+    deadline?: Date | string | null
+    interviewAt?: Date | string | null
+    status?: string
+    contacts?: string | null
+    checklist?: string | null
+    followUpAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    statusHistory?: StatusHistoryUncheckedCreateNestedManyWithoutJobInput
+    coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutJobInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutJobInput
+  }
+
+  export type JobPostingCreateOrConnectWithoutPortfoliosInput = {
+    where: JobPostingWhereUniqueInput
+    create: XOR<JobPostingCreateWithoutPortfoliosInput, JobPostingUncheckedCreateWithoutPortfoliosInput>
   }
 
   export type UserUpsertWithoutPortfoliosInput = {
@@ -22550,6 +24728,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
@@ -22574,9 +24753,273 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
+  }
+
+  export type JobPostingUpsertWithoutPortfoliosInput = {
+    update: XOR<JobPostingUpdateWithoutPortfoliosInput, JobPostingUncheckedUpdateWithoutPortfoliosInput>
+    create: XOR<JobPostingCreateWithoutPortfoliosInput, JobPostingUncheckedCreateWithoutPortfoliosInput>
+    where?: JobPostingWhereInput
+  }
+
+  export type JobPostingUpdateToOneWithWhereWithoutPortfoliosInput = {
+    where?: JobPostingWhereInput
+    data: XOR<JobPostingUpdateWithoutPortfoliosInput, JobPostingUncheckedUpdateWithoutPortfoliosInput>
+  }
+
+  export type JobPostingUpdateWithoutPortfoliosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    position?: StringFieldUpdateOperationsInput | string
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
+    followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutJobPostingsNestedInput
+    statusHistory?: StatusHistoryUpdateManyWithoutJobNestedInput
+    coverLetters?: CoverLetterUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUpdateManyWithoutJobNestedInput
+  }
+
+  export type JobPostingUncheckedUpdateWithoutPortfoliosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    position?: StringFieldUpdateOperationsInput | string
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
+    followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    statusHistory?: StatusHistoryUncheckedUpdateManyWithoutJobNestedInput
+    coverLetters?: CoverLetterUncheckedUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutJobNestedInput
+  }
+
+  export type UserCreateWithoutExperiencesInput = {
+    id?: string
+    email: string
+    password: string
+    name?: string | null
+    major?: string | null
+    targetJob?: string | null
+    skills: string
+    role?: string
+    companyName?: string | null
+    companyDesc?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    portfolios?: PortfolioCreateNestedManyWithoutUserInput
+    jobPostings?: JobPostingCreateNestedManyWithoutUserInput
+    roadmapItems?: RoadmapItemCreateNestedManyWithoutUserInput
+    interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
+    customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
+    coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    notifications?: UserNotificationCreateNestedManyWithoutUserInput
+    bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
+    recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
+  }
+
+  export type UserUncheckedCreateWithoutExperiencesInput = {
+    id?: string
+    email: string
+    password: string
+    name?: string | null
+    major?: string | null
+    targetJob?: string | null
+    skills: string
+    role?: string
+    companyName?: string | null
+    companyDesc?: string | null
+    isApproved?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    portfolios?: PortfolioUncheckedCreateNestedManyWithoutUserInput
+    jobPostings?: JobPostingUncheckedCreateNestedManyWithoutUserInput
+    roadmapItems?: RoadmapItemUncheckedCreateNestedManyWithoutUserInput
+    interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
+    customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
+    coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
+    bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
+    recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
+  }
+
+  export type UserCreateOrConnectWithoutExperiencesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutExperiencesInput, UserUncheckedCreateWithoutExperiencesInput>
+  }
+
+  export type JobPostingCreateWithoutExperiencesInput = {
+    id?: string
+    company: string
+    position: string
+    url?: string | null
+    deadline?: Date | string | null
+    interviewAt?: Date | string | null
+    status?: string
+    contacts?: string | null
+    checklist?: string | null
+    followUpAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutJobPostingsInput
+    statusHistory?: StatusHistoryCreateNestedManyWithoutJobInput
+    coverLetters?: CoverLetterCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerCreateNestedManyWithoutJobInput
+  }
+
+  export type JobPostingUncheckedCreateWithoutExperiencesInput = {
+    id?: string
+    userId: string
+    company: string
+    position: string
+    url?: string | null
+    deadline?: Date | string | null
+    interviewAt?: Date | string | null
+    status?: string
+    contacts?: string | null
+    checklist?: string | null
+    followUpAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    statusHistory?: StatusHistoryUncheckedCreateNestedManyWithoutJobInput
+    coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioUncheckedCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutJobInput
+  }
+
+  export type JobPostingCreateOrConnectWithoutExperiencesInput = {
+    where: JobPostingWhereUniqueInput
+    create: XOR<JobPostingCreateWithoutExperiencesInput, JobPostingUncheckedCreateWithoutExperiencesInput>
+  }
+
+  export type UserUpsertWithoutExperiencesInput = {
+    update: XOR<UserUpdateWithoutExperiencesInput, UserUncheckedUpdateWithoutExperiencesInput>
+    create: XOR<UserCreateWithoutExperiencesInput, UserUncheckedCreateWithoutExperiencesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutExperiencesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutExperiencesInput, UserUncheckedUpdateWithoutExperiencesInput>
+  }
+
+  export type UserUpdateWithoutExperiencesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    targetJob?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    portfolios?: PortfolioUpdateManyWithoutUserNestedInput
+    jobPostings?: JobPostingUpdateManyWithoutUserNestedInput
+    roadmapItems?: RoadmapItemUpdateManyWithoutUserNestedInput
+    interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
+    customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
+    coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    notifications?: UserNotificationUpdateManyWithoutUserNestedInput
+    bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
+    recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutExperiencesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    targetJob?: NullableStringFieldUpdateOperationsInput | string | null
+    skills?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDesc?: NullableStringFieldUpdateOperationsInput | string | null
+    isApproved?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    portfolios?: PortfolioUncheckedUpdateManyWithoutUserNestedInput
+    jobPostings?: JobPostingUncheckedUpdateManyWithoutUserNestedInput
+    roadmapItems?: RoadmapItemUncheckedUpdateManyWithoutUserNestedInput
+    interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
+    customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
+    coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+    bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
+    recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
+  }
+
+  export type JobPostingUpsertWithoutExperiencesInput = {
+    update: XOR<JobPostingUpdateWithoutExperiencesInput, JobPostingUncheckedUpdateWithoutExperiencesInput>
+    create: XOR<JobPostingCreateWithoutExperiencesInput, JobPostingUncheckedCreateWithoutExperiencesInput>
+    where?: JobPostingWhereInput
+  }
+
+  export type JobPostingUpdateToOneWithWhereWithoutExperiencesInput = {
+    where?: JobPostingWhereInput
+    data: XOR<JobPostingUpdateWithoutExperiencesInput, JobPostingUncheckedUpdateWithoutExperiencesInput>
+  }
+
+  export type JobPostingUpdateWithoutExperiencesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    position?: StringFieldUpdateOperationsInput | string
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
+    followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutJobPostingsNestedInput
+    statusHistory?: StatusHistoryUpdateManyWithoutJobNestedInput
+    coverLetters?: CoverLetterUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUpdateManyWithoutJobNestedInput
+  }
+
+  export type JobPostingUncheckedUpdateWithoutExperiencesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    position?: StringFieldUpdateOperationsInput | string
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
+    followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    statusHistory?: StatusHistoryUncheckedUpdateManyWithoutJobNestedInput
+    coverLetters?: CoverLetterUncheckedUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUncheckedUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type UserCreateWithoutJobPostingsInput = {
@@ -22598,6 +25041,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
@@ -22622,6 +25066,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
@@ -22694,6 +25139,112 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PortfolioCreateWithoutJobInput = {
+    id?: string
+    title: string
+    description: string
+    techStack: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    githubUrl?: string | null
+    deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutPortfoliosInput
+  }
+
+  export type PortfolioUncheckedCreateWithoutJobInput = {
+    id?: string
+    userId: string
+    title: string
+    description: string
+    techStack: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    githubUrl?: string | null
+    deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PortfolioCreateOrConnectWithoutJobInput = {
+    where: PortfolioWhereUniqueInput
+    create: XOR<PortfolioCreateWithoutJobInput, PortfolioUncheckedCreateWithoutJobInput>
+  }
+
+  export type PortfolioCreateManyJobInputEnvelope = {
+    data: PortfolioCreateManyJobInput | PortfolioCreateManyJobInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ExperienceCreateWithoutJobInput = {
+    id?: string
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutExperiencesInput
+  }
+
+  export type ExperienceUncheckedCreateWithoutJobInput = {
+    id?: string
+    userId: string
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExperienceCreateOrConnectWithoutJobInput = {
+    where: ExperienceWhereUniqueInput
+    create: XOR<ExperienceCreateWithoutJobInput, ExperienceUncheckedCreateWithoutJobInput>
+  }
+
+  export type ExperienceCreateManyJobInputEnvelope = {
+    data: ExperienceCreateManyJobInput | ExperienceCreateManyJobInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InterviewAnswerCreateWithoutJobInput = {
+    id?: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutInterviewAnswersInput
+    question: InterviewQuestionCreateNestedOneWithoutAnswersInput
+  }
+
+  export type InterviewAnswerUncheckedCreateWithoutJobInput = {
+    id?: string
+    userId: string
+    questionId: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InterviewAnswerCreateOrConnectWithoutJobInput = {
+    where: InterviewAnswerWhereUniqueInput
+    create: XOR<InterviewAnswerCreateWithoutJobInput, InterviewAnswerUncheckedCreateWithoutJobInput>
+  }
+
+  export type InterviewAnswerCreateManyJobInputEnvelope = {
+    data: InterviewAnswerCreateManyJobInput | InterviewAnswerCreateManyJobInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutJobPostingsInput = {
     update: XOR<UserUpdateWithoutJobPostingsInput, UserUncheckedUpdateWithoutJobPostingsInput>
     create: XOR<UserCreateWithoutJobPostingsInput, UserUncheckedCreateWithoutJobPostingsInput>
@@ -22724,6 +25275,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
@@ -22748,6 +25300,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
@@ -22796,6 +25349,54 @@ export namespace Prisma {
     data: XOR<CoverLetterUpdateManyMutationInput, CoverLetterUncheckedUpdateManyWithoutJobInput>
   }
 
+  export type PortfolioUpsertWithWhereUniqueWithoutJobInput = {
+    where: PortfolioWhereUniqueInput
+    update: XOR<PortfolioUpdateWithoutJobInput, PortfolioUncheckedUpdateWithoutJobInput>
+    create: XOR<PortfolioCreateWithoutJobInput, PortfolioUncheckedCreateWithoutJobInput>
+  }
+
+  export type PortfolioUpdateWithWhereUniqueWithoutJobInput = {
+    where: PortfolioWhereUniqueInput
+    data: XOR<PortfolioUpdateWithoutJobInput, PortfolioUncheckedUpdateWithoutJobInput>
+  }
+
+  export type PortfolioUpdateManyWithWhereWithoutJobInput = {
+    where: PortfolioScalarWhereInput
+    data: XOR<PortfolioUpdateManyMutationInput, PortfolioUncheckedUpdateManyWithoutJobInput>
+  }
+
+  export type ExperienceUpsertWithWhereUniqueWithoutJobInput = {
+    where: ExperienceWhereUniqueInput
+    update: XOR<ExperienceUpdateWithoutJobInput, ExperienceUncheckedUpdateWithoutJobInput>
+    create: XOR<ExperienceCreateWithoutJobInput, ExperienceUncheckedCreateWithoutJobInput>
+  }
+
+  export type ExperienceUpdateWithWhereUniqueWithoutJobInput = {
+    where: ExperienceWhereUniqueInput
+    data: XOR<ExperienceUpdateWithoutJobInput, ExperienceUncheckedUpdateWithoutJobInput>
+  }
+
+  export type ExperienceUpdateManyWithWhereWithoutJobInput = {
+    where: ExperienceScalarWhereInput
+    data: XOR<ExperienceUpdateManyMutationInput, ExperienceUncheckedUpdateManyWithoutJobInput>
+  }
+
+  export type InterviewAnswerUpsertWithWhereUniqueWithoutJobInput = {
+    where: InterviewAnswerWhereUniqueInput
+    update: XOR<InterviewAnswerUpdateWithoutJobInput, InterviewAnswerUncheckedUpdateWithoutJobInput>
+    create: XOR<InterviewAnswerCreateWithoutJobInput, InterviewAnswerUncheckedCreateWithoutJobInput>
+  }
+
+  export type InterviewAnswerUpdateWithWhereUniqueWithoutJobInput = {
+    where: InterviewAnswerWhereUniqueInput
+    data: XOR<InterviewAnswerUpdateWithoutJobInput, InterviewAnswerUncheckedUpdateWithoutJobInput>
+  }
+
+  export type InterviewAnswerUpdateManyWithWhereWithoutJobInput = {
+    where: InterviewAnswerScalarWhereInput
+    data: XOR<InterviewAnswerUpdateManyMutationInput, InterviewAnswerUncheckedUpdateManyWithoutJobInput>
+  }
+
   export type JobPostingCreateWithoutStatusHistoryInput = {
     id?: string
     company: string
@@ -22805,11 +25406,15 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutJobPostingsInput
     coverLetters?: CoverLetterCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioCreateNestedManyWithoutJobInput
+    experiences?: ExperienceCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerCreateNestedManyWithoutJobInput
   }
 
   export type JobPostingUncheckedCreateWithoutStatusHistoryInput = {
@@ -22822,10 +25427,14 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioUncheckedCreateNestedManyWithoutJobInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutJobInput
   }
 
   export type JobPostingCreateOrConnectWithoutStatusHistoryInput = {
@@ -22853,11 +25462,15 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutJobPostingsNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUpdateManyWithoutJobNestedInput
   }
 
   export type JobPostingUncheckedUpdateWithoutStatusHistoryInput = {
@@ -22870,10 +25483,14 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUncheckedUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type UserCreateWithoutRoadmapItemsInput = {
@@ -22895,6 +25512,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
@@ -22919,6 +25537,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
@@ -22959,6 +25578,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
@@ -22983,6 +25603,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
@@ -23007,6 +25628,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemCreateNestedManyWithoutUserInput
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
@@ -23031,6 +25653,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUncheckedCreateNestedManyWithoutUserInput
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
@@ -23047,11 +25670,13 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutInterviewAnswersInput
+    job?: JobPostingCreateNestedOneWithoutInterviewAnswersInput
   }
 
   export type InterviewAnswerUncheckedCreateWithoutQuestionInput = {
     id?: string
     userId: string
+    jobId?: string | null
     answer: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -23097,6 +25722,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUpdateManyWithoutUserNestedInput
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
@@ -23121,6 +25747,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUncheckedUpdateManyWithoutUserNestedInput
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
@@ -23161,6 +25788,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
@@ -23185,6 +25813,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
@@ -23193,6 +25822,51 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutInterviewAnswersInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutInterviewAnswersInput, UserUncheckedCreateWithoutInterviewAnswersInput>
+  }
+
+  export type JobPostingCreateWithoutInterviewAnswersInput = {
+    id?: string
+    company: string
+    position: string
+    url?: string | null
+    deadline?: Date | string | null
+    interviewAt?: Date | string | null
+    status?: string
+    contacts?: string | null
+    checklist?: string | null
+    followUpAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutJobPostingsInput
+    statusHistory?: StatusHistoryCreateNestedManyWithoutJobInput
+    coverLetters?: CoverLetterCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioCreateNestedManyWithoutJobInput
+    experiences?: ExperienceCreateNestedManyWithoutJobInput
+  }
+
+  export type JobPostingUncheckedCreateWithoutInterviewAnswersInput = {
+    id?: string
+    userId: string
+    company: string
+    position: string
+    url?: string | null
+    deadline?: Date | string | null
+    interviewAt?: Date | string | null
+    status?: string
+    contacts?: string | null
+    checklist?: string | null
+    followUpAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    statusHistory?: StatusHistoryUncheckedCreateNestedManyWithoutJobInput
+    coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioUncheckedCreateNestedManyWithoutJobInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutJobInput
+  }
+
+  export type JobPostingCreateOrConnectWithoutInterviewAnswersInput = {
+    where: JobPostingWhereUniqueInput
+    create: XOR<JobPostingCreateWithoutInterviewAnswersInput, JobPostingUncheckedCreateWithoutInterviewAnswersInput>
   }
 
   export type InterviewQuestionCreateWithoutAnswersInput = {
@@ -23248,6 +25922,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
@@ -23272,9 +25947,61 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
+  }
+
+  export type JobPostingUpsertWithoutInterviewAnswersInput = {
+    update: XOR<JobPostingUpdateWithoutInterviewAnswersInput, JobPostingUncheckedUpdateWithoutInterviewAnswersInput>
+    create: XOR<JobPostingCreateWithoutInterviewAnswersInput, JobPostingUncheckedCreateWithoutInterviewAnswersInput>
+    where?: JobPostingWhereInput
+  }
+
+  export type JobPostingUpdateToOneWithWhereWithoutInterviewAnswersInput = {
+    where?: JobPostingWhereInput
+    data: XOR<JobPostingUpdateWithoutInterviewAnswersInput, JobPostingUncheckedUpdateWithoutInterviewAnswersInput>
+  }
+
+  export type JobPostingUpdateWithoutInterviewAnswersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    position?: StringFieldUpdateOperationsInput | string
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
+    followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutJobPostingsNestedInput
+    statusHistory?: StatusHistoryUpdateManyWithoutJobNestedInput
+    coverLetters?: CoverLetterUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUpdateManyWithoutJobNestedInput
+  }
+
+  export type JobPostingUncheckedUpdateWithoutInterviewAnswersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    position?: StringFieldUpdateOperationsInput | string
+    url?: NullableStringFieldUpdateOperationsInput | string | null
+    deadline?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
+    followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    statusHistory?: StatusHistoryUncheckedUpdateManyWithoutJobNestedInput
+    coverLetters?: CoverLetterUncheckedUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUncheckedUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type InterviewQuestionUpsertWithoutAnswersInput = {
@@ -23325,6 +26052,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemCreateNestedManyWithoutUserInput
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
@@ -23349,6 +26077,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUncheckedCreateNestedManyWithoutUserInput
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
@@ -23368,11 +26097,15 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutJobPostingsInput
     statusHistory?: StatusHistoryCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioCreateNestedManyWithoutJobInput
+    experiences?: ExperienceCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerCreateNestedManyWithoutJobInput
   }
 
   export type JobPostingUncheckedCreateWithoutCoverLettersInput = {
@@ -23385,10 +26118,14 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     statusHistory?: StatusHistoryUncheckedCreateNestedManyWithoutJobInput
+    portfolios?: PortfolioUncheckedCreateNestedManyWithoutJobInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutJobInput
+    interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutJobInput
   }
 
   export type JobPostingCreateOrConnectWithoutCoverLettersInput = {
@@ -23450,6 +26187,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUpdateManyWithoutUserNestedInput
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
@@ -23474,6 +26212,7 @@ export namespace Prisma {
     roadmapItems?: RoadmapItemUncheckedUpdateManyWithoutUserNestedInput
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
@@ -23499,11 +26238,15 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutJobPostingsNestedInput
     statusHistory?: StatusHistoryUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUpdateManyWithoutJobNestedInput
   }
 
   export type JobPostingUncheckedUpdateWithoutCoverLettersInput = {
@@ -23516,10 +26259,14 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     statusHistory?: StatusHistoryUncheckedUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUncheckedUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type CoverLetterVersionUpsertWithWhereUniqueWithoutCoverLetterInput = {
@@ -23641,6 +26388,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
   }
@@ -23665,6 +26413,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
   }
@@ -23727,6 +26476,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
   }
@@ -23751,6 +26501,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -23791,6 +26542,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     notifications?: UserNotificationCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
@@ -23815,6 +26567,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     notifications?: UserNotificationUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
@@ -23900,6 +26653,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
@@ -23924,6 +26678,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     notifications?: UserNotificationUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
@@ -23999,6 +26754,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterCreateNestedManyWithoutUserInput
+    experiences?: ExperienceCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkCreateNestedManyWithoutUserInput
     recruitListings?: JobListingCreateNestedManyWithoutRecruiterInput
   }
@@ -24023,6 +26779,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedCreateNestedManyWithoutUserInput
     customQuestions?: InterviewQuestionUncheckedCreateNestedManyWithoutUserInput
     coverLetters?: CoverLetterUncheckedCreateNestedManyWithoutUserInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: JobBookmarkUncheckedCreateNestedManyWithoutUserInput
     recruitListings?: JobListingUncheckedCreateNestedManyWithoutRecruiterInput
   }
@@ -24063,6 +26820,7 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUpdateManyWithoutRecruiterNestedInput
   }
@@ -24087,12 +26845,14 @@ export namespace Prisma {
     interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutUserNestedInput
     customQuestions?: InterviewQuestionUncheckedUpdateManyWithoutUserNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutUserNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: JobBookmarkUncheckedUpdateManyWithoutUserNestedInput
     recruitListings?: JobListingUncheckedUpdateManyWithoutRecruiterNestedInput
   }
 
   export type PortfolioCreateManyUserInput = {
     id?: string
+    jobId?: string | null
     title: string
     description: string
     techStack: string
@@ -24100,6 +26860,8 @@ export namespace Prisma {
     endDate?: Date | string | null
     githubUrl?: string | null
     deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -24113,6 +26875,7 @@ export namespace Prisma {
     interviewAt?: Date | string | null
     status?: string
     contacts?: string | null
+    checklist?: string | null
     followUpAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24132,6 +26895,7 @@ export namespace Prisma {
 
   export type InterviewAnswerCreateManyUserInput = {
     id?: string
+    jobId?: string | null
     questionId: string
     answer: string
     createdAt?: Date | string
@@ -24159,8 +26923,24 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type ExperienceCreateManyUserInput = {
+    id?: string
+    jobId?: string | null
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type UserNotificationCreateManyUserInput = {
     id?: string
+    type?: string
+    referenceId?: string | null
+    actionUrl?: string | null
     title: string
     body: string
     isRead?: boolean
@@ -24201,12 +26981,16 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
     deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    job?: JobPostingUpdateOneWithoutPortfoliosNestedInput
   }
 
   export type PortfolioUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     techStack?: StringFieldUpdateOperationsInput | string
@@ -24214,12 +26998,15 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
     deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PortfolioUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
     techStack?: StringFieldUpdateOperationsInput | string
@@ -24227,6 +27014,8 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
     deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24240,11 +27029,15 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     statusHistory?: StatusHistoryUpdateManyWithoutJobNestedInput
     coverLetters?: CoverLetterUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUpdateManyWithoutJobNestedInput
   }
 
   export type JobPostingUncheckedUpdateWithoutUserInput = {
@@ -24256,11 +27049,15 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     statusHistory?: StatusHistoryUncheckedUpdateManyWithoutJobNestedInput
     coverLetters?: CoverLetterUncheckedUpdateManyWithoutJobNestedInput
+    portfolios?: PortfolioUncheckedUpdateManyWithoutJobNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutJobNestedInput
+    interviewAnswers?: InterviewAnswerUncheckedUpdateManyWithoutJobNestedInput
   }
 
   export type JobPostingUncheckedUpdateManyWithoutUserInput = {
@@ -24272,6 +27069,7 @@ export namespace Prisma {
     interviewAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
     contacts?: NullableStringFieldUpdateOperationsInput | string | null
+    checklist?: NullableStringFieldUpdateOperationsInput | string | null
     followUpAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24318,11 +27116,13 @@ export namespace Prisma {
     answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    job?: JobPostingUpdateOneWithoutInterviewAnswersNestedInput
     question?: InterviewQuestionUpdateOneRequiredWithoutAnswersNestedInput
   }
 
   export type InterviewAnswerUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     questionId?: StringFieldUpdateOperationsInput | string
     answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24331,6 +27131,7 @@ export namespace Prisma {
 
   export type InterviewAnswerUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     questionId?: StringFieldUpdateOperationsInput | string
     answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24404,8 +27205,50 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ExperienceUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    job?: JobPostingUpdateOneWithoutExperiencesNestedInput
+  }
+
+  export type ExperienceUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExperienceUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserNotificationUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     body?: StringFieldUpdateOperationsInput | string
     isRead?: BoolFieldUpdateOperationsInput | boolean
@@ -24414,6 +27257,9 @@ export namespace Prisma {
 
   export type UserNotificationUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     body?: StringFieldUpdateOperationsInput | string
     isRead?: BoolFieldUpdateOperationsInput | boolean
@@ -24422,6 +27268,9 @@ export namespace Prisma {
 
   export type UserNotificationUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
     body?: StringFieldUpdateOperationsInput | string
     isRead?: BoolFieldUpdateOperationsInput | boolean
@@ -24525,6 +27374,44 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type PortfolioCreateManyJobInput = {
+    id?: string
+    userId: string
+    title: string
+    description: string
+    techStack: string
+    startDate: Date | string
+    endDate?: Date | string | null
+    githubUrl?: string | null
+    deployUrl?: string | null
+    githubAnalysis?: string | null
+    githubAnalysisFetchedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ExperienceCreateManyJobInput = {
+    id?: string
+    userId: string
+    title: string
+    situation: string
+    action: string
+    result: string
+    technologies: string
+    metrics?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InterviewAnswerCreateManyJobInput = {
+    id?: string
+    userId: string
+    questionId: string
+    answer: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type StatusHistoryUpdateWithoutJobInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -24587,9 +27474,124 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PortfolioUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    techStack?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPortfoliosNestedInput
+  }
+
+  export type PortfolioUncheckedUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    techStack?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PortfolioUncheckedUpdateManyWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    techStack?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    githubUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    deployUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
+    githubAnalysisFetchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExperienceUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutExperiencesNestedInput
+  }
+
+  export type ExperienceUncheckedUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExperienceUncheckedUpdateManyWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    situation?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    result?: StringFieldUpdateOperationsInput | string
+    technologies?: StringFieldUpdateOperationsInput | string
+    metrics?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InterviewAnswerUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutInterviewAnswersNestedInput
+    question?: InterviewQuestionUpdateOneRequiredWithoutAnswersNestedInput
+  }
+
+  export type InterviewAnswerUncheckedUpdateWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InterviewAnswerUncheckedUpdateManyWithoutJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    questionId?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type InterviewAnswerCreateManyQuestionInput = {
     id?: string
     userId: string
+    jobId?: string | null
     answer: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -24601,11 +27603,13 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutInterviewAnswersNestedInput
+    job?: JobPostingUpdateOneWithoutInterviewAnswersNestedInput
   }
 
   export type InterviewAnswerUncheckedUpdateWithoutQuestionInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24614,6 +27618,7 @@ export namespace Prisma {
   export type InterviewAnswerUncheckedUpdateManyWithoutQuestionInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    jobId?: NullableStringFieldUpdateOperationsInput | string | null
     answer?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24704,6 +27709,10 @@ export namespace Prisma {
      * @deprecated Use PortfolioDefaultArgs instead
      */
     export type PortfolioArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PortfolioDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ExperienceDefaultArgs instead
+     */
+    export type ExperienceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ExperienceDefaultArgs<ExtArgs>
     /**
      * @deprecated Use JobPostingDefaultArgs instead
      */

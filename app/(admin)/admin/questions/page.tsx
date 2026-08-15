@@ -127,7 +127,7 @@ export default function AdminQuestionsPage() {
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
         >
           <Plus className="w-4 h-4" /> 질문 추가
         </button>
@@ -142,7 +142,7 @@ export default function AdminQuestionsPage() {
             onClick={() => setFilterCategory(cat)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               filterCategory === cat
-                ? 'bg-[#0f172a] text-white'
+                ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
             }`}
           >
@@ -163,7 +163,7 @@ export default function AdminQuestionsPage() {
                 value={newCategory}
                 onChange={e => setNewCategory(e.target.value as Category)}
                 aria-label="카테고리 선택"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 <option value="TECHNICAL">기술</option>
                 <option value="PERSONALITY">인성</option>
@@ -177,7 +177,7 @@ export default function AdminQuestionsPage() {
                 onChange={e => setNewJobType(e.target.value)}
                 aria-label="직군 선택"
                 title="직군 선택"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 {JOB_TYPES.map(jt => (
                   <option key={jt.value} value={jt.value}>{jt.label}</option>
@@ -192,7 +192,7 @@ export default function AdminQuestionsPage() {
               onChange={e => setNewQuestion(e.target.value)}
               rows={3}
               placeholder="면접 질문을 입력하세요"
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 resize-none"
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
             />
           </div>
           <div className="flex gap-2 justify-end">
@@ -207,7 +207,7 @@ export default function AdminQuestionsPage() {
               type="button"
               onClick={() => addMutation.mutate()}
               disabled={!newQuestion.trim() || addMutation.isPending}
-              className="px-4 py-2 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+              className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               {addMutation.isPending ? '추가 중...' : '추가'}
             </button>
@@ -234,7 +234,7 @@ export default function AdminQuestionsPage() {
                       rows={3}
                       aria-label="질문 수정"
                       placeholder="질문 내용을 입력하세요"
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 resize-none"
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                     />
                     <div className="flex gap-2 justify-end">
                       <button type="button" onClick={() => setEditId(null)} className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700">취소</button>
@@ -242,7 +242,7 @@ export default function AdminQuestionsPage() {
                         type="button"
                         onClick={() => editMutation.mutate({ id: q.id, question: editText })}
                         disabled={editMutation.isPending}
-                        className="px-3 py-1.5 bg-[#0f172a] text-white text-xs font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50"
+                        className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50"
                       >
                         저장
                       </button>
@@ -252,15 +252,15 @@ export default function AdminQuestionsPage() {
                   <div className="flex items-start gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cat.bg}`}>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cat.bg}`}>
                           {cat.label}
                         </span>
                         {q.jobType && (
-                          <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                          <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
                             {q.jobType}
                           </span>
                         )}
-                        <span className="text-[10px] text-gray-300 flex items-center gap-0.5">
+                        <span className="text-xs text-gray-300 flex items-center gap-0.5">
                           <MessageSquare className="w-3 h-3" /> {q._count.answers}
                         </span>
                       </div>

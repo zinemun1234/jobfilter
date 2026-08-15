@@ -96,8 +96,27 @@ export const ROADMAP_TEMPLATES: RoadmapTemplate[] = [
   },
 ];
 
+export const ROADMAP_CATEGORIES = ROADMAP_TEMPLATES.map(template => template.jobCategory);
+
 export function getRoadmapTemplate(jobCategory: string): RoadmapTemplate | undefined {
   return ROADMAP_TEMPLATES.find(template => template.jobCategory === jobCategory);
+}
+
+/**
+ * 직무명/목표직무 문자열에서 로드맵 jobCategory를 추론합니다.
+ * 매칭되지 않으면 'general'을 반환합니다.
+ */
+export function getJobCategory(input?: string | null): string {
+  if (!input) return 'general';
+  const lower = input.toLowerCase();
+
+  if (/front|프론트|react|vue|angular|html|css|ui\/ux|uiux|웹/.test(lower)) return 'frontend';
+  if (/back|백엔드|server|api|node|express|nest|django|spring|서버/.test(lower)) return 'backend';
+  if (/full|풀스택|fullstack/.test(lower)) return 'fullstack';
+  if (/data|데이터|analyst|분석|sql|analytics/.test(lower)) return 'data';
+  if (/ai|ml|machine|인공지능|딥러닝|deep/.test(lower)) return 'ai';
+
+  return 'general';
 }
 
 export function calculateProgress(items: Array<{ status: SkillStatus }>): number {

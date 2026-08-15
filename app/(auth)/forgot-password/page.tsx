@@ -38,29 +38,29 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-slate-950">
       {/* 좌측 브랜딩 패널 */}
-      <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between overflow-hidden bg-[#0a0f1e] px-14 py-14">
-        <div className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px]" />
-        <div className="pointer-events-none absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-violet-600/15 blur-[100px]" />
+      <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between overflow-hidden bg-slate-950 px-14 py-14">
+        <div className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="pointer-events-none absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-violet-500/15 blur-[100px]" />
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '40px 40px' }}
         />
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-500/30">
-            <span className="text-[11px] font-black text-white tracking-tight">JF</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/30">
+            <span className="text-xs font-black text-white tracking-tight">JF</span>
           </div>
           <span className="text-sm font-bold text-white tracking-tight">Job Filter</span>
-          <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/50">CS 취업지원 포털</span>
+          <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/50">CS 취업지원 포털</span>
         </div>
 
         <div className="relative z-10 space-y-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-              <span className="text-[11px] font-semibold text-blue-300 tracking-widest uppercase">계정 보안</span>
+              <span className="text-xs font-semibold text-blue-300 tracking-widest uppercase">계정 보안</span>
             </div>
             <h2 className="text-[2.6rem] font-light text-white leading-[1.2] tracking-tight">
               비밀번호를<br />
@@ -77,8 +77,8 @@ export default function ForgotPasswordPage() {
           <div className="space-y-3">
             {FEATURES.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex items-center gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.04] px-4 py-3.5 backdrop-blur-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/20">
-                  <Icon className="h-4 w-4 text-blue-400" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/20">
+                  <Icon className="h-4 w-4 text-blue-300" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">{title}</p>
@@ -93,25 +93,25 @@ export default function ForgotPasswordPage() {
           {[['CS 맞춤 공고', '자동 필터링'], ['자소서 코칭', 'AI 피드백'], ['면접 준비', '예상 질문']].map(([t, d]) => (
             <div key={t}>
               <p className="text-xs font-semibold text-white/60">{t}</p>
-              <p className="text-[11px] text-white/25 mt-0.5">{d}</p>
+              <p className="text-xs text-white/25 mt-0.5">{d}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* 우측 폼 패널 */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-gray-50/50">
+      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-background">
         <div className="w-full max-w-[380px]">
           <div className="mb-8 flex items-center gap-2 lg:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0f172a]">
-              <span className="text-[10px] font-black text-white">JF</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900">
+              <span className="text-xs font-black text-white">JF</span>
             </div>
-            <span className="text-sm font-bold text-gray-900">Job Filter</span>
+            <span className="text-sm font-bold text-foreground">Job Filter</span>
           </div>
 
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">비밀번호 찾기</h1>
-            <p className="mt-1.5 text-sm text-gray-400">가입한 이메일 주소를 입력하세요</p>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">비밀번호 찾기</h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">가입한 이메일 주소를 입력하세요</p>
           </div>
 
           {status === 'done' ? (
@@ -121,24 +121,24 @@ export default function ForgotPasswordPage() {
                 <p className="text-xs text-emerald-600 mt-1">받은 편지함을 확인하고 링크를 클릭하세요.</p>
               </div>
               <Link href="/login"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50">
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted">
                 로그인으로 돌아가기
               </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label htmlFor="email" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">이메일</label>
+                <label htmlFor="email" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">이메일</label>
                 <input
                   id="email" type="email" required
                   value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="example@email.com"
-                  className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-300 shadow-sm transition-all focus:border-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#0f172a]/10"
+                  className="block w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
               {status === 'error' && (
-                <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+                <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
                   오류가 발생했습니다. 다시 시도해주세요.
                 </div>
               )}
@@ -146,7 +146,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#0f172a]/20 transition-all hover:bg-[#1e293b] hover:shadow-[#0f172a]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group mt-2 flex w-full h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === 'loading' ? (
                   <span className="flex items-center gap-2">
@@ -162,13 +162,13 @@ export default function ForgotPasswordPage() {
               </button>
 
               <div className="my-2 flex items-center gap-3">
-                <div className="h-px flex-1 bg-gray-100" />
-                <span className="text-xs text-gray-300">또는</span>
-                <div className="h-px flex-1 bg-gray-100" />
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">또는</span>
+                <div className="h-px flex-1 bg-border" />
               </div>
 
               <Link href="/login"
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50">
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted">
                 로그인으로 돌아가기
               </Link>
             </form>

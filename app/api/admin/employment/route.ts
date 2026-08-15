@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/api';
+import { handleApiError } from '@/lib/errors';
 
 export const dynamic = 'force-dynamic';
 
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== 'ADMIN') return null;
-  return session;
-}
-
 // GET — 취업확정 목록
 export async function GET() {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const records = await prisma.employmentRecord.findMany({
     orderBy: { confirmedAt: 'desc' },
@@ -35,8 +32,11 @@ export async function GET() {
 
 // POST — 취업확정 등록
 export async function POST(req: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const body = await req.json();
   const { userId, company, position, employType, startDate, salary, note } = body;

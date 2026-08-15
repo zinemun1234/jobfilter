@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Download, FileText } from 'lucide-react';
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, pdf, Font } from '@react-pdf/renderer';
 
 type CLItem = { question: string; answer: string };
 type CoverLetter = {
@@ -14,14 +14,22 @@ type CoverLetter = {
   updatedAt: string;
 };
 
+Font.register({
+  family: 'NotoSansKR',
+  fonts: [
+    { src: 'https://fonts.gstatic.com/s/notosanskr/v39/PbyxFmXiEBPT4ITbgNA5Cgms3VYcOA-vvnIzzuoyeLQ.ttf', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/notosanskr/v39/PbyxFmXiEBPT4ITbgNA5Cgms3VYcOA-vvnIzzg01eLQ.ttf', fontWeight: 700 },
+  ],
+});
+
 const styles = StyleSheet.create({
-  page: { padding: 48, fontFamily: 'Helvetica', backgroundColor: '#ffffff' },
+  page: { padding: 48, fontFamily: 'NotoSansKR', backgroundColor: '#ffffff' },
   header: { marginBottom: 24, borderBottom: '1 solid #e2e8f0', paddingBottom: 16 },
-  company: { fontSize: 20, fontFamily: 'Helvetica-Bold', color: '#0f172a', marginBottom: 4 },
+  company: { fontSize: 20, fontFamily: 'NotoSansKR', fontWeight: 700, color: '#0f172a', marginBottom: 4 },
   position: { fontSize: 11, color: '#64748b' },
   sectionLabel: { fontSize: 8, color: '#94a3b8', letterSpacing: 1.5, marginBottom: 10, marginTop: 20, textTransform: 'uppercase' },
   item: { marginBottom: 18 },
-  question: { fontSize: 10, fontFamily: 'Helvetica-Bold', color: '#374151', marginBottom: 6 },
+  question: { fontSize: 10, fontFamily: 'NotoSansKR', fontWeight: 700, color: '#374151', marginBottom: 6 },
   answer: { fontSize: 10, color: '#4b5563', lineHeight: 1.7 },
   charCount: { fontSize: 8, color: '#9ca3af', marginTop: 4, textAlign: 'right' },
   divider: { borderBottom: '1 solid #f1f5f9', marginBottom: 18 },
@@ -58,8 +66,31 @@ async function fetchLetters(): Promise<CoverLetter[]> {
 export default function CoverLetterExportPage() {
   const { data: letters = [], isLoading } = useQuery({ queryKey: ['cover-letters'], queryFn: fetchLetters });
   const [selected, setSelected] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const letter = letters.find(l => l.id === selected) ?? null;
+
+  const handleDownload = async () => {
+    if (!letter) return;
+    setDownloading(true);
+    try {
+      const doc = <CoverLetterPDF letter={letter} />;
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `자기소개서_${letter.company}_${letter.position}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('PDF 다운로드 실패:', error);
+      alert('PDF 다운로드에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
@@ -83,10 +114,10 @@ export default function CoverLetterExportPage() {
               const totalChars = l.items.reduce((s, it) => s + it.answer.length, 0);
               return (
                 <label key={l.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${
-                  selected === l.id ? 'border-[#0f172a] bg-[#0f172a]/5' : 'border-gray-100 bg-white hover:bg-gray-50'
+                  selected === l.id ? 'border-primary bg-primary/5' : 'border-gray-100 bg-white hover:bg-gray-50'
                 }`}>
                   <input type="radio" name="letter" value={l.id} checked={selected === l.id}
-                    onChange={() => setSelected(l.id)} className="accent-[#0f172a]" />
+                    onChange={() => setSelected(l.id)} className="accent-primary" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">{l.company}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{l.position} · 항목 {l.items.length}개 · 총 {totalChars.toLocaleString()}자</p>
@@ -103,14 +134,14 @@ export default function CoverLetterExportPage() {
                 <p><span className="font-medium">{letter.company}</span> · {letter.position}</p>
                 <p className="text-gray-400">항목 {letter.items.length}개</p>
               </div>
-              <PDFDownloadLink
-                document={<CoverLetterPDF letter={letter} />}
-                fileName={`자기소개서_${letter.company}_${letter.position}.pdf`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] transition-colors"
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-4 h-4" />
-                PDF 다운로드
-              </PDFDownloadLink>
+                {downloading ? '다운로드 중...' : 'PDF 다운로드'}
+              </button>
             </div>
           )}
         </>

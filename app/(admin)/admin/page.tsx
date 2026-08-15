@@ -124,7 +124,7 @@ export default function AdminHomePage() {
                 <Icon className={`w-4 h-4 ${c.icon}`} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-gray-900 group-hover:text-[#0f172a]">{label}</p>
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-primary">{label}</p>
                 <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{desc}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0 mt-0.5 transition-colors" />
@@ -240,7 +240,7 @@ function StatCard({
       <div className="flex items-center justify-between mb-4">
         <div className={`rounded-xl ${iconBg} p-2.5`}>{icon}</div>
         {badge && (
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeColor}`}>{badge}</span>
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badgeColor}`}>{badge}</span>
         )}
       </div>
       <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>

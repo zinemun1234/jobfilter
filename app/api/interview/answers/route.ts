@@ -20,6 +20,7 @@ import { z } from 'zod';
 const answerSchema = z.object({
   questionId: z.string(),
   answer: z.string().min(1),
+  jobId: z.string().optional(),
   // Optional fields for resolving temp IDs (default-/random-/mock- prefixes)
   questionText: z.string().optional(),
   questionCategory: z.string().optional(),
@@ -105,11 +106,12 @@ export async function POST(request: NextRequest) {
           questionId,
         },
       },
-      update: { answer: validatedData.answer },
+      update: { answer: validatedData.answer, jobId: validatedData.jobId || null },
       create: {
         userId: session.user.id,
         questionId,
         answer: validatedData.answer,
+        jobId: validatedData.jobId || null,
       },
       include: { question: true },
     });

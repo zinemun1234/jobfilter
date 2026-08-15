@@ -1,17 +1,5 @@
 import type { ApplicationStatus } from '@/types';
-
-const STATUS_CONFIG: Record<ApplicationStatus, { label: string; dot: string }> = {
-  PREPARING:     { label: '서류 준비 중', dot: 'bg-slate-400'   },
-  APPLIED:       { label: '지원 완료',   dot: 'bg-blue-500'    },
-  DOCUMENT_PASS: { label: '서류 합격',   dot: 'bg-emerald-500' },
-  INTERVIEW:     { label: '면접 예정',   dot: 'bg-amber-500'   },
-  FINAL_PASS:    { label: '최종 합격',   dot: 'bg-violet-500'  },
-  REJECTED:      { label: '불합격',     dot: 'bg-red-400'     },
-};
-
-const STATUS_ORDER: ApplicationStatus[] = [
-  'PREPARING', 'APPLIED', 'DOCUMENT_PASS', 'INTERVIEW', 'FINAL_PASS', 'REJECTED',
-];
+import { STATUS_CONFIG, STATUS_ORDER } from '@/lib/status-config';
 
 interface ApplicationSummaryProps {
   counts: Record<ApplicationStatus, number>;

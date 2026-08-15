@@ -11,7 +11,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Plus, Trash2, Search, ExternalLink, Edit2, ToggleLeft, ToggleRight, Upload, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, Search, ExternalLink, Edit2, ToggleLeft, ToggleRight, Upload, CheckCircle, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { SlideOver } from '@/components/ui/slide-over';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
@@ -149,6 +149,12 @@ export default function AdminListingsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href="/admin/listings/keywords"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <Tag className="w-4 h-4" /> 키워드 관리
+          </Link>
+          <Link
             href="/admin/listings/upload"
             className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
@@ -157,7 +163,7 @@ export default function AdminListingsPage() {
           <button
             type="button"
             onClick={openNew}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0f172a] px-3 py-2 text-sm font-medium text-white hover:bg-[#1e293b] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
           >
             <Plus className="w-4 h-4" /> 공고 등록
           </button>
@@ -171,22 +177,22 @@ export default function AdminListingsPage() {
           placeholder="회사명 또는 직무 검색"
           value={searchInput}
           onChange={e => setSearchInput(e.target.value)}
-          className="w-full pl-9 pr-20 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+          className="w-full pl-9 pr-20 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
-        <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-medium bg-[#0f172a] text-white rounded-md">검색</button>
+        <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-medium bg-primary text-white rounded-md">검색</button>
       </form>
 
       {/* 탭 — 전체 / 구인자 등록 대기 */}
       <div className="flex gap-1 border-b border-gray-100">
         <button type="button" onClick={() => setTab('all')}
-          className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${tab === 'all' ? 'border-[#0f172a] text-[#0f172a]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
+          className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${tab === 'all' ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
           전체 ({listings.length})
         </button>
         <button type="button" onClick={() => setTab('pending')}
           className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${tab === 'pending' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
           구인자 등록 대기
           {pendingListings.length > 0 && (
-            <span className="text-[10px] font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full">{pendingListings.length}</span>
+            <span className="text-xs font-bold bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full">{pendingListings.length}</span>
           )}
         </button>
       </div>
@@ -197,7 +203,7 @@ export default function AdminListingsPage() {
         ) : listings.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-sm text-gray-400 mb-3">등록된 공고가 없습니다</p>
-            <button type="button" onClick={openNew} className="text-sm font-medium text-[#0f172a] hover:underline">첫 공고 등록하기</button>
+            <button type="button" onClick={openNew} className="text-sm font-medium text-primary hover:underline">첫 공고 등록하기</button>
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -221,14 +227,14 @@ export default function AdminListingsPage() {
                       <p className="font-medium text-gray-900">{l.company}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{l.position}</p>
                       {l.source === '구인자 직접등록' && (
-                        <span className="text-[10px] bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded-full mt-1 inline-block">구인자 등록</span>
+                        <span className="text-xs bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded-full mt-1 inline-block">구인자 등록</span>
                       )}
                       {tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {tags.slice(0, 3).map(t => (
-                            <span key={t} className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{t}</span>
+                            <span key={t} className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{t}</span>
                           ))}
-                          {tags.length > 3 && <span className="text-[10px] text-gray-400">+{tags.length - 3}</span>}
+                          {tags.length > 3 && <span className="text-xs text-gray-400">+{tags.length - 3}</span>}
                         </div>
                       )}
                     </td>
@@ -295,21 +301,21 @@ export default function AdminListingsPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">회사명 *</label>
-              <input value={form.company} onChange={f('company')} placeholder="예: 카카오" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+              <input value={form.company} onChange={f('company')} placeholder="예: 카카오" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">직무 *</label>
-              <input value={form.position} onChange={f('position')} placeholder="예: 프론트엔드 개발자" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+              <input value={form.position} onChange={f('position')} placeholder="예: 프론트엔드 개발자" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">근무지</label>
-              <input value={form.location} onChange={f('location')} placeholder="예: 서울 강남구" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+              <input value={form.location} onChange={f('location')} placeholder="예: 서울 강남구" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">경력</label>
-              <select value={form.career} onChange={f('career')} aria-label="경력 선택" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 bg-white">
+              <select value={form.career} onChange={f('career')} aria-label="경력 선택" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
                 <option value="">선택</option>
                 <option value="신입">신입</option>
                 <option value="경력">경력</option>
@@ -321,7 +327,7 @@ export default function AdminListingsPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">고용형태</label>
-              <select value={form.employType} onChange={f('employType')} aria-label="고용형태 선택" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 bg-white">
+              <select value={form.employType} onChange={f('employType')} aria-label="고용형태 선택" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
                 <option value="">선택</option>
                 <option value="정규직">정규직</option>
                 <option value="계약직">계약직</option>
@@ -331,7 +337,7 @@ export default function AdminListingsPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">학력</label>
-              <select value={form.education} onChange={f('education')} aria-label="학력 선택" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 bg-white">
+              <select value={form.education} onChange={f('education')} aria-label="학력 선택" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
                 <option value="">선택</option>
                 <option value="학력무관">학력무관</option>
                 <option value="고졸이상">고졸이상</option>
@@ -343,30 +349,30 @@ export default function AdminListingsPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">급여</label>
-              <input value={form.salary} onChange={f('salary')} placeholder="예: 4,000만원 이상" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+              <input value={form.salary} onChange={f('salary')} placeholder="예: 4,000만원 이상" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">마감일</label>
-              <input type="date" value={form.deadline} onChange={f('deadline')} aria-label="마감일 선택" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+              <input type="date" value={form.deadline} onChange={f('deadline')} aria-label="마감일 선택" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">원본 공고 URL</label>
-            <input value={form.url} onChange={f('url')} placeholder="https://..." className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+            <input value={form.url} onChange={f('url')} placeholder="https://..." className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">기술 태그 (쉼표로 구분)</label>
-            <input value={form.tags} onChange={f('tags')} placeholder="예: React, TypeScript, Node.js" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+            <input value={form.tags} onChange={f('tags')} placeholder="예: React, TypeScript, Node.js" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">공고 상세 내용</label>
-            <textarea value={form.description} onChange={f('description')} rows={5} placeholder="주요 업무, 자격 요건, 우대 사항 등..." className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 resize-none" />
+            <textarea value={form.description} onChange={f('description')} rows={5} placeholder="주요 업무, 자격 요건, 우대 사항 등..." className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
           </div>
           <button
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={!form.company || !form.position || saveMutation.isPending}
-            className="w-full py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+            className="w-full py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {saveMutation.isPending ? '저장 중...' : editing ? '수정 완료' : '공고 등록'}
           </button>

@@ -14,15 +14,12 @@
  * rows는 DB에 저장하지 않고 클라이언트에서 확인 후 별도 저장
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/api';
+import { handleApiError } from '@/lib/errors';
 import * as XLSX from 'xlsx';
 
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== 'ADMIN') return null;
-  return session;
-}
+export const dynamic = 'force-dynamic';
 
 // 컴퓨터공학부 관련 직군 키워드
 const CS_KEYWORDS = [
@@ -107,12 +104,16 @@ function mapRow(row: Record<string, unknown>): {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const formData = await req.formData();
   const file = formData.get('file') as File | null;
   if (!file) return NextResponse.json({ error: '파일이 없습니다' }, { status: 400 });
+  if (file.size > 10 * 1024 * 1024) return NextResponse.json({ error: '파일은 10MB 이하만 업로드할 수 있습니다.' }, { status: 413 });
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
     let text = buffer.toString('utf-8').replace(/^\uFEFF/, '');
     const lines = text.split(/\r?\n/).filter(l => l.trim());
     if (lines.length < 2) {
-      return NextResponse.json({ data: { total: 0, parsed: 0, filtered: 0, categoryStats: {}, rows: [] } });
+      return NextResponse.json({ data: { total: 0, parsed: 0, filtered: 0, duplicateCount: 0, invalidCount: 0, excludedCount: 0, categoryStats: {}, rows: [] } });
     }
     const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
     rows = lines.slice(1).map(line => {
@@ -151,9 +152,16 @@ export async function POST(req: NextRequest) {
     rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' });
   }
 
+  if (rows.length > 5000) {
+    return NextResponse.json({ error: '한 번에 최대 5,000행까지 분석할 수 있습니다.' }, { status: 413 });
+  }
+
   const total = rows.length;
   const parsed = rows.map(mapRow).filter(Boolean) as NonNullable<ReturnType<typeof mapRow>>[];
   const filtered = parsed.filter(r => isCSRelated(r.position, r.description));
+  const existing = await prisma.jobListing.findMany({ select: { company: true, position: true } });
+  const existingKeys = new Set(existing.map(row => `${row.company.trim()}__${row.position.trim()}`));
+  const duplicateCount = filtered.filter(row => existingKeys.has(`${row.company}__${row.position}`)).length;
 
   // 직군별 분류 통계
   const categoryStats = {
@@ -169,6 +177,9 @@ export async function POST(req: NextRequest) {
       parsed: parsed.length,
       filtered: filtered.length,
       categoryStats,
+      duplicateCount,
+      invalidCount: total - parsed.length,
+      excludedCount: parsed.length - filtered.length,
       rows: filtered,
     },
   });

@@ -14,7 +14,7 @@ export default async function AuthLayout({
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-slate-950">
       {children}
     </main>
   );

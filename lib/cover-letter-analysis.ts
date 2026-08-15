@@ -90,7 +90,7 @@ export const SCORE_WEIGHTS: Record<string, number> = {
  * @returns FeedbackItem[] — level(good/warn/bad), category, message, suggestion, weight
  */
 export function analyzeText(text: string, category: string): FeedbackItem[] {
-  if (!text || text.trim().length < 50) return [];
+  if (!text || text.trim().length < 30) return [];
 
   const feedback: FeedbackItem[] = [];
   const lower = text.toLowerCase();

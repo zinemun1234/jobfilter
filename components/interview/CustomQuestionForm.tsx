@@ -116,7 +116,7 @@ export function CustomQuestionForm({ onSuccess }: CustomQuestionFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-lg bg-[#0f172a] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e293b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting ? '추가 중...' : '추가'}
         </button>

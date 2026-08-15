@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JobFilter · 2026.08.13 작업 보고서</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+:root{
+  --navy:#0b1e3f;
+  --navy-800:#122c5a;
+  --navy-50:#f1f4f9;
+  --gold:#c9a24b;
+  --gold-light:#e8d5a8;
+  --paper:#fff;
+  --paper-warm:#faf9f6;
+  --ink:#1f2937;
+  --ink-light:#4b5563;
+  --line:#d1d5db;
+  --line-dark:#9ca3af;
+  --muted:#6b7280;
+  --red:#b91c1c;
+  --red-bg:#fef2f2;
+  --green:#047857;
+  --green-bg:#ecfdf5;
+  --amber:#b45309;
+  --amber-bg:#fffbeb;
+  --blue:#1d4ed8;
+  --blue-bg:#eff6ff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font-family:'Noto Sans KR','Inter',system-ui,sans-serif;font-size:15px;line-height:1.75;background:var(--paper-warm)}
+
+/* navigation */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.nav-inner{max-width:1040px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:58px}
+.nav-logo{font-family:'Noto Serif KR',serif;font-weight:900;font-size:18px;color:var(--navy);letter-spacing:-0.02em}
+.nav-links{display:flex;gap:22px;list-style:none;margin:0;padding:0;font-size:13px}
+.nav-links a{color:var(--ink-light);text-decoration:none;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--navy)}
+
+/* hero */
+.hero{position:relative;max-width:1040px;margin:0 auto;padding:80px 24px 60px;background:var(--paper-warm)}
+.hero::before{content:'';position:absolute;top:0;left:24px;right:24px;height:1px;background:var(--line)}
+.hero-label{font-family:'Noto Serif KR',serif;font-size:13px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
+.hero h1{margin:0 0 18px;font-family:'Noto Serif KR',serif;font-weight:900;font-size:52px;line-height:1.12;color:var(--navy);letter-spacing:-0.03em}
+.hero-sub{max-width:720px;font-size:17px;color:var(--ink-light);line-height:1.8;margin:0 0 44px}
+.hero-meta{display:flex;gap:40px;font-size:13px;color:var(--muted)}
+.hero-meta b{display:block;font-size:15px;color:var(--navy);font-weight:800;margin-top:4px}
+
+/* key metrics */
+.metrics{max-width:1040px;margin:0 auto;padding:0 24px 64px}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.metric-card{padding:28px 24px;background:var(--paper);border:1px solid var(--line);position:relative}
+.metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--gold)}
+.metric-value{font-family:'Noto Serif KR',serif;font-size:38px;font-weight:900;color:var(--navy);line-height:1}
+.metric-label{margin-top:10px;font-size:13px;color:var(--muted)}
+
+/* sections */
+main{max-width:1040px;margin:0 auto;padding:0 24px 80px}
+.section{padding:72px 0 64px;border-top:1px solid var(--line)}
+.section:first-of-type{border-top:0}
+.section-header{display:flex;align-items:baseline;gap:18px;margin-bottom:28px}
+.section-num{font-family:'Noto Serif KR',serif;font-size:48px;font-weight:900;color:var(--gold);line-height:1}
+.section-title{margin:0;font-family:'Noto Serif KR',serif;font-size:28px;font-weight:700;color:var(--navy);letter-spacing:-0.02em}
+.section-lead{max-width:760px;font-size:16px;color:var(--ink-light);line-height:1.85;margin-bottom:36px}
+
+/* two columns */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+
+/* info card */
+.info-card{padding:24px;background:var(--paper);border:1px solid var(--line)}
+.info-card h3{margin:0 0 10px;font-size:16px;font-weight:800;color:var(--navy)}
+.info-card p{margin:0;font-size:14px;color:var(--ink-light);line-height:1.7}
+.info-card ul{margin:12px 0 0;padding-left:18px;font-size:14px;color:var(--ink-light);line-height:1.7}
+
+/* tables */
+.report-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:14px}
+.report-table th{padding:14px 16px;text-align:left;background:var(--navy);color:var(--paper);font-weight:700;font-size:13px}
+.report-table td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-light)}
+.report-table tr:last-child td{border-bottom:2px solid var(--navy)}
+.report-table td:first-child{color:var(--navy);font-weight:700}
+
+/* status */
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:2px;font-size:12px;font-weight:700}
+.status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.status.done{color:var(--green);background:var(--green-bg)}
+.status.progress{color:var(--amber);background:var(--amber-bg)}
+.status.next{color:var(--blue);background:var(--blue-bg)}
+
+/* priority */
+.priority{display:inline-block;padding:3px 10px;border-radius:2px;font-size:11px;font-weight:800;margin-right:6px}
+.priority.p0{color:var(--red);background:var(--red-bg)}
+.priority.p1{color:var(--amber);background:var(--amber-bg)}
+.priority.p2{color:var(--blue);background:var(--blue-bg)}
+
+/* timeline */
+.timeline{position:relative;padding-left:24px;margin:32px 0}
+.timeline::before{content:'';position:absolute;top:8px;bottom:8px;left:7px;width:2px;background:var(--line-dark)}
+.timeline-item{position:relative;padding-left:28px;padding-bottom:28px}
+.timeline-item:last-child{padding-bottom:0}
+.timeline-item::before{content:'';position:absolute;left:-21px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--gold)}
+.timeline-item h4{margin:0 0 6px;font-size:15px;font-weight:800;color:var(--navy)}
+.timeline-item p{margin:0;font-size:14px;color:var(--ink-light);line-height:1.7}
+
+/* issue cards */
+.issue-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:32px 0}
+.issue-card{padding:28px;background:var(--paper);border-left:4px solid var(--gold)}
+.issue-card h4{margin:0 0 10px;font-size:16px;font-weight:800;color:var(--navy)}
+.issue-card p{margin:0 0 16px;font-size:14px;color:var(--ink-light);line-height:1.7}
+.issue-card .fix{display:inline-block;padding:8px 14px;background:var(--navy-800);color:var(--paper);font-size:13px;font-weight:700;border-radius:2px}
+
+/* figure */
+.figure{padding:32px;background:var(--navy);color:var(--paper);border-radius:2px}
+.figure h4{margin:0 0 20px;font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700}
+.figure-row{display:flex;align-items:center;gap:16px;margin:12px 0;font-size:14px}
+.figure-row span{width:110px;font-weight:500}
+.bar-bg{flex:1;height:26px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;background:var(--gold);display:flex;align-items:center;justify-content:flex-end;padding-right:12px;font-size:12px;font-weight:800;color:var(--navy)}
+
+/* quote */
+.quote{margin:32px 0;padding:28px 32px;background:var(--navy);color:var(--paper);font-family:'Noto Serif KR',serif;font-size:18px;line-height:1.7;border-left:6px solid var(--gold)}
+.quote small{display:block;margin-top:14px;font-family:'Noto Sans KR',sans-serif;font-size:13px;color:var(--gold-light)}
+
+/* list */
+.clean-list{margin:20px 0;padding:0;list-style:none}
+.clean-list li{position:relative;padding-left:22px;margin-bottom:12px;font-size:15px;color:var(--ink-light);line-height:1.7}
+.clean-list li::before{content:'';position:absolute;left:0;top:10px;width:6px;height:6px;background:var(--gold);border-radius:50%}
+
+/* footer */
+.footer{max-width:1040px;margin:0 auto;padding:40px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+
+/* print */
+@media print{
+  .nav{display:none}
+  body{background:var(--paper)}
+  .section{page-break-inside:avoid;padding:40px 0}
+  .issue-card,.info-card,.metric-card{page-break-inside:avoid}
+}
+
+/* mobile */
+@media (max-width:860px){
+  .hero h1{font-size:36px}
+  .metrics-grid,.two-col,.three-col,.issue-grid{grid-template-columns:1fr}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">JobFilter</div>
+    <ul class="nav-links">
+      <li><a href="#overview">개요</a></li>
+      <li><a href="#build">Build</a></li>
+      <li><a href="#link">연결</a></li>
+      <li><a href="#api">API</a></li>
+      <li><a href="#db">DB</a></li>
+      <li><a href="#e2e">E2E</a></li>
+      <li><a href="#next">다음 단계</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-label">Weekly Work Report</div>
+  <h1>2026년 8월 13일<br>JobFilter 작업 보고</h1>
+  <p class="hero-sub">
+    production build 실패, 데이터 연결, API 보안, 운영 안정성, 코드 정리 항목들을
+    반영했다. 지원 공고와 포트폴리오, 경험, 면접 답변을 jobId로 연결하고,
+    Supabase 운영 DB에 마이그레이션을 적용한 뒤 브라우저에서 사용자 흐름을 확인했다.
+  </p>
+  <div class="hero-meta">
+    <div>프로젝트<b>JobFilter</b></div>
+    <div>작성일<b>2026.08.13</b></div>
+    <div>작성자<b>Devin</b></div>
+  </div>
+</header>
+
+<section class="metrics">
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-value">4/4</div>
+      <div class="metric-label">검증 항목 통과</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">3</div>
+      <div class="metric-label">DB 마이그레이션 적용</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">15</div>
+      <div class="metric-label">관리자 API 통일</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">47</div>
+      <div class="metric-label">Static Pages Build</div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<section class="section" id="overview">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">이번 주의 주요 성과</h2>
+  </div>
+  <p class="section-lead">
+    어제 분석에서 나온 문제들을 하나씩 해결했다. build는 통과했고, 데이터 모델과 API,
+    UI가 연결되었다.
+  </p>
+  <div class="three-col">
+    <div class="info-card">
+      <h3>Build 안정화</h3>
+      <p>getServerSession과 useSearchParams를 사용하는 곳에서 발생하던 static prerender 오류를 제거했다.</p>
+    </div>
+    <div class="info-card">
+      <h3>자료 연결</h3>
+      <p>Portfolio, Experience, InterviewAnswer에 jobId를 추가하고, 입력 폼과 상세 페이지에 반영했다.</p>
+    </div>
+    <div class="info-card">
+      <h3>API 정리</h3>
+      <p>관리자 API 15개의 권한/인증을 lib/api.ts로 통일하고, 응답에서 userId를 제거했다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="build">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Build 검증</h2>
+  </div>
+  <p class="section-lead">
+    모든 검증을 통과했다. 가장 긴 작업은 DB 마이그레이션과 build였다.
+  </p>
+  <table class="report-table">
+    <thead>
+      <tr><th>항목</th><th>결과</th><th>비고</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>npm run test</td>
+        <td><span class="status done">통과 4/4</span></td>
+        <td>lib/matching.test.ts, lib/security.test.ts</td>
+      </tr>
+      <tr>
+        <td>npx tsc --noEmit</td>
+        <td><span class="status done">오류 없음</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>npm run lint</td>
+        <td><span class="status done">경고/오류 없음</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>npx next build</td>
+        <td><span class="status done">통과</span></td>
+        <td>47/47 static pages</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section" id="link">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">지원 공고와 자료 연결</h2>
+  </div>
+  <p class="section-lead">
+    사용자가 포트폴리오, 경험, 면접 답변을 작성할 때 어떤 지원 공고와 관련 있는지
+    선택할 수 있게 했다. 상세 페이지에서는 연결된 자료를 한눈에 볼 수 있다.
+  </p>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <h4>데이터 모델 변경</h4>
+      <p>Prisma 스키마에 jobId 추가. Portfolio, Experience, InterviewAnswer와 JobPosting 간의 관계를 정의하고 migration 20260813000000_add_job_id_links 생성.</p>
+    </div>
+    <div class="timeline-item">
+      <h4>API 확장</h4>
+      <p>portfolio, experiences, interview/answers API에서 jobId 저장/수정을 지원. /api/jobs/[id] 응답에 연결된 자료 포함.</p>
+    </div>
+    <div class="timeline-item">
+      <h4>UI 추가</h4>
+      <p>PortfolioForm, ExperienceLibrary, AnswerSlideOver에 /api/jobs 조회 드롭다운 추가. /jobs/[id]에 "연결된 준비 자료" 섹션 추가.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="api">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">API 보안 및 인증 통일</h2>
+  </div>
+  <p class="section-lead">
+    관리자 API가 각자 session 체크를 하고 있었기 때문에 패턴이 달랐다.
+    lib/api.ts의 requireAdmin()과 sanitizeJobPosting()으로 통일했다.
+  </p>
+
+  <div class="two-col">
+    <div class="info-card">
+      <h3>권한/인증</h3>
+      <ul>
+        <li>requireAdmin(): 관리자 권한 확인 후 { userId, role } 반환</li>
+        <li>requireAdminOrOwner(): 소유자 또는 관리자 통과</li>
+        <li>15개 관리자 API에 적용</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>DTO 변환</h3>
+      <ul>
+        <li>sanitizeUser(): password 제거</li>
+        <li>sanitizeJobPosting(): userId, user 제거</li>
+        <li>/api/jobs, /api/jobs/[id] 응답에 적용</li>
+      </ul>
+    </div>
+  </div>
+
+  <table class="report-table" style="margin-top:36px">
+    <thead>
+      <tr><th>파일</th><th>변경 내용</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>app/api/jobs/route.ts</td><td>GET/POST 응답 sanitizeJobPosting() 적용</td></tr>
+      <tr><td>app/api/jobs/[id]/route.ts</td><td>GET/PUT/PATCH/POST 응답에서 userId 제거, 연결 자료 포함</td></tr>
+      <tr><td>app/api/portfolio/*.ts</td><td>jobId 저장/수정</td></tr>
+      <tr><td>app/api/experiences/*.ts</td><td>jobId 저장/수정</td></tr>
+      <tr><td>app/api/interview/answers/route.ts</td><td>answerSchema/upsert에 jobId 추가</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section" id="db">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">운영 DB 마이그레이션</h2>
+  </div>
+  <p class="section-lead">
+    Supabase에 3개 마이그레이션을 적용했다. Experience 테이블은 이미 존재해
+    수동으로 applied 기록을 추가했고, 나머지 두 마이그레이션은 deploy했다.
+  </p>
+
+  <div class="figure">
+    <h4>마이그레이션 적용 흐름</h4>
+    <div class="figure-row">
+      <span>migrate status</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:100%">3개 pending 확인</div></div>
+    </div>
+    <div class="figure-row">
+      <span>resolve applied</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:33%">Experience 기존</div></div>
+    </div>
+    <div class="figure-row">
+      <span>migrate deploy</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:100%">jobId 링크 + 알림 필드 적용</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="e2e">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">E2E 확인</h2>
+  </div>
+  <p class="section-lead">
+    브라우저에서 /jobs -> /portfolio -> /cover-letter -> /interview -> /jobs/[id]
+    순서로 흐름을 확인했다. 포트폴리오, 경험, 면접 답변에 공고를 연결하고,
+    상세 페이지에서 표시되는 것을 확인했다.
+  </p>
+
+  <div class="issue-grid">
+    <div class="issue-card">
+      <h4>문제: /jobs/[id] 연결 자료가 바로 갱신되지 않음</h4>
+      <p>포트폴리오/경험/면접 저장 후 React Query 캐시의 ['job', id]가 무효화되지 않아 stale 데이터가 노출됨.</p>
+      <span class="fix">queryClient.invalidateQueries({ queryKey: ['job'] }) 추가</span>
+    </div>
+    <div class="issue-card">
+      <h4>문제: /api/jobs 응답에 userId 노출</h4>
+      <p>GET/POST /api/jobs가 sanitizeJobPosting()을 거치지 않아 userId가 클라이언트로 내려감.</p>
+      <span class="fix">app/api/jobs/route.ts에 sanitizeJobPosting() 적용</span>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="next">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h2 class="section-title">다음 단계</h2>
+  </div>
+  <p class="section-lead">
+    production 배포 전에 남은 필수 항목들이다.
+  </p>
+
+  <table class="report-table">
+    <thead>
+      <tr><th>우선순위</th><th>항목</th><th>내용</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="priority p0">P0</span></td>
+        <td>SMTP 연동</td>
+        <td>비밀번호 재설정 메일 실제 발송 (Resend/Nodemailer)</td>
+      </tr>
+      <tr>
+        <td><span class="priority p0">P0</span></td>
+        <td>DTO sanitize 확대</td>
+        <td>portfolio, experiences, interview, admin/user API 응답에서 userId/password 제거</td>
+      </tr>
+      <tr>
+        <td><span class="priority p0">P0</span></td>
+        <td>Vercel 배포</td>
+        <td>DATABASE_URL, NEXTAUTH_SECRET, SMTP 관련 환경변수 확인</td>
+      </tr>
+      <tr>
+        <td><span class="priority p1">P1</span></td>
+        <td>데이터 정리</td>
+        <td>UserNotification referenceId 백필, 불필요한 코드/주석 제거</td>
+      </tr>
+      <tr>
+        <td><span class="priority p1">P1</span></td>
+        <td>UX 개선</td>
+        <td>연결 자료 링크 이동, 연결 해제, 드롭다운 검색/필터</td>
+      </tr>
+      <tr>
+        <td><span class="priority p2">P2</span></td>
+        <td>AI API 연동 검토</td>
+        <td>Gemini 등을 자소서 분석/공고 추천/면접 코칭에 쓸지 결정</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="quote">
+    "이번 주 작업으로 production build는 통과했고, 핵심 데이터 연결도 정상 동작한다.
+    다음 주에는 SMTP 연동과 DTO sanitize 확대를 마무리하면 실제 사용자가 쓸 수 있는
+    수준이 된다."
+    <small>JobFilter 프로젝트 · 2026.08.13</small>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div>JobFilter 프로젝트 · 2026.08.13 작업 보고</div>
+  <div>Devin</div>
+</footer>
+
+</body>
+</html>

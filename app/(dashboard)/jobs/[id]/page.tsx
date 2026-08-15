@@ -2,20 +2,29 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ExternalLink, Calendar, Edit, Trash2, Clock, UserPlus, Bell, Phone, Mail, X, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, ExternalLink, Calendar, Edit, Trash2, Clock, UserPlus, Bell, Phone, Mail, X, Plus, FileText, ListChecks } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SlideOver } from '@/components/ui/slide-over';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { JobForm } from '@/components/jobs/JobForm';
+import JobChecklist from '@/components/jobs/JobChecklist';
+import type { ChecklistItem } from '@/lib/job-checklist';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { JobPosting, StatusHistory } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
+import { STATUS_CONFIG, STATUS_ORDER } from '@/lib/status-config';
 
-type JobWithHistory = JobPosting & {
+type JobWithHistory = Omit<JobPosting, 'contacts' | 'followUpAt' | 'checklist'> & {
   statusHistory: StatusHistory[];
-  contacts: string | null;
+  contacts: Contact[];
   followUpAt: Date | null;
+  checklist: ChecklistItem[] | null;
+  coverLetters: { id: string; version: number; analysisScore: number | null; updatedAt: Date }[];
+  portfolios: { id: string; title: string; githubUrl: string | null; techStack: string[]; updatedAt: Date }[];
+  experiences: { id: string; title: string; situation: string; action: string; result: string; technologies: string[]; metrics: string | null; updatedAt: Date }[];
+  interviewAnswers: { id: string; answer: string; updatedAt: Date; question: { id: string; question: string; category: string } }[];
 };
 
 type Contact = {
@@ -26,16 +35,7 @@ type Contact = {
   memo?: string;
 };
 
-const statusConfig: Record<ApplicationStatus, { label: string; dot: string; text: string; bg: string }> = {
-  PREPARING:     { label: '서류 준비 중', dot: 'bg-slate-400',  text: 'text-slate-700',  bg: 'bg-slate-50'  },
-  APPLIED:       { label: '지원 완료',   dot: 'bg-blue-500',   text: 'text-blue-700',   bg: 'bg-blue-50'   },
-  DOCUMENT_PASS: { label: '서류 합격',   dot: 'bg-emerald-500',text: 'text-emerald-700',bg: 'bg-emerald-50'},
-  INTERVIEW:     { label: '면접 예정',   dot: 'bg-amber-500',  text: 'text-amber-700',  bg: 'bg-amber-50'  },
-  FINAL_PASS:    { label: '최종 합격',   dot: 'bg-violet-500', text: 'text-violet-700', bg: 'bg-violet-50' },
-  REJECTED:      { label: '불합격',     dot: 'bg-red-400',    text: 'text-red-700',    bg: 'bg-red-50'    },
-};
 
-const statusOrder: ApplicationStatus[] = ['PREPARING','APPLIED','DOCUMENT_PASS','INTERVIEW','FINAL_PASS'];
 
 async function fetchJob(id: string): Promise<JobWithHistory> {
   const res = await fetch(`/api/jobs/${id}`);
@@ -151,6 +151,22 @@ export default function JobDetailPage() {
     onError: () => toast.error('상태 변경에 실패했습니다'),
   });
 
+  const checklistMutation = useMutation({
+    mutationFn: async (items: ChecklistItem[]) => {
+      const res = await fetch(`/api/jobs/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checklist: items }),
+      });
+      if (!res.ok) throw new Error('Failed');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['job', id] });
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+    },
+    onError: () => toast.error('체크리스트 저장에 실패했습니다'),
+  });
+
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-8 space-y-6 animate-pulse">
@@ -163,7 +179,7 @@ export default function JobDetailPage() {
 
   if (!job) return null;
 
-  const cfg = statusConfig[job.status as ApplicationStatus] ?? statusConfig.PREPARING;
+  const cfg = STATUS_CONFIG[job.status as ApplicationStatus] ?? STATUS_CONFIG.PREPARING;
   const isRejected = job.status === 'REJECTED';
   const isFinalPass = job.status === 'FINAL_PASS';
   const deadlineDate = job.deadline ? new Date(job.deadline) : null;
@@ -175,15 +191,21 @@ export default function JobDetailPage() {
   const timeline = [...(job.statusHistory ?? [])]
     .sort((a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime());
 
-  const contacts: Contact[] = (() => {
-    try { return job.contacts ? JSON.parse(job.contacts as string) : []; }
-    catch { return []; }
-  })();
+  const contacts: Contact[] = job.contacts ?? [];
 
-  const followUpDate_parsed = job.followUpAt ? new Date(job.followUpAt as unknown as string) : null;
+  const followUpDate_parsed = job.followUpAt ?? null;
   const followUpDiff = followUpDate_parsed
     ? Math.ceil((followUpDate_parsed.getTime() - Date.now()) / 86400000)
     : null;
+  const checklistDone = (job.checklist ?? []).filter(item => item.checked).length;
+  const checklistTotal = job.checklist?.length ?? 0;
+  const readinessItems = [
+    { label: '자소서 연결', done: job.coverLetters.length > 0, href: `/cover-letter?company=${encodeURIComponent(job.company)}&position=${encodeURIComponent(job.position)}&jobId=${encodeURIComponent(job.id)}` },
+    { label: '체크리스트 완료', done: checklistTotal > 0 && checklistDone === checklistTotal, href: '#checklist' },
+    { label: '면접 일정 설정', done: Boolean(job.interviewAt), href: '#schedule' },
+    { label: '팔로업 일정 설정', done: Boolean(job.followUpAt), href: '#schedule' },
+  ];
+  const readinessScore = Math.round((readinessItems.filter(item => item.done).length / readinessItems.length) * 100);
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">
@@ -262,16 +284,100 @@ export default function JobDetailPage() {
         </a>
       )}
 
+      <section className="rounded-xl border border-blue-100 bg-blue-50/50 p-5">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div>
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest">지원 준비 워크스페이스</p>
+            <p className="text-sm text-gray-600 mt-1">이 지원 건에 필요한 준비 화면으로 바로 이동하세요.</p>
+          </div>
+          <span className="text-xs font-medium text-blue-700 bg-white border border-blue-100 rounded-full px-2.5 py-1">Command Center</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <Link href={`/cover-letter?company=${encodeURIComponent(job.company)}&position=${encodeURIComponent(job.position)}&jobId=${encodeURIComponent(job.id)}`} className="rounded-lg bg-white border border-blue-100 px-3 py-2.5 text-xs font-medium text-gray-700 hover:border-blue-300 hover:text-blue-700 transition-colors">자소서 준비</Link>
+          <Link href="/interview" className="rounded-lg bg-white border border-blue-100 px-3 py-2.5 text-xs font-medium text-gray-700 hover:border-blue-300 hover:text-blue-700 transition-colors">면접 연습</Link>
+          <Link href="/portfolio" className="rounded-lg bg-white border border-blue-100 px-3 py-2.5 text-xs font-medium text-gray-700 hover:border-blue-300 hover:text-blue-700 transition-colors">포트폴리오</Link>
+          <Link href="/calendar" className="rounded-lg bg-white border border-blue-100 px-3 py-2.5 text-xs font-medium text-gray-700 hover:border-blue-300 hover:text-blue-700 transition-colors">일정 관리</Link>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <ListChecks className="w-4 h-4 text-violet-600" />
+            <div>
+              <p className="text-xs font-semibold text-violet-600 uppercase tracking-widest">Readiness Report</p>
+              <h2 className="text-base font-semibold text-gray-900">지원 준비 현황</h2>
+            </div>
+          </div>
+          <span className="text-lg font-bold text-violet-600">{readinessScore}%</span>
+        </div>
+        <div className="h-2 rounded-full bg-gray-100 overflow-hidden mb-4"><div className="h-full rounded-full bg-violet-500 transition-all" style={{ width: `${readinessScore}%` }} /></div>
+        <div className="grid grid-cols-2 gap-2">
+          {readinessItems.map(item => (
+            <Link key={item.label} href={item.href} className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-xs transition-colors ${item.done ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-amber-100 bg-amber-50 text-amber-700 hover:border-amber-300'}`}>
+              <span className={`w-2 h-2 rounded-full ${item.done ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+              {item.label}
+            </Link>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 mt-3 text-[11px] text-gray-500">
+          <FileText className="w-3.5 h-3.5" />
+          {job.coverLetters[0]?.analysisScore != null ? `최근 자소서 분석 ${job.coverLetters[0].analysisScore}점` : '자소서 분석을 아직 실행하지 않았습니다.'}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <ListChecks className="w-4 h-4 text-blue-600" />
+          <h2 className="text-base font-semibold text-gray-900">연결된 준비 자료</h2>
+        </div>
+        <div className="space-y-3">
+          {job.portfolios && job.portfolios.length > 0 && (
+            <div className="text-sm">
+              <span className="text-gray-500">포트폴리오</span>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {job.portfolios.map(p => (
+                  <Link key={p.id} href="/portfolio" className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">{p.title}</Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {job.experiences && job.experiences.length > 0 && (
+            <div className="text-sm">
+              <span className="text-gray-500">경험</span>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {job.experiences.map(e => (
+                  <Link key={e.id} href="/cover-letter" className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">{e.title}</Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {job.interviewAnswers && job.interviewAnswers.length > 0 && (
+            <div className="text-sm">
+              <span className="text-gray-500">면접 답변</span>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {job.interviewAnswers.map(a => (
+                  <Link key={a.id} href="/interview" className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">{a.question.question.slice(0, 20)}...</Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {!job.portfolios?.length && !job.experiences?.length && !job.interviewAnswers?.length && (
+            <p className="text-sm text-gray-400">연결된 자료가 없습니다. 포트폴리오, 면접, 경험 페이지에서 지원 건을 연결해보세요.</p>
+          )}
+        </div>
+      </section>
+
       {/* 진행 단계 */}
       {!isRejected && (
         <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
           <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-5">진행 단계</p>
           <div className="flex items-center gap-0">
-            {statusOrder.map((s, i) => {
-              const currentIdx = statusOrder.indexOf(job.status as ApplicationStatus);
+            {STATUS_ORDER.map((s, i) => {
+              const currentIdx = STATUS_ORDER.indexOf(job.status as ApplicationStatus);
               const isDone = i <= currentIdx;
               const isCur = s === job.status;
-              const sc = statusConfig[s];
+              const sc = STATUS_CONFIG[s];
               return (
                 <div key={s} className="flex items-center flex-1 last:flex-none">
                   <div className="flex flex-col items-center gap-1.5">
@@ -281,11 +387,11 @@ export default function JobDetailPage() {
                         'bg-white border-gray-200 text-gray-300'}`}>
                       {isDone && !isCur ? '✓' : i + 1}
                     </div>
-                    <span className={`text-[10px] whitespace-nowrap ${isCur ? sc.text + ' font-semibold' : isDone ? 'text-gray-600' : 'text-gray-300'}`}>
+                    <span className={`text-xs whitespace-nowrap ${isCur ? sc.text + ' font-semibold' : isDone ? 'text-gray-600' : 'text-gray-300'}`}>
                       {sc.label}
                     </span>
                   </div>
-                  {i < statusOrder.length - 1 && (
+                  {i < STATUS_ORDER.length - 1 && (
                     <div className={`flex-1 h-0.5 mb-5 mx-1 ${i < currentIdx ? 'bg-gray-800' : 'bg-gray-100'}`} />
                   )}
                 </div>
@@ -304,7 +410,7 @@ export default function JobDetailPage() {
       {/* 상태 변경 — 관리자 전용, 학생은 표시 안 함 */}
 
       {/* 팔로업 + 담당자 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div id="schedule" className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         {/* 팔로업 */}
         <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -351,13 +457,13 @@ export default function JobDetailPage() {
                 aria-label="팔로업 날짜 선택"
                 value={followUpDate}
                 onChange={e => setFollowUpDate(e.target.value)}
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <button
                 type="button"
                 onClick={() => followUpMutation.mutate(followUpDate)}
                 disabled={!followUpDate || followUpMutation.isPending}
-                className="px-3 py-1.5 bg-[#0f172a] text-white text-xs font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+                className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 저장
               </button>
@@ -425,32 +531,32 @@ export default function JobDetailPage() {
                 value={newContact.name}
                 onChange={e => setNewContact(p => ({ ...p, name: e.target.value }))}
                 placeholder="이름 *"
-                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <input
                 value={newContact.role ?? ''}
                 onChange={e => setNewContact(p => ({ ...p, role: e.target.value }))}
                 placeholder="직책 (예: 채용 담당자)"
-                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <input
                 value={newContact.email ?? ''}
                 onChange={e => setNewContact(p => ({ ...p, email: e.target.value }))}
                 placeholder="이메일"
-                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <input
                 value={newContact.phone ?? ''}
                 onChange={e => setNewContact(p => ({ ...p, phone: e.target.value }))}
                 placeholder="전화번호"
-                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <textarea
                 value={newContact.memo ?? ''}
                 onChange={e => setNewContact(p => ({ ...p, memo: e.target.value }))}
                 placeholder="메모"
                 rows={2}
-                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 resize-none"
+                className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
               />
               <button
                 type="button"
@@ -459,13 +565,22 @@ export default function JobDetailPage() {
                   contactMutation.mutate([...contacts, newContact]);
                 }}
                 disabled={!newContact.name.trim() || contactMutation.isPending}
-                className="w-full py-1.5 bg-[#0f172a] text-white text-xs font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
+                className="w-full py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" /> 담당자 추가
               </button>
             </div>
           )}
         </div>
+      </div>
+
+      <div id="checklist">
+        {/* 제출 서류 체크리스트 */}
+      <JobChecklist
+        items={job.checklist ?? []}
+        onChangeAction={(items) => checklistMutation.mutate(items)}
+        disabled={checklistMutation.isPending}
+      />
       </div>
 
       {/* 상태 변경 이력 — 세로 타임라인 */}
@@ -477,7 +592,7 @@ export default function JobDetailPage() {
             <div className="absolute left-[7px] top-2 bottom-2 w-px bg-gray-100" />
             <div className="space-y-0">
               {timeline.map((h, i) => {
-                const hcfg = statusConfig[h.status as ApplicationStatus] ?? statusConfig.PREPARING;
+                const hcfg = STATUS_CONFIG[h.status as ApplicationStatus] ?? STATUS_CONFIG.PREPARING;
                 const isFirst = i === 0;
                 return (
                   <div key={h.id} className="relative flex items-start gap-4 pb-5 last:pb-0">

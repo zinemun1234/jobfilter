@@ -3,19 +3,11 @@ import type { ApplicationStatus } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from 'lucide-react';
+import { STATUS_CONFIG } from '@/lib/status-config';
 
 interface StatusTimelineProps {
   job: JobPosting & { statusHistory: StatusHistory[] };
 }
-
-const statusConfig: Record<ApplicationStatus, { label: string; color: string }> = {
-  PREPARING: { label: '서류 준비 중', color: 'bg-gray-500' },
-  APPLIED: { label: '지원 완료', color: 'bg-blue-500' },
-  DOCUMENT_PASS: { label: '서류 합격', color: 'bg-green-500' },
-  INTERVIEW: { label: '면접 예정', color: 'bg-yellow-500' },
-  FINAL_PASS: { label: '최종 합격', color: 'bg-purple-500' },
-  REJECTED: { label: '불합격', color: 'bg-red-500' },
-};
 
 export function StatusTimeline({ job }: StatusTimelineProps) {
   const timeline = [
@@ -54,8 +46,9 @@ export function StatusTimeline({ job }: StatusTimelineProps) {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <Badge className={`${statusConfig[item.status as ApplicationStatus]?.color ?? 'bg-gray-500'} text-white`}>
-                      {statusConfig[item.status as ApplicationStatus]?.label ?? item.status}
+                    <Badge className={`${STATUS_CONFIG[item.status as ApplicationStatus]?.dot ?? 'bg-slate-400'} ${STATUS_CONFIG[item.status as ApplicationStatus]?.text ?? 'text-white'} border-0`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-white/80 mr-1.5" />
+                      {STATUS_CONFIG[item.status as ApplicationStatus]?.label ?? item.status}
                     </Badge>
                     <div className="flex items-center text-sm text-gray-500">
                       <Calendar className="w-4 h-4 mr-1" />

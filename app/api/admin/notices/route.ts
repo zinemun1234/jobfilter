@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/api';
+import { handleApiError } from '@/lib/errors';
 import { z } from 'zod';
-import type { Session } from 'next-auth';
 
 export const dynamic = 'force-dynamic';
 
-function requireAdmin(session: Session | null) {
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (session.user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  return null;
-}
 
 const noticeSchema = z.object({
   title: z.string().min(1),
@@ -20,8 +14,11 @@ const noticeSchema = z.object({
 });
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const notices = await prisma.notice.findMany({
     orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
@@ -30,9 +27,11 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  const err = requireAdmin(session);
-  if (err) return err;
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleApiError(error);
+  }
 
   const body = await req.json();
   const data = noticeSchema.parse(body);

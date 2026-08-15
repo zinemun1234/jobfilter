@@ -11,14 +11,15 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { portfolioSchema } from '@/lib/validations';
-import { Portfolio } from '@/lib/generated/prisma';
+import { JobPosting, Portfolio } from '@/lib/generated/prisma';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 type PortfolioFormData = z.infer<typeof portfolioSchema>;
 
 interface PortfolioFormProps {
   portfolio?: Portfolio;
-  onSuccess: () => void;
+  onSuccessAction: () => void;
 }
 
 const TECH_STACK_OPTIONS = [
@@ -30,7 +31,7 @@ const TECH_STACK_OPTIONS = [
   'Git', 'GitHub', 'GitLab', 'CI/CD', 'TDD', 'Agile',
 ];
 
-export function PortfolioForm({ portfolio, onSuccess }: PortfolioFormProps) {
+export function PortfolioForm({ portfolio, onSuccessAction }: PortfolioFormProps) {
   const parsedTechStack: string[] = (() => {
     if (!portfolio?.techStack) return [];
     if (Array.isArray(portfolio.techStack)) return portfolio.techStack as string[];
@@ -40,6 +41,15 @@ export function PortfolioForm({ portfolio, onSuccess }: PortfolioFormProps) {
   const [techStack, setTechStack] = useState<string[]>(parsedTechStack);
   const [newTech, setNewTech] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery<JobPosting[]>({
+    queryKey: ['jobs'],
+    queryFn: async () => {
+      const response = await fetch('/api/jobs');
+      if (!response.ok) throw new Error('Failed to fetch jobs');
+      return (await response.json()).data;
+    },
+  });
 
   const {
     register,
@@ -58,6 +68,7 @@ export function PortfolioForm({ portfolio, onSuccess }: PortfolioFormProps) {
       endDate: portfolio?.endDate ? new Date(portfolio.endDate).toISOString().split('T')[0] : '',
       githubUrl: portfolio?.githubUrl || '',
       deployUrl: portfolio?.deployUrl || '',
+      jobId: portfolio?.jobId ?? '',
     },
   });
 
@@ -95,7 +106,7 @@ export function PortfolioForm({ portfolio, onSuccess }: PortfolioFormProps) {
       }
 
       toast.success(portfolio ? '포트폴리오가 수정되었습니다' : '포트폴리오가 추가되었습니다');
-      onSuccess();
+      onSuccessAction();
       reset();
     } catch (error) {
       toast.error('저장에 실패했습니다');
@@ -235,6 +246,26 @@ export function PortfolioForm({ portfolio, onSuccess }: PortfolioFormProps) {
         />
         {errors.deployUrl && (
           <p className="text-sm text-red-500">{errors.deployUrl.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="jobId">연결된 공고 (선택)</Label>
+        <select
+          id="jobId"
+          {...register('jobId')}
+          disabled={jobsLoading}
+          className="w-full h-10 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50"
+        >
+          <option value="">공고 연결 안 함</option>
+          {jobs.map((job) => (
+            <option key={job.id} value={job.id}>
+              {job.company} - {job.position}
+            </option>
+          ))}
+        </select>
+        {errors.jobId && (
+          <p className="text-sm text-red-500">{errors.jobId.message}</p>
         )}
       </div>
 

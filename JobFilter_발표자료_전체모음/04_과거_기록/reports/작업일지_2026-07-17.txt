@@ -1,0 +1,304 @@
+JobFilter Phase 1 추천 기능 구현 작업일지
+=============================================================
+
+작업 일자: 2026-07-17
+프로젝트 경로: c:\Users\USER\Downloads\새 폴더 (48)\jobfilter
+작업자: Cascade
+
+=============================================================
+1. 작업 개요
+=============================================================
+요청: 추천기능_상세구현계획.txt의 Phase 1 우선 기능 3가지 구현
+  - 안건 02: JD ↔ 자소서 키워드 매칭 히트맵
+  - 안건 05: 지금 당장 지원해야 할 공고 점수
+  - 안건 04: 리크루터 시점 미리보기
+
+AI API 사용 금지 규칙 준수: 모든 키워드 추출/매칭은 사전 기반(rule-based)으로 처리.
+
+=============================================================
+2. 구현 내역
+=============================================================
+
+[안건 05] 지금 당장 지원해야 할 공고 점수
+---------------------------------------------
+목적: 활성 공고 중 사용자가 지금 당장 지원해야 할 공고를 점수로 정렬해 대시보드 상단에 노출
+
+점수 산출 공식:
+  - fitScore: 사용자 skills와 JobListing.tags의 교집합 비율 (0~100)
+  - urgencyScore: 마감일까지 남은 일수 (7일 이하=100, 30일 이상=30, 그 사이 선형)
+  - competitionScore: 북마크 수 역수 (0개=100, 10개 이상=0, 사이는 10점씩 차감)
+  - priorityScore = fitScore * 0.5 + urgencyScore * 0.3 + competitionScore * 0.2
+
+신규 파일:
+  - app/api/dashboard/priority-jobs/route.ts
+      * GET /api/dashboard/priority-jobs
+      * 인증 세션 → 사용자 skills 조회 → isActive=true, deadline>=today인 JobListing 조회
+      * Prisma _count.bookmarks로 북마크 집계
+      * priorityScore 기준 상위 5개 반환
+
+  - components/dashboard/PriorityJobCard.tsx
+      * 공고 카드 UI: 순위, 회사/직무, priorityScore, 세부 점수(fit/urgency/competition), D-day/북마크 수, 태그
+
+  - components/dashboard/PrioritySection.tsx
+      * 'use client', CSR로 /api/dashboard/priority-jobs 호출
+      * 로딩/빈 상태 처리, 대시보드에 "오늘의 추천 공고" 섹션으로 배치
+
+수정 파일:
+  - app/(dashboard)/dashboard/page.tsx
+      * import PrioritySection 추가
+      * 히어로 배너 아래 max-w-5xl 영역에 <PrioritySection /> 삽입
+
+[안건 02] JD ↔ 자소서 키워드 매칭 히트맵
+---------------------------------------------
+목적: JD(공고)의 기술/역량 키워드가 자소서 각 문항에 얼마나 포함되었는지 시각화
+
+신규 파일:
+  - app/api/cover-letter/keyword-heatmap/route.ts
+      * POST /api/cover-letter/keyword-heatmap
+      * body: { coverLetterId, jobListingId }
+      * JobListing.tags + description에서 사전 기반 기술 키워드 추출 (최대 20개)
+      * CoverLetter.items 각 문항에 키워드 등장 횟수 카운트
+      * 반환: { keywords, matrix, company, position }
+
+  - components/cover-letter/KeywordHeatmap.tsx
+      * 공고 선택 드롭다운
+      * 문항(rows) × 키워드(columns) 히트맵
+      * 색상: 0회=회색, 1회=노랑(amber-200), 2회 이상=빨강(red-500) (강도 비율 적용)
+      * 셀 클릭 시 해당 문항/키워드 하이라이트 가능 (onHighlight prop)
+      * 범례 포함
+
+수정 파일:
+  - app/(dashboard)/cover-letter/page.tsx
+      * Target 아이콘 import
+      * KeywordHeatmap 컴포넌트 import
+      * fetchListings() 추가 (/api/listings 조회)
+      * useQuery listings 추가
+      * heatmapId state 추가
+      * 자소서 카드에 "JD 매칭" 버튼 추가
+      * expanded 상태일 때 히트맵 패널 조건부 렌더링 (heatMapId === l.id)
+
+[안건 04] 리크루터 시점 미리보기
+---------------------------------------------
+목적: 사용자가 자신의 프로필을 리크루터가 보는 시점에서 미리 확인하고, 민감 정보(이름/연락처)는 마스킹
+
+신규 파일:
+  - lib/visibility-config.ts
+      * RECRUITER_VISIBLE_FIELDS: ['name', 'major', 'targetJob', 'skills']
+      * RECRUITER_MASK_CONFIG: 필드별 공개 여부 + 마스킹 함수
+
+수정 파일:
+  - components/profile/ProfileForm.tsx
+      * ProfileFormProps에 viewMode?: 'owner' | 'recruiter' 추가
+      * useRouter import (토글용)
+      * 리크루터 시점 토글 UI 상단 추가 (Eye/EyeOff 아이콘 + 스위치)
+      * isRecruiterView일 때:
+        - 이름은 첫 글자 + ** 마스킹 (예: 홍**)
+        - 전공/목표직무/기술스택은 공개지만 입력 필드 disabled
+        - 기술 추가/삭제 버튼 숨김
+        - 저장 버튼 숨김
+      * 토글 클릭 시 /profile 또는 /profile?view=recruiter로 이동
+
+  - app/(dashboard)/profile/page.tsx
+      * searchParams prop 추가
+      * view === 'recruiter'일 때 ProfileForm에 viewMode='recruiter' 전달
+
+=============================================================
+3. 검증 및 테스트
+=============================================================
+
+실행한 명령어:
+  - npx tsc --noEmit
+      → 결과: exit code 0, 타입 오류 없음
+  - npx next lint
+      → 결과: exit code 0, ESLint warning/error 없음
+      → 단, @typescript-eslint/typescript-estree에서 설치된 TypeScript 5.9.3이 공식 지원 버전(<5.5.0)보다 높다는 경고 메시지는 출력됨(동작에는 영향 없음)
+
+개발 서버 확인:
+  - npm run dev 실행 시 정상 컴파일
+  - /dashboard 접근 시 인증 세션 필요로 /login 리다이렉트되어 UI 시각 확인은 미수행
+  - 따라서 실제 데이터 기반 동작은 인증 후 브라우저/수동 테스트 필요
+
+=============================================================
+4. 변경 파일 요약
+=============================================================
+
+신규 생성:
+  - app/api/dashboard/priority-jobs/route.ts
+  - components/dashboard/PriorityJobCard.tsx
+  - components/dashboard/PrioritySection.tsx
+  - app/api/cover-letter/keyword-heatmap/route.ts
+  - components/cover-letter/KeywordHeatmap.tsx
+  - lib/visibility-config.ts
+
+수정:
+  - app/(dashboard)/dashboard/page.tsx
+  - app/(dashboard)/cover-letter/page.tsx
+  - components/profile/ProfileForm.tsx
+  - app/(dashboard)/profile/page.tsx
+
+=============================================================
+5. 제약사항 및 후속 고려사항
+=============================================================
+
+- "리크루터 시점 미리보기"는 기존에 실제 리크루터가 학생 프로필/포트폴리오/자소서를 조회하는 화면이 없어,
+  profile 페이지 내에서 토글 + 필드 마스킹/비활성화 방식으로만 구현.
+  추후 실제 리크루터 뷰(/recruiter/users/[id])가 추가되면 해당 페이지에서 동일한 마스킹 로직 재사용 가능.
+
+- 히트맵은 공고(JoListing)를 드롭다운으로 직접 선택. CoverLetter의 jobId는 JobPosting을 연결하므로
+  JobListing과 자동 매핑이 불가능했음. 사용자가 직접 비교 대상 공고를 선택하는 UX로 처리.
+
+- 추천 공고 점수는 사용자 skills가 비어 있으면 fitScore가 0이 되므로, 스킬 입력 권장.
+
+- 실제 UI/데이터 흐름 확인은 로그인 후 /dashboard, /cover-letter, /profile?view=recruiter에서 진행 필요.
+
+=============================================================
+=============================================================
+7. Phase 2 추가 구현 (A: GitHub 포트폴리오 분석 / 공고별 체크리스트, B: 엑셀 업로드, C: 자소서 중복/자기표절 경고)
+=============================================================
+
+요청: 추천기능_상세구현계획.txt의 Phase 2 기능 중 AI/크론 없이 구현 가능한 항목 우선 구현
+
+AI API 사용 금지 규칙 준수: 모든 키워드 추출/매칭/유사도 계산은 사전/룰 기반으로 처리.
+
+[안건 A] GitHub 포트폴리오 자동 분석 카드
+---------------------------------------------
+목적: 포트폴리오에 등록된 GitHub 저장소의 공개 정보를 분석해 리크루터 신뢰도 향상
+
+신규 파일:
+  - lib/github-analysis.ts
+      * GitHub REST API(공개 repo)로 owner/repo 파싱
+      * languages, commits, README, license, lastPush 수집
+      * 7일 캐싱 권장, 60회/시간 rate limit 고려
+
+  - components/portfolio/GitHubAnalysisCard.tsx
+      * 언어 비율, 커밋 수, README/라이선스 여부, 마지막 push, 활동 상태 시각화
+      * 새로고침 버튼 및 로딩 상태
+
+  - app/api/portfolio/[id]/route.ts (GET/PUT + POST 추가)
+      * GET/PUT: githubAnalysis JSON 파싱
+      * POST /api/portfolio/[id]: GitHub 분석 실행 후 DB 저장
+
+  - app/api/portfolio/route.ts
+      * 포트폴리오 목록 응답 시 githubAnalysis JSON 파싱
+
+  - components/jobs/JobChecklist.tsx
+      * 마이크로 체크리스트 UI (토글 + 진행률 바)
+      * onChangeAction prop으로 Next.js lint 규칙 준수
+
+  - app/api/jobs/[id]/route.ts
+      * GET: checklist JSON 파싱
+      * PUT: checklist 포함 저장
+      * POST: checklist 단독 업데이트
+
+  - app/api/listings/route.ts
+      * 내 지원 목록 추가 시 extractJobChecklist()로 체크리스트 자동 생성
+
+  - app/(dashboard)/jobs/[id]/page.tsx
+      * JobChecklist 컴포넌트 연동, checklist 변경 시 POST /api/jobs/[id] 저장
+
+DB Schema 변경:
+  - Portfolio 모델: githubAnalysis(String?, JSON), githubAnalysisFetchedAt(DateTime?) 추가
+  - JobPosting 모델: checklist(String?, JSON) 추가
+
+[안건 B] 관리자 엑셀 공고 일괄 업로드 API 완성
+---------------------------------------------
+목적: /admin/listings/upload 페이지에서 엑셀/CSV 파일을 업로드하면 CS 직군 공고만 추출·등록
+
+확인 사항:
+  - /admin/listings/upload/page.tsx UI는 이미 구현돼 있었음
+  - /api/admin/listings/upload, /api/admin/listings/bulk API 이미 존재
+
+보강/변경 파일:
+  - lib/job-tags.ts (신규)
+      * 80여 개 IT/개발/기획 키워드 매핑
+      * position + company + description에서 기술 태그 추출
+
+  - app/api/admin/listings/bulk/route.ts
+      * createMany 데이터에 tags(JSON) 자동 추출 로직 추가
+      * 등록된 공고가 우선순위 점수/히트맵/체크리스트에서 활용 가능
+
+[안건 C] 자소서 중복/자기표절 경고
+---------------------------------------------
+목적: 동일 자소서 항목 간 또는 다른 자소서 간 중복 문장을 사전에 경고
+
+신규 파일:
+  - lib/cover-letter-duplicate.ts
+      * 2-gram + 3-gram 코사인 유사도 계산
+      * 동일 자소서 내 항목(자기표절) 및 다른 자소서 항목(중복) 검출
+
+  - app/api/cover-letter/duplicate-check/route.ts
+      * POST /api/cover-letter/duplicate-check
+      * 본인 소유 coverLetterId 기준으로 전체 자소서 대비 중복 검사
+
+  - components/cover-letter/DuplicateCheckPanel.tsx
+      * 유사도 기준 50/60/70/80% 선택
+      * 자기표절(빨강) / 다른 자소서(주황) 구분, 유사도 바, 문항/문장 미리보기
+
+수정 파일:
+  - app/(dashboard)/cover-letter/page.tsx
+      * Copy 아이콘 import
+      * duplicateId 상태 추가
+      * 자소서 카드에 '중복 검사' 버튼 추가
+      * expanded 상태일 때 DuplicateCheckPanel 조건부 렌더링
+
+=============================================================
+8. Phase 2 검증 및 테스트
+=============================================================
+
+실행한 명령어:
+  - npx tsc --noEmit
+      → 결과: exit code 0, 타입 오류 없음
+  - npx next lint
+      → 결과: exit code 0, ESLint warning/error 없음
+      → 단, @typescript-eslint/typescript-estree에서 설치된 TypeScript 5.9.3이 공식 지원 버전(<5.5.0)보다 높다는 경고 메시지는 출력됨(동작에는 영향 없음)
+
+개발 서버 확인:
+  - npm run dev 실행 시 정상 컴파일
+  - /dashboard, /cover-letter, /portfolio, /jobs/[id], /admin/listings/upload 접근 시 인증 세션 필요
+  - 실제 데이터 기반 동작은 로그인 후 브라우저/수동 테스트 필요
+
+=============================================================
+9. Phase 2 변경 파일 요약
+=============================================================
+
+신규 생성:
+  - lib/github-analysis.ts
+  - components/portfolio/GitHubAnalysisCard.tsx
+  - lib/job-checklist.ts
+  - components/jobs/JobChecklist.tsx
+  - lib/job-tags.ts
+  - lib/cover-letter-duplicate.ts
+  - app/api/cover-letter/duplicate-check/route.ts
+  - components/cover-letter/DuplicateCheckPanel.tsx
+
+수정:
+  - prisma/schema.prisma
+  - app/api/portfolio/[id]/route.ts
+  - app/api/portfolio/route.ts
+  - app/(dashboard)/portfolio/page.tsx
+  - app/api/jobs/[id]/route.ts
+  - app/api/listings/route.ts
+  - app/(dashboard)/jobs/[id]/page.tsx
+  - app/api/admin/listings/bulk/route.ts
+  - app/(dashboard)/cover-letter/page.tsx
+
+=============================================================
+10. 제약사항 및 후속 고려사항 (Phase 2)
+=============================================================
+
+- GitHub 분석은 공개 저장소 기준, 인증 토큰 없이 60회/시간 rate limit이 있어 캐싱(7일) 권장.
+- 체크리스트 추출은 description 키워드 매칭 기반이므로, 비정형 공고는 수동 보완 필요.
+- 엑셀 업로드 시 CSV 내부 쉼표/따옴표 및 인코딩(euc-kr 등)은 추가 대응 필요.
+- 자소서 중복 검사는 2-3-gram 코사인 유사도 기반이며, 짧은 문장은 오탐 가능.
+- Prisma schema에 GitHub 분석/체크리스트 필드가 추가됨. DB 적용을 위해 npx prisma db push 필요.
+
+=============================================================
+11. 다음 작업 제안
+=============================================================
+
+- Phase 1/Phase 2 기능 UI/데이터 수동 테스트 (로그인 후 /dashboard, /cover-letter, /portfolio, /jobs, /admin/listings/upload)
+- 공고 변경 감지(Diff 알림) — 크론 환경 필요
+- 리크루터용 학생 프로필 조회 페이지(/recruiter/users/[id]) 추가 검토
+- 엑셀 업로드 인코딩/CSV 파싱 강화
+
+=============================================================

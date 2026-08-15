@@ -38,7 +38,7 @@ export default async function NoticesPage() {
                   <div className="flex items-center gap-2 mb-1">
                     <p className="text-sm font-semibold text-gray-900">{n.title}</p>
                     {n.isPinned && (
-                      <span className="text-[10px] font-semibold bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">고정</span>
+                      <span className="text-xs font-semibold bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">고정</span>
                     )}
                   </div>
                   <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{n.content}</p>

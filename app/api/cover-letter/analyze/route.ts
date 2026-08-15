@@ -23,77 +23,6 @@ function compareWithPrevious(
   return { resolved, remaining, new: newIssues, score };
 }
 
-// 공고 매칭 분석 — listingInfo의 태그/직무명과 자소서 텍스트 간 키워드 겹침률
-function analyzeListingMatch(
-  text: string,
-  listingInfo: { company?: string; position?: string; tags?: string[] } | null
-): FeedbackItem[] {
-  if (!listingInfo) return [];
-
-  const feedback: FeedbackItem[] = [];
-  const lower = text.toLowerCase();
-
-  const allKeywords: string[] = [];
-
-  // 공고 태그 수집
-  if (listingInfo.tags && listingInfo.tags.length > 0) {
-    allKeywords.push(...listingInfo.tags);
-  }
-
-  // 직무명에서 키워드 추출 (공백 분리)
-  if (listingInfo.position) {
-    const posWords = listingInfo.position.split(/[\s,/·]+/).filter(w => w.length > 1);
-    allKeywords.push(...posWords);
-  }
-
-  if (allKeywords.length === 0) return [];
-
-  const matched = allKeywords.filter(k => lower.includes(k.toLowerCase()));
-  const missing = allKeywords.filter(k => !lower.includes(k.toLowerCase()));
-  const matchRate = Math.round((matched.length / allKeywords.length) * 100);
-
-  if (matchRate >= 60) {
-    feedback.push({
-      level: 'good',
-      category: '공고 매칭',
-      weight: 0,
-      message: `공고 키워드 ${matchRate}% 매칭 — 이 공고에 잘 맞는 자소서입니다`,
-    });
-  } else if (matchRate >= 30) {
-    feedback.push({
-      level: 'warn',
-      category: '공고 매칭',
-      weight: 0,
-      message: `공고 키워드 ${matchRate}% 매칭 — 더 맞춤화가 필요합니다`,
-      suggestion: missing.length > 0
-        ? `공고에서 요구하는 키워드를 추가하세요: ${missing.slice(0, 4).join(', ')}`
-        : '공고 내용을 더 반영해서 작성하세요.',
-    });
-  } else {
-    feedback.push({
-      level: 'bad',
-      category: '공고 매칭',
-      weight: 0,
-      message: `공고 키워드 ${matchRate}% 매칭 — 이 공고와 자소서가 맞지 않습니다`,
-      suggestion: missing.length > 0
-        ? `공고 핵심 키워드가 자소서에 없습니다: ${missing.slice(0, 5).join(', ')}`
-        : '공고 직무 설명을 다시 읽고 자소서를 맞춤 작성하세요.',
-    });
-  }
-
-  // 매칭된 키워드 목록도 표시
-  if (matched.length > 0) {
-    feedback.push({
-      level: 'good',
-      category: '공고 키워드 반영',
-      weight: 0,
-      message: `공고 키워드 반영됨: ${matched.slice(0, 5).join(', ')}`,
-    });
-  }
-
-  return feedback;
-}
-
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -105,12 +34,11 @@ export async function POST(req: NextRequest) {
     targetJob,
     skills = [],
     previousFeedback,
-    listingInfo,
     coverLetterId, // 점수 저장용 (선택)
   } = body;
 
-  if (!text || text.trim().length < 50) {
-    return NextResponse.json({ error: '50자 이상 입력하세요' }, { status: 400 });
+  if (!text || text.trim().length < 30) {
+    return NextResponse.json({ error: '30자 이상 입력하세요' }, { status: 400 });
   }
 
   // 1. 기본 키워드 분석 (11가지 항목)
@@ -179,10 +107,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // 4. 공고 매칭 분석
-  const listingFeedback = analyzeListingMatch(text, listingInfo ?? null);
-
-  const allFeedback = [...feedback, ...personalizedFeedback, ...deepFeedback, ...listingFeedback];
+  const allFeedback = [...feedback, ...personalizedFeedback, ...deepFeedback];
 
   // 5. 재분석 비교
   let comparison = null;
@@ -193,13 +118,7 @@ export async function POST(req: NextRequest) {
   // 6. 가중치 기반 점수 계산
   const overallScore = calculateWeightedScore(allFeedback);
 
-  // 7. 공고 매칭률 별도 반환 (UI에서 강조 표시용)
-  const matchingItem = listingFeedback.find(f => f.category === '공고 매칭');
-  const listingMatchRate = matchingItem
-    ? parseInt(matchingItem.message.match(/(\d+)%/)?.[1] ?? '0')
-    : null;
-
-  // 8. 분석 점수 DB 저장 (coverLetterId가 있을 때만)
+  // 7. 분석 점수 DB 저장 (coverLetterId가 있을 때만)
   if (coverLetterId) {
     try {
       const existing = await (prisma.coverLetter as unknown as {
@@ -251,7 +170,6 @@ export async function POST(req: NextRequest) {
       feedback: allFeedback,
       overallScore,
       comparison,
-      listingMatchRate,
       analyzedAt: new Date().toISOString(),
     },
   });

@@ -99,7 +99,7 @@ export default function AdminNoticesPage() {
         <button
           type="button"
           onClick={() => setShowForm(v => !v)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-[#0f172a] px-3 py-2 text-sm font-medium text-white hover:bg-[#1e293b] transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
         >
           <Plus className="w-4 h-4" /> 공지 작성
         </button>
@@ -116,7 +116,7 @@ export default function AdminNoticesPage() {
               value={newNotice.title}
               onChange={e => setNewNotice(v => ({ ...v, title: e.target.value }))}
               placeholder="공지 제목"
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div>
@@ -126,7 +126,7 @@ export default function AdminNoticesPage() {
               onChange={e => setNewNotice(v => ({ ...v, content: e.target.value }))}
               rows={4}
               placeholder="공지 내용을 입력하세요"
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export default function AdminNoticesPage() {
               type="button"
               disabled={!newNotice.title.trim() || !newNotice.content.trim() || createMutation.isPending}
               onClick={() => createMutation.mutate()}
-              className="px-4 py-2 text-sm font-medium bg-[#0f172a] text-white rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               등록
             </button>
@@ -176,14 +176,14 @@ export default function AdminNoticesPage() {
                     value={editData.title}
                     onChange={e => setEditData(v => ({ ...v, title: e.target.value }))}
                     aria-label="공지 제목 수정"
-                    className="w-full text-sm font-medium border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                    className="w-full text-sm font-medium border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                   <textarea
                     value={editData.content}
                     onChange={e => setEditData(v => ({ ...v, content: e.target.value }))}
                     rows={3}
                     aria-label="공지 내용 수정"
-                    className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+                    className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                   <div className="flex gap-2 justify-end">
                     <button

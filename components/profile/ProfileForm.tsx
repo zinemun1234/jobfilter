@@ -103,7 +103,13 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         {/* 이름 */}
         <div className="px-5 py-4">
           <label htmlFor="name" className={labelClass}>이름</label>
-          <input id="name" type="text" {...register('name')} className={fieldClass} placeholder="홍길동" />
+          <input
+            id="name"
+            type="text"
+            {...register('name')}
+            className={fieldClass}
+            placeholder="홍길동"
+          />
           {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
         </div>
 
@@ -172,7 +178,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full rounded-lg bg-[#0f172a] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1e293b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {isLoading ? '저장 중...' : '저장'}
       </button>

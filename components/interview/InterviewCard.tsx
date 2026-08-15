@@ -35,7 +35,7 @@ export function InterviewCard({ question, onEdit, onDelete, canDelete = false }:
           <span className={`h-2 w-2 rounded-full ${cat.dot}`} />
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{cat.label}</span>
           {question.jobType && (
-            <span className="rounded-full border border-gray-200 px-2 py-0.5 text-[10px] text-gray-500">
+            <span className="rounded-full border border-gray-200 px-2 py-0.5 text-xs text-gray-500">
               {question.jobType}
             </span>
           )}

@@ -11,7 +11,7 @@ export default function RoadmapProgress({ progress, total, completed }: RoadmapP
     return (
       <div className="text-center py-4">
         <p className="text-sm text-gray-400 mb-2">로드맵이 설정되지 않았습니다</p>
-        <Link href="/roadmap" className="text-sm font-medium text-[#0f172a] hover:underline">
+        <Link href="/roadmap" className="text-sm font-medium text-primary hover:underline">
           로드맵 설정하기 →
         </Link>
       </div>
@@ -28,7 +28,7 @@ export default function RoadmapProgress({ progress, total, completed }: RoadmapP
       </div>
       <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
         <div
-          className="h-full rounded-full bg-[#0f172a] transition-all duration-500"
+          className="h-full rounded-full bg-primary transition-all duration-500"
           style={{ width: `${clamped}%` }}
         />
       </div>

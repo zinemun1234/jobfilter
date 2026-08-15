@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Download, FileText } from 'lucide-react';
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
 
 type Portfolio = {
   id: string;
@@ -111,6 +111,7 @@ export default function PortfolioExportPage() {
   const { data: portfolios = [], isLoading: pLoading } = useQuery({ queryKey: ['portfolios'], queryFn: fetchPortfolios });
   const { data: profile, isLoading: prLoading } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [downloading, setDownloading] = useState(false);
 
   const isLoading = pLoading || prLoading;
   const filtered = portfolios.filter(p => selected.size === 0 || selected.has(p.id));
@@ -122,6 +123,28 @@ export default function PortfolioExportPage() {
       return next;
     });
   }
+
+  const handleDownload = async () => {
+    if (!profile || filtered.length === 0) return;
+    setDownloading(true);
+    try {
+      const doc = <PortfolioPDF profile={profile} portfolios={filtered} />;
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `portfolio_${profile.name ?? 'export'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('PDF 다운로드 실패:', error);
+      alert('PDF 다운로드에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
@@ -144,7 +167,7 @@ export default function PortfolioExportPage() {
             </div>
             {portfolios.map(p => (
               <label key={p.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-colors ${
-                selected.has(p.id) ? 'border-[#0f172a] bg-[#0f172a]/5' : 'border-gray-100 bg-white hover:bg-gray-50'
+                selected.has(p.id) ? 'border-primary bg-primary/5' : 'border-gray-100 bg-white hover:bg-gray-50'
               }`}>
                 <input type="checkbox" checked={selected.size === 0 || selected.has(p.id)}
                   onChange={() => toggle(p.id)} className="rounded" />
@@ -154,7 +177,7 @@ export default function PortfolioExportPage() {
                 </div>
                 <div className="flex flex-wrap gap-1 max-w-[160px] justify-end">
                   {p.techStack.slice(0, 3).map(t => (
-                    <span key={t} className="text-[10px] bg-gray-100 text-gray-500 rounded px-1.5 py-0.5">{t}</span>
+                    <span key={t} className="text-xs bg-gray-100 text-gray-500 rounded px-1.5 py-0.5">{t}</span>
                   ))}
                 </div>
               </label>
@@ -170,14 +193,14 @@ export default function PortfolioExportPage() {
                 <p className="text-gray-400">프로젝트 {filtered.length}개 포함</p>
               </div>
               <div className="mt-4">
-                <PDFDownloadLink
-                  document={<PortfolioPDF profile={profile} portfolios={filtered} />}
-                  fileName={`portfolio_${profile.name ?? 'export'}.pdf`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] transition-colors"
+                <button
+                  onClick={handleDownload}
+                  disabled={downloading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Download className="w-4 h-4" />
-                  PDF 다운로드
-                </PDFDownloadLink>
+                  {downloading ? '다운로드 중...' : 'PDF 다운로드'}
+                </button>
               </div>
             </div>
           )}

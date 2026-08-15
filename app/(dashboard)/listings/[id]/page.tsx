@@ -123,7 +123,7 @@ export default function ListingDetailPage() {
               <Building2 className="w-4 h-4 text-gray-400" />
               <p className="text-sm font-medium text-gray-500">{listing.company}</p>
               {listing.source && (
-                <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{listing.source}</span>
+                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{listing.source}</span>
               )}
             </div>
             <h1 className="text-xl font-semibold text-gray-900">{listing.position}</h1>
@@ -135,7 +135,7 @@ export default function ListingDetailPage() {
             className={`shrink-0 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               added
                 ? 'bg-emerald-50 text-emerald-600 cursor-default'
-                : 'bg-[#0f172a] text-white hover:bg-[#1e293b]'
+                : 'bg-primary text-white hover:bg-primary/90'
             } disabled:opacity-60`}
           >
             {added ? <><CheckCircle className="w-4 h-4" /> 추가됨</> : <><Plus className="w-4 h-4" /> 내 목록에 추가</>}

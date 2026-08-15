@@ -75,3 +75,45 @@ export async function getAuthSession(): Promise<string> {
 
   return session.user.id;
 }
+
+// 관리자 권한 확인
+export async function requireAdmin(): Promise<{ userId: string; role: string }> {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    throw new AppError('인증이 필요합니다.', ERROR_CODES.UNAUTHORIZED);
+  }
+  if (session.user.role !== 'ADMIN') {
+    throw new AppError('관리자 권한이 필요합니다.', ERROR_CODES.FORBIDDEN);
+  }
+
+  return { userId: session.user.id, role: session.user.role };
+}
+
+// 리소스 소유자 또는 관리자 권한 확인
+export async function requireAdminOrOwner(resourceUserId: string): Promise<{ userId: string; role: string }> {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    throw new AppError('인증이 필요합니다.', ERROR_CODES.UNAUTHORIZED);
+  }
+  if (session.user.role !== 'ADMIN' && session.user.id !== resourceUserId) {
+    throw new AppError('접근 권한이 없습니다.', ERROR_CODES.FORBIDDEN);
+  }
+
+  return { userId: session.user.id, role: session.user.role };
+}
+
+// 민감정보 제거 DTO
+export function sanitizeUser<T extends { password?: string }>(user: T): Omit<T, 'password'> {
+  const { password, ...rest } = user;
+  return rest;
+}
+
+export function sanitizeJobPosting<T extends { userId?: string; user?: unknown }>(
+  job: T
+): Omit<T, 'userId' | 'user'> {
+  const { userId, user, ...rest } = job as T & { userId?: string; user?: unknown };
+  void user;
+  return rest as Omit<T, 'userId' | 'user'>;
+}

@@ -7,48 +7,38 @@
  *
  * 구성:
  * - KanbanBoard: DndContext 루트, 드래그 이벤트 처리
- * - KanbanColumn: 상태별 컬럼 (SortableContext)
+ * - KanbanColumn: 상태별 컬럼 (SortableContext + Droppable)
  * - JobCard: 드래그 가능한 공고 카드 (useSortable)
  *
  * 드래그 동작:
- * - dragOver: 다른 컬럼 위에 올라가면 낙관적으로 onStatusChange 호출
  * - dragEnd: 최종 위치 확정 후 onStatusChange 호출
- * - DragOverlay: 드래그 중인 카드의 고스트 UI (rotate-2 효과)
+ * - 낙관적 업데이트: 드롭 즉시 카드 컬럼 이동, API 호출, 실패 시 롤백
+ * - DragOverlay: 드래그 중인 카드 고스트 UI
  *
  * PointerSensor에 distance: 5 설정 — 클릭과 드래그를 구분
  */
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   DndContext,
   DragEndEvent,
-  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  useDroppable,
   useSensor,
   useSensors,
   closestCorners,
 } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { JobPosting } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
 import { AlertCircle, ExternalLink, Trash2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
-
-const statusConfig: Record<ApplicationStatus, { label: string; dot: string; text: string; bg: string; border: string; header: string }> = {
-  PREPARING:     { label: '서류 준비 중', dot: 'bg-slate-400',   text: 'text-slate-700',   bg: 'bg-slate-50',   border: 'border-slate-200', header: 'bg-slate-100' },
-  APPLIED:       { label: '지원 완료',   dot: 'bg-blue-400',    text: 'text-blue-700',    bg: 'bg-blue-50',    border: 'border-blue-200',  header: 'bg-blue-100'  },
-  DOCUMENT_PASS: { label: '서류 합격',   dot: 'bg-emerald-400', text: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200',header: 'bg-emerald-100'},
-  INTERVIEW:     { label: '면접 예정',   dot: 'bg-amber-400',   text: 'text-amber-700',   bg: 'bg-amber-50',   border: 'border-amber-200', header: 'bg-amber-100' },
-  FINAL_PASS:    { label: '최종 합격',   dot: 'bg-violet-400',  text: 'text-violet-700',  bg: 'bg-violet-50',  border: 'border-violet-200',header: 'bg-violet-100'},
-  REJECTED:      { label: '불합격',     dot: 'bg-red-400',     text: 'text-red-700',     bg: 'bg-red-50',     border: 'border-red-200',   header: 'bg-red-100'   },
-};
-
-const statusOrder: ApplicationStatus[] = [
-  'PREPARING', 'APPLIED', 'DOCUMENT_PASS', 'INTERVIEW', 'FINAL_PASS', 'REJECTED',
-];
+import { STATUS_CONFIG, STATUS_ORDER } from '@/lib/status-config';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 function JobCard({
   job,
@@ -79,16 +69,18 @@ function JobCard({
       onClick={() => router.push(`/jobs/${job.id}`)}
     >
       <div className="flex items-start gap-2">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           {...attributes}
           {...listeners}
           onClick={(e) => e.stopPropagation()}
-          className="mt-0.5 p-0.5 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing shrink-0"
+          className="mt-0.5 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing shrink-0"
           aria-label="드래그 핸들"
         >
-          <GripVertical className="w-3.5 h-3.5" />
-        </button>
+          <GripVertical className="w-3 h-3" />
+        </Button>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate">{job.company}</p>
           <p className="text-xs text-gray-500 truncate mt-0.5">{job.position}</p>
@@ -103,25 +95,33 @@ function JobCard({
         </div>
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           {job.url && (
-            <a
-              href={job.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              aria-label="공고 링크"
-              className="p-1 rounded text-gray-300 hover:text-blue-500 transition-colors"
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              asChild
+              className="text-gray-300 hover:text-blue-500"
             >
-              <ExternalLink className="w-3 h-3" />
-            </a>
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                aria-label="공고 링크"
+              >
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             onClick={(e) => { e.stopPropagation(); onDelete(job.id); }}
             aria-label="삭제"
-            className="p-1 rounded text-gray-300 hover:text-red-500 transition-colors"
+            className="text-gray-300 hover:text-red-500"
           >
             <Trash2 className="w-3 h-3" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -137,14 +137,18 @@ function KanbanColumn({
   jobs: JobPosting[];
   onDelete: (id: string) => void;
 }) {
-  const cfg = statusConfig[status];
+  const cfg = STATUS_CONFIG[status];
+  const { setNodeRef, isOver } = useDroppable({ id: status, data: { status } });
+
   return (
-    <div className={`flex flex-col rounded-xl border ${cfg.border} min-w-[220px] w-[220px] shrink-0`}>
+    <div
+      ref={setNodeRef}
+      className={`flex flex-col rounded-xl border ${cfg.border} min-w-[220px] w-[220px] shrink-0 transition-all ${isOver ? 'ring-2 ring-primary/30' : ''}`}>
       <div className={`${cfg.header} rounded-t-xl px-3 py-2.5 flex items-center justify-between`}>
-        <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-          <span className={`text-xs font-semibold ${cfg.text}`}>{cfg.label}</span>
-        </div>
+        <Badge className={`border-0 ${cfg.bg} ${cfg.text}`}>
+          <span className={`w-2 h-2 rounded-full ${cfg.dot} mr-1.5`} />
+          {cfg.label}
+        </Badge>
         <span className="text-xs text-gray-400 font-medium tabular-nums">{jobs.length}</span>
       </div>
       <SortableContext items={jobs.map(j => j.id)} strategy={verticalListSortingStrategy}>
@@ -160,62 +164,66 @@ function KanbanColumn({
 
 export function KanbanBoard({
   jobs,
-  onStatusChange,
-  onDelete,
+  onStatusChangeAction,
+  onDeleteAction,
 }: {
   jobs: JobPosting[];
-  onStatusChange: (id: string, status: ApplicationStatus) => void;
-  onDelete: (id: string) => void;
+  onStatusChangeAction: (id: string, status: ApplicationStatus) => Promise<void>;
+  onDeleteAction: (id: string) => void;
 }) {
+  const [items, setItems] = useState<JobPosting[]>(jobs);
   const [activeJob, setActiveJob] = useState<JobPosting | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  const grouped = statusOrder.reduce((acc, s) => {
-    acc[s] = jobs.filter(j => j.status === s);
+  const grouped = useMemo(() => STATUS_ORDER.reduce((acc, s) => {
+    acc[s] = items.filter(j => j.status === s);
     return acc;
-  }, {} as Record<ApplicationStatus, JobPosting[]>);
+  }, {} as Record<ApplicationStatus, JobPosting[]>), [items]);
 
-  function findColumn(jobId: string): ApplicationStatus | null {
-    for (const s of statusOrder) {
-      if (grouped[s].some(j => j.id === jobId)) return s;
+  useEffect(() => {
+    if (!activeJob) {
+      setItems(jobs);
     }
-    return null;
+  }, [jobs, activeJob]);
+
+  function findColumn(id: string): ApplicationStatus | null {
+    if (STATUS_ORDER.includes(id as ApplicationStatus)) {
+      return id as ApplicationStatus;
+    }
+    const job = items.find(j => j.id === id);
+    return (job?.status as ApplicationStatus) ?? null;
   }
 
   function handleDragStart(e: DragStartEvent) {
-    const job = jobs.find(j => j.id === e.active.id);
+    const job = items.find(j => j.id === e.active.id);
     setActiveJob(job ?? null);
   }
 
-  function handleDragOver(e: DragOverEvent) {
-    const { active, over } = e;
-    if (!over) return;
-
-    const activeCol = findColumn(active.id as string);
-    // over could be a column id or a job id
-    const overCol = statusOrder.includes(over.id as ApplicationStatus)
-      ? (over.id as ApplicationStatus)
-      : findColumn(over.id as string);
-
-    if (!activeCol || !overCol || activeCol === overCol) return;
-    onStatusChange(active.id as string, overCol);
-  }
-
   function handleDragEnd(e: DragEndEvent) {
-    setActiveJob(null);
     const { active, over } = e;
-    if (!over) return;
 
-    const activeCol = findColumn(active.id as string);
-    const overCol = statusOrder.includes(over.id as ApplicationStatus)
-      ? (over.id as ApplicationStatus)
-      : findColumn(over.id as string);
+    setActiveJob(null);
+    if (!over || !activeJob) return;
 
-    if (!activeCol || !overCol || activeCol === overCol) return;
-    onStatusChange(active.id as string, overCol);
+    const activeId = active.id as string;
+    const originalStatus = activeJob.status as ApplicationStatus;
+    const overCol = findColumn(over.id as string);
+
+    if (!overCol || originalStatus === overCol) return;
+
+    // 낙관적 업데이트: 드롭 즉시 컬럼 이동
+    setItems(prev => prev.map(j => (j.id === activeId ? { ...j, status: overCol } : j)));
+
+    onStatusChangeAction(activeId, overCol)
+      .then(() => toast.success('상태가 변경되었습니다'))
+      .catch(() => {
+        // 실패 시 원래 상태로 롤백
+        setItems(prev => prev.map(j => (j.id === activeId ? { ...j, status: originalStatus } : j)));
+        toast.error('상태 변경에 실패했습니다');
+      });
   }
 
   return (
@@ -223,16 +231,15 @@ export function KanbanBoard({
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div className="flex gap-3 overflow-x-auto pb-4">
-        {statusOrder.map(status => (
+        {STATUS_ORDER.map(status => (
           <KanbanColumn
             key={status}
             status={status}
             jobs={grouped[status]}
-            onDelete={onDelete}
+            onDelete={onDeleteAction}
           />
         ))}
       </div>

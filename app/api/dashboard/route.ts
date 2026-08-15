@@ -9,6 +9,8 @@ import {
 } from '@/lib/dashboard';
 import type { DashboardSummary, JobPosting, SkillStatus } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(): Promise<NextResponse> {
   try {
     const userId = await getAuthSession();

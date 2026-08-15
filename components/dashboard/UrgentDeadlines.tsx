@@ -31,7 +31,7 @@ export default function UrgentDeadlines({ postings }: UrgentDeadlinesProps) {
             </div>
             <div className="ml-4 shrink-0 flex items-center gap-3">
               {isVeryUrgent && (
-                <span className="text-[10px] font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
                   마감 임박
                 </span>
               )}

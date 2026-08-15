@@ -22,6 +22,7 @@ export async function GET() {
     const parsed = portfolios.map(p => ({
       ...p,
       techStack: (() => { try { return JSON.parse(p.techStack as string); } catch { return []; } })(),
+      githubAnalysis: (() => { try { return p.githubAnalysis ? JSON.parse(p.githubAnalysis) : null; } catch { return null; } })(),
     }));
 
     return NextResponse.json({ data: parsed });
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
     const portfolio = await prisma.portfolio.create({
       data: {
         ...validatedData,
+        jobId: validatedData.jobId || null,
         techStack: JSON.stringify(validatedData.techStack), // JSON string for SQLite compatibility
         startDate: new Date(validatedData.startDate),
         endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,

@@ -137,7 +137,7 @@ export default function BulkJobsPage() {
         onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
         onClick={() => inputRef.current?.click()}
         className={`relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed py-14 cursor-pointer transition-colors ${
-          dragging ? 'border-[#0f172a] bg-gray-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+          dragging ? 'border-primary bg-gray-50' : 'border-gray-200 hover:border-gray-300 bg-white'
         }`}
       >
         <input
@@ -168,7 +168,7 @@ export default function BulkJobsPage() {
           type="button"
           onClick={handleUpload}
           disabled={loading}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
         >
           <Filter className="w-4 h-4" />
           {loading ? '분석 중...' : '공고 파싱 시작'}
@@ -282,7 +282,7 @@ export default function BulkJobsPage() {
                   type="button"
                   onClick={handleRegister}
                   disabled={selected.size === 0 || registering}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   {registering ? '등록 중...' : `선택한 ${selected.size}개 공고 등록`}

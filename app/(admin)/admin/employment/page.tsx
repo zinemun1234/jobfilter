@@ -99,12 +99,12 @@ export default function AdminEmploymentPage() {
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-2 text-center">
             <p className="text-lg font-bold text-emerald-700">{records.length}</p>
-            <p className="text-[10px] text-emerald-500">확정 등록</p>
+            <p className="text-xs text-emerald-500">확정 등록</p>
           </div>
           <button
             type="button"
             onClick={() => { setForm(emptyForm); setSlideOpen(true); }}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0f172a] px-3 py-2 text-sm font-medium text-white hover:bg-[#1e293b] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
           >
             <Plus className="w-4 h-4" /> 취업 확정 등록
           </button>
@@ -118,7 +118,7 @@ export default function AdminEmploymentPage() {
           placeholder="학생명, 이메일, 회사명 검색"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-9 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20"
+          className="w-full pl-9 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -184,7 +184,7 @@ export default function AdminEmploymentPage() {
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">학생 선택 *</label>
             <select value={form.userId} onChange={f('userId')} aria-label="학생 선택"
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 bg-white">
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
               <option value="">학생을 선택하세요</option>
               {users.map((u: User) => (
                 <option key={u.id} value={u.id}>{u.name ?? u.email} ({u.email})</option>
@@ -195,19 +195,19 @@ export default function AdminEmploymentPage() {
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">회사명 *</label>
               <input value={form.company} onChange={f('company')} placeholder="예: 카카오"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">직무 *</label>
               <input value={form.position} onChange={f('position')} placeholder="예: 백엔드 개발자"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">고용형태</label>
               <select value={form.employType} onChange={f('employType')} aria-label="고용형태 선택"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 bg-white">
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white">
                 <option value="">선택</option>
                 <option value="정규직">정규직</option>
                 <option value="계약직">계약직</option>
@@ -217,24 +217,24 @@ export default function AdminEmploymentPage() {
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">입사일</label>
               <input type="date" value={form.startDate} onChange={f('startDate')} aria-label="입사일 선택"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">급여</label>
             <input value={form.salary} onChange={f('salary')} placeholder="예: 4,000만원"
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20" />
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">메모</label>
             <textarea value={form.note} onChange={f('note')} rows={3} placeholder="특이사항 등..."
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 resize-none" />
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
           </div>
           <button
             type="button"
             onClick={() => saveMutation.mutate()}
             disabled={!form.userId || !form.company || !form.position || saveMutation.isPending}
-            className="w-full py-2.5 bg-[#0f172a] text-white text-sm font-medium rounded-lg hover:bg-[#1e293b] disabled:opacity-50 transition-colors"
+            className="w-full py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {saveMutation.isPending ? '등록 중...' : '취업 확정 등록'}
           </button>

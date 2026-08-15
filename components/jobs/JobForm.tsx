@@ -5,25 +5,30 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { jobPostingSchema } from '@/lib/validations';
-import type { JobPosting as PrismaJobPosting } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
 import { toast } from 'sonner';
+import { STATUS_CONFIG, STATUS_ORDER } from '@/lib/status-config';
 
 type JobFormData = z.infer<typeof jobPostingSchema>;
 
+interface JobFormDataPartial {
+  id: string;
+  company: string;
+  position: string;
+  url: string | null;
+  deadline: Date | null;
+  status: string;
+}
+
 interface JobFormProps {
-  job?: PrismaJobPosting;
+  job?: JobFormDataPartial;
   onSuccess: () => void;
 }
 
-const statusOptions: { value: ApplicationStatus; label: string }[] = [
-  { value: 'PREPARING', label: '서류 준비 중' },
-  { value: 'APPLIED', label: '지원 완료' },
-  { value: 'DOCUMENT_PASS', label: '서류 합격' },
-  { value: 'INTERVIEW', label: '면접 예정' },
-  { value: 'FINAL_PASS', label: '최종 합격' },
-  { value: 'REJECTED', label: '불합격' },
-];
+const statusOptions: { value: ApplicationStatus; label: string }[] = STATUS_ORDER.map((status) => ({
+  value: status,
+  label: STATUS_CONFIG[status].label,
+}));
 
 export function JobForm({ job, onSuccess }: JobFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -118,7 +123,7 @@ export function JobForm({ job, onSuccess }: JobFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-lg bg-[#0f172a] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e293b] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting ? '저장 중...' : job ? '수정' : '추가'}
         </button>

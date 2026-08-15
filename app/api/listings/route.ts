@@ -1,7 +1,6 @@
 /**
  * GET /api/listings
- * 활성 공고 목록 조회 (search 파라미터로 회사명/직무/지역 검색)
- * tags 필드는 JSON 문자열 → 배열로 파싱해서 반환
+ * 활성 공고 목록 조회 (서버 사이드 필터링 + 페이지네이션)
  *
  * POST /api/listings
  * 공고를 내 지원 목록(JobPosting)에 추가
@@ -12,6 +11,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { extractJobChecklist } from '@/lib/job-checklist';
+import { getListings } from '@/lib/server/listings';
 
 // 유저용: 활성 공고 목록 조회
 export async function GET(req: NextRequest) {
@@ -19,28 +20,8 @@ export async function GET(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const search = searchParams.get('search') ?? '';
-
-  const listings = await prisma.jobListing.findMany({
-    where: {
-      isActive: true,
-      ...(search ? {
-        OR: [
-          { company: { contains: search } },
-          { position: { contains: search } },
-          { location: { contains: search } },
-        ],
-      } : {}),
-    },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  return NextResponse.json({
-    data: listings.map(l => ({
-      ...l,
-      tags: (() => { try { return l.tags ? JSON.parse(l.tags) : []; } catch { return []; } })(),
-    })),
-  });
+  const response = await getListings(searchParams, session.user.id);
+  return NextResponse.json(response);
 }
 
 // 유저용: 공고를 내 지원 목록에 추가
@@ -60,6 +41,9 @@ export async function POST(req: NextRequest) {
   });
   if (existing) return NextResponse.json({ error: '이미 추가된 공고입니다' }, { status: 409 });
 
+  const tags = (() => { try { return listing.tags ? JSON.parse(listing.tags) : []; } catch { return []; } })();
+  const checklist = extractJobChecklist(listing.description, tags);
+
   const job = await prisma.jobPosting.create({
     data: {
       userId: session.user.id,
@@ -68,6 +52,7 @@ export async function POST(req: NextRequest) {
       url: listing.url,
       deadline: listing.deadline,
       status: 'PREPARING',
+      checklist: checklist.length > 0 ? JSON.stringify(checklist) : null,
     },
   });
 

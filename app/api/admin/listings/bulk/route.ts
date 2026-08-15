@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { extractJobTags } from '@/lib/job-tags';
+import { requireAdmin } from '@/lib/api';
+import { notifyUsersOfNewListingsSummary } from '@/lib/notifications';
+import type { Prisma } from '@/lib/generated/prisma';
 
 export const dynamic = 'force-dynamic';
-
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== 'ADMIN') return null;
-  return session;
-}
 
 type BulkRow = {
   company: string; position: string; location?: string; career?: string;
@@ -18,18 +14,11 @@ type BulkRow = {
 };
 
 export async function POST(req: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  await requireAdmin();
 
   const body = await req.json();
   const rows: BulkRow[] = body.rows ?? [];
   if (!rows.length) return NextResponse.json({ error: '등록할 데이터가 없습니다.' }, { status: 400 });
-
-  // 1. 마감일 지난 공고 자동 비활성화
-  await prisma.jobListing.updateMany({
-    where: { deadline: { lt: new Date() }, isActive: true },
-    data: { isActive: false },
-  });
 
   // 2. 기존 공고 (company + position) 중복 감지
   const existing = await prisma.jobListing.findMany({
@@ -44,25 +33,74 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: { count: 0, duplicateCount, message: '모두 중복 공고입니다.' } });
   }
 
-  const created = await prisma.jobListing.createMany({
-    data: newRows.map(r => ({
-      company: r.company, position: r.position,
-      location: r.location || null, career: r.career || null,
-      employType: r.employType || null, education: r.education || null,
-      salary: r.salary || null,
-      deadline: r.deadline ? (isNaN(new Date(r.deadline).getTime()) ? null : new Date(r.deadline)) : null,
-      url: r.url || null, description: r.description || null,
-      tags: null, isActive: true,
-    })),
+  // 행별로 변환 및 유효성 검사 (트랜잭션 전에 실패 행 분리)
+  const validRows: Prisma.JobListingCreateManyInput[] = [];
+  const failedRows: { row: number; company: string; position: string; reason: string }[] = [];
+
+  newRows.forEach((r, idx) => {
+    try {
+      if (!r.company?.trim() || !r.position?.trim()) {
+        throw new Error('회사명과 직무명은 필수입니다.');
+      }
+      const sourceText = `${r.position} ${r.company} ${r.description ?? ''}`;
+      const tags = extractJobTags(sourceText);
+      const deadlineDate = r.deadline ? new Date(r.deadline) : null;
+      if (r.deadline && (!deadlineDate || isNaN(deadlineDate.getTime()))) {
+        throw new Error('마감일 형식이 올바르지 않습니다.');
+      }
+      validRows.push({
+        company: r.company.trim(),
+        position: r.position.trim(),
+        location: r.location?.trim() || null,
+        career: r.career?.trim() || null,
+        employType: r.employType?.trim() || null,
+        education: r.education?.trim() || null,
+        salary: r.salary?.trim() || null,
+        deadline: deadlineDate,
+        url: r.url?.trim() || null,
+        description: r.description?.trim() || null,
+        tags: tags.length > 0 ? JSON.stringify(tags) : null,
+        isActive: true,
+      });
+    } catch (e) {
+      failedRows.push({
+        row: idx,
+        company: r.company ?? '',
+        position: r.position ?? '',
+        reason: e instanceof Error ? e.message : '변환 오류',
+      });
+    }
   });
 
-  return NextResponse.json({ data: { count: created.count, duplicateCount } }, { status: 201 });
+  if (!validRows.length) {
+    return NextResponse.json({ data: { count: 0, duplicateCount, failed: failedRows } }, { status: 400 });
+  }
+
+  // 트랜잭션으로 마감일 지난 공고 비활성화 + 벌크 등록 원자화
+  const [_, created] = await prisma.$transaction([
+    prisma.jobListing.updateMany({
+      where: { deadline: { lt: new Date() }, isActive: true },
+      data: { isActive: false },
+    }),
+    prisma.jobListing.createMany({ data: validRows }),
+  ]);
+
+  // 사용자 알림 생성
+  try {
+    await notifyUsersOfNewListingsSummary(created.count);
+  } catch {
+    // 알림 생성 실패는 응답에 영향을 주지 않음
+  }
+
+  return NextResponse.json(
+    { data: { count: created.count, duplicateCount, failed: failedRows.length > 0 ? failedRows : undefined } },
+    { status: 201 }
+  );
 }
 
 // 마감일 지난 공고 일괄 비활성화 (GET으로 수동 처리도 가능)
 export async function GET() {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  await requireAdmin();
 
   const result = await prisma.jobListing.updateMany({
     where: { deadline: { lt: new Date() }, isActive: true },

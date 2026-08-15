@@ -42,31 +42,31 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-slate-950">
       {/* ── 좌측 브랜딩 패널 ── */}
-      <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between overflow-hidden bg-[#0a0f1e] px-14 py-14">
+      <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between overflow-hidden bg-slate-950 px-14 py-14">
         {/* 배경 그라디언트 오브 */}
-        <div className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px]" />
-        <div className="pointer-events-none absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-violet-600/15 blur-[100px]" />
+        <div className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="pointer-events-none absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-violet-500/15 blur-[100px]" />
         {/* 그리드 패턴 */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
 
         {/* 로고 */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-500/30">
-            <span className="text-[11px] font-black text-white tracking-tight">JF</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/30">
+            <span className="text-xs font-black text-white tracking-tight">JF</span>
           </div>
           <span className="text-sm font-bold text-white tracking-tight">Job Filter</span>
-          <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/50">CS 취업지원 포털</span>
+          <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/50">CS 취업지원 포털</span>
         </div>
 
         {/* 메인 카피 */}
         <div className="relative z-10 space-y-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-              <span className="text-[11px] font-semibold text-blue-300 tracking-widest uppercase">컴퓨터공학부 전용</span>
+              <span className="text-xs font-semibold text-blue-300 tracking-widest uppercase">컴퓨터공학부 전용</span>
             </div>
             <h2 className="text-[2.6rem] font-light text-white leading-[1.2] tracking-tight">
               취업 준비,<br />
@@ -84,8 +84,8 @@ export default function LoginPage() {
           <div className="space-y-3">
             {FEATURES.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex items-center gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.04] px-4 py-3.5 backdrop-blur-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/20">
-                  <Icon className="h-4 w-4 text-blue-400" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/20">
+                  <Icon className="h-4 w-4 text-blue-300" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">{title}</p>
@@ -101,26 +101,26 @@ export default function LoginPage() {
           {[['CS 맞춤 공고', '자동 필터링'], ['자소서 코칭', 'AI 피드백'], ['면접 준비', '예상 질문']].map(([t, d]) => (
             <div key={t}>
               <p className="text-xs font-semibold text-white/60">{t}</p>
-              <p className="text-[11px] text-white/25 mt-0.5">{d}</p>
+              <p className="text-xs text-white/25 mt-0.5">{d}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── 우측 폼 패널 ── */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-gray-50/50">
+      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-background">
         <div className="w-full max-w-[380px]">
           {/* 모바일 로고 */}
           <div className="mb-8 flex items-center gap-2 lg:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0f172a]">
-              <span className="text-[10px] font-black text-white">JF</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900">
+              <span className="text-xs font-black text-white">JF</span>
             </div>
-            <span className="text-sm font-bold text-gray-900">Job Filter</span>
+            <span className="text-sm font-bold text-foreground">Job Filter</span>
           </div>
 
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">다시 오셨군요</h1>
-            <p className="mt-1.5 text-sm text-gray-400">계정에 로그인하세요</p>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">다시 오셨군요</h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">계정에 로그인하세요</p>
           </div>
 
           {isRegistered && (
@@ -130,7 +130,7 @@ export default function LoginPage() {
             </div>
           )}
           {authError && (
-            <div className="mb-5 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+            <div className="mb-5 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
               {authError}
             </div>
           )}
@@ -138,21 +138,21 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* 이메일 */}
             <div className="space-y-1.5">
-              <label htmlFor="email" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">이메일</label>
+              <label htmlFor="email" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">이메일</label>
               <input
                 id="email" type="email" autoComplete="email"
                 {...register('email')}
                 placeholder="example@email.com"
-                className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-300 shadow-sm transition-all focus:border-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#0f172a]/10"
+                className="block w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
-              {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+              {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
 
             {/* 비밀번호 */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">비밀번호</label>
-                <Link href="/forgot-password" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                <label htmlFor="password" className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">비밀번호</label>
+                <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                   비밀번호 찾기
                 </Link>
               </div>
@@ -163,25 +163,25 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   {...register('password')}
                   placeholder="비밀번호를 입력하세요"
-                  className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-11 text-sm text-gray-900 placeholder-gray-300 shadow-sm transition-all focus:border-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#0f172a]/10"
+                  className="block w-full rounded-xl border border-border bg-white px-4 py-3 pr-11 text-sm text-foreground placeholder:text-muted-foreground shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPw(v => !v)}
                   aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
                 >
                   {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+              {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
 
             {/* 로그인 버튼 */}
             <button
               type="submit"
               disabled={isLoading}
-              className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#0f172a]/20 transition-all hover:bg-[#1e293b] hover:shadow-[#0f172a]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group mt-2 flex w-full h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
@@ -199,24 +199,18 @@ export default function LoginPage() {
 
           {/* 구분선 */}
           <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-100" />
-            <span className="text-xs text-gray-300">또는</span>
-            <div className="h-px flex-1 bg-gray-100" />
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">또는</span>
+            <div className="h-px flex-1 bg-border" />
           </div>
 
           {/* 회원가입 링크 */}
           <div className="space-y-2.5">
             <Link
               href="/register"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted"
             >
               학생 회원가입
-            </Link>
-            <Link
-              href="/register-recruiter"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-500 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50"
-            >
-              기업 회원가입 (RECRUITER)
             </Link>
           </div>
         </div>
