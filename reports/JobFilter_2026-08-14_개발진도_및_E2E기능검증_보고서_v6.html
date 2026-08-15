@@ -192,6 +192,8 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 <tr><td>17 ~ 30</td><td>[부록] 사용자 화면 (14종)</td></tr>
 <tr><td>31 ~ 40</td><td>[부록] 관리자 화면 (10종)</td></tr>
 <tr><td>41 ~ 51</td><td>[부록] 인터랙션 검증 (11종)</td></tr>
+<tr><td>52</td><td>추가 작업 보고 (Phase 6~8)</td></tr>
+<tr><td>53</td><td>차기 실행 계획</td></tr>
 </tbody>
 </table>
 </div>
@@ -1602,6 +1604,157 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 <li><span class="mono">b9a7fd4</span> Phase 7 Recruiter 스키마 부분 정리: JobListing recruiter 관계 제거</li>
 </ul>
 <p>working tree clean, 배포는 별도 요청 없이 진행하지 않음.</p>
+</div>
+</div>
+</div>
+<div class="page">
+<div class="content">
+<div class="page-header">
+<h2>차기 실행 계획</h2>
+<span class="page-num">53</span>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">01</span>
+<span class="section-text">현재 상태</span>
+</div>
+<p>
+        Phase 1~8 까지 완료했다.
+        <span class="mono">npx next build</span>, <span class="mono">npx tsc --noEmit</span>,
+        <span class="mono">npm run lint</span>, <span class="mono">npm run test</span> 모두 통과,
+        production smoke test 정상, Git working tree clean 상태다.
+        다만 아직 원격 DB 마이그레이션과 <span class="mono">outputFileTracing: false</span> workaround는 해결되지 않았다.
+      </p>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">02</span>
+<span class="section-text">P0: 배포 직전 반드시 해야 할 일</span>
+</div>
+<table class="report-table">
+<thead>
+<tr><th style="width:22%">항목</th><th style="width:42%">해야 할 일</th><th style="width:22%">해결 시점</th><th style="width:14%">우선순위</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>Recruiter 스키마 마이그레이션 확정</td>
+<td>
+                RECRUITER 사용자(<span class="mono">wkfsl@naver.com</span>) 처리 방안 확정 후 마이그레이션 SQL 작성 및 <span class="mono">npx prisma migrate deploy</span> 적용.
+                안전한 방안은 <span class="mono">User</span> 필드 보존 + <span class="mono">JobListing.recruiterId</span> 컬럼/외래키 삭제 + <span class="mono">UserNotification_userId_createdAt_idx</span> 생성.
+              </td>
+<td>배포 전</td>
+<td><span class="priority p0">P0</span></td>
+</tr>
+<tr>
+<td><span class="mono">outputFileTracing: false</span> workaround</td>
+<td>
+                Vercel/운영 배포 환경에서는 <span class="mono">outputFileTracing: false</span> 제거 가능 여부 확인.
+                Windows 로컬에서만 필요하다면 환경변수 분기 또는 주석으로 분리.
+              </td>
+<td>배포 전</td>
+<td><span class="priority p0">P0</span></td>
+</tr>
+<tr>
+<td>최종 보안/소유권 점검</td>
+<td>
+                <span class="mono">/api/admin/*</span> 관리자 인증, <span class="mono">/api/jobs/[id]</span> 소유권 검증,
+                API 응답 DTO sanitize 재확인. 민감 정보(password, userId 등) 누출 여부 spot check.
+              </td>
+<td>배포 전</td>
+<td><span class="priority p0">P0</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">03</span>
+<span class="section-text">P1: 안정성 및 UX 마무리</span>
+</div>
+<table class="report-table">
+<thead>
+<tr><th style="width:22%">항목</th><th style="width:50%">해야 할 일</th><th style="width:14%">해결 시점</th><th style="width:14%">우선순위</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>데이터 정리</td>
+<td><span class="mono">UserNotification</span> 기존 데이터 <span class="mono">referenceId</span> 백필, <span class="mono">devToken</span>/불필요한 <span class="mono">console.log</span>/주석 제거</td>
+<td>배포 후</td>
+<td><span class="priority p1">P1</span></td>
+</tr>
+<tr>
+<td>연결 자료 UX</td>
+<td><span class="mono">/jobs/[id]</span> 연결 자료 카드 클릭 시 포트폴리오/경험/면접 페이지 이동, 연결 해제 기능, 드롭다운 로딩/빈/검색/필터 개선</td>
+<td>배포 후</td>
+<td><span class="priority p1">P1</span></td>
+</tr>
+<tr>
+<td>E2E 자동화</td>
+<td>Playwright MCP 수동 검증 흐름을 <span class="mono">*.spec.ts</span> 테스트 코드로 전환 (로그인, 공고 CRUD, admin 등록, .ics 다운로드)</td>
+<td>배포 후</td>
+<td><span class="priority p1">P1</span></td>
+</tr>
+<tr>
+<td>Vercel Preview smoke</td>
+<td>Vercel preview 배포 후 <span class="mono">/open/listings</span>, <span class="mono">/login</span>, <span class="mono">/api/jobs</span> 등 실제 도메인으로 스모크 테스트</td>
+<td>배포 직후</td>
+<td><span class="priority p1">P1</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">04</span>
+<span class="section-text">P2: 장기 확장</span>
+</div>
+<table class="report-table">
+<thead>
+<tr><th style="width:22%">항목</th><th style="width:64%">해야 할 일</th><th style="width:14%">우선순위</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>AI API 연동</td>
+<td>자소서 분석/공고 추천/면접 코칭용 Gemini API server-side 호출, rule-based 후처리, rate limit/fallback 처리</td>
+<td><span class="priority p2">P2</span></td>
+</tr>
+<tr>
+<td>Recruiter 기능 확정</td>
+<td>구인자 등록/승인/공고 직접 등록 플로우 정식 지원, 또는 <span class="mono">User</span>에서 완전 제거</td>
+<td><span class="priority p2">P2</span></td>
+</tr>
+<tr>
+<td>매칭/추천 고도화</td>
+<td>기술 스택 매칭 가중치, 마감일/인기/신선도 알고리즘 개선, 사용자 피드백 기반 랭킹</td>
+<td><span class="priority p2">P2</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">05</span>
+<span class="section-text">의사결정 필요 사항</span>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">01</span>RECRUITER 사용자 처리</h4>
+<div class="detail-block"><h5>선택지</h5><p>A) RECRUITER 기능 정식 지원 (UI/승인/공고 등록 플로우 구현) / B) 해당 사용자를 USER 또는 ADMIN으로 전환하고 기업 정보는 별도 저장 / C) 현재처럼 보존하고 JobListing 관계만 삭제</p></div>
+<div class="detail-block"><h5>권장</h5><p>배포 전까지는 C)를 적용해 안전하게 진행. 이후 B) 또는 A)는 사용자 요구에 따라 결정.</p></div>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">02</span><span class="mono">UserNotification</span> 인덱스</h4>
+<div class="detail-block"><h5>상황</h5><p>스키마에는 <span class="mono">@@index([userId, createdAt])</span>가 있으나 DB에는 없는 것으로 확인됨. 마이그레이션에 포함하면 자동 생성.</p></div>
+<div class="detail-block"><h5>권장</h5><p>Recruiter 마이그레이션 시 함께 <span class="mono">CREATE INDEX</span> 추가. 운영 DB 부하가 적은 시간에 적용.</p></div>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">03</span>Windows <span class="mono">outputFileTracing</span> workaround</h4>
+<div class="detail-block"><h5>상황</h5><p>Windows에서 <span class="mono">C:\Users\USER\Application Data</span> 같은 보호된 junction 스캔으로 <span class="mono">EPERM</span>이 발생해 <span class="mono">outputFileTracing: false</span>를 설정. 이 옵션은 향후 Next.js major에서 사라질 예정.</p></div>
+<div class="detail-block"><h5>권장</h5><p>Vercel 배포 시 제거. 로컬에서만 필요하다면 <span class="mono">process.env.LOCAL_BUILD</span> 같은 분기로 분리.</p></div>
+</div>
+</div>
+<div class="quote">
+      "Phase 6~8은 마무리됐다. 배포 전에는 Recruiter 마이그레이션 정책과 outputFileTracing workaround만 확정하면 운영 배포가 가능하다."
+      <small>JobFilter 프로젝트 · 2026.08.15</small>
 </div>
 </div>
 </div>
