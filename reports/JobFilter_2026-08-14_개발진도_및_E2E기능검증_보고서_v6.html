@@ -194,6 +194,7 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 <tr><td>41 ~ 51</td><td>[부록] 인터랙션 검증 (11종)</td></tr>
 <tr><td>52</td><td>추가 작업 보고 (Phase 6~8)</td></tr>
 <tr><td>53</td><td>차기 실행 계획</td></tr>
+<tr><td>54</td><td>Recruiter 완전 삭제 상세 계획 (MCP 확인)</td></tr>
 </tbody>
 </table>
 </div>
@@ -1754,6 +1755,147 @@ button.print{position:fixed;z-index:100;top:18px;right:22px;border:1px solid var
 </div>
 <div class="quote">
       "Phase 6~8은 마무리됐다. 배포 전에는 Recruiter 마이그레이션 정책과 outputFileTracing workaround만 확정하면 운영 배포가 가능하다."
+      <small>JobFilter 프로젝트 · 2026.08.15</small>
+</div>
+</div>
+</div>
+<div class="page">
+<div class="content">
+<div class="page-header">
+<h2>Recruiter 완전 삭제 상세 계획</h2>
+<span class="page-num">54</span>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">01</span>
+<span class="section-text">Supabase MCP 확인 결과</span>
+</div>
+<p>
+        Supabase MCP를 통해 연결된 프로젝트 및 실제 DB 상태를 조회했다.
+      </p>
+<table class="report-table">
+<thead>
+<tr><th>확인 항목</th><th>결과</th><th>의미</th></tr>
+</thead>
+<tbody>
+<tr><td>프로젝트</td><td><span class="mono">rkwuwijaxebnjdmdxyan</span> (ACTIVE_HEALTHY)</td><td>실제 운영 DB가 연결되어 있음</td></tr>
+<tr><td>Postgres 버전</td><td>17.6.1.084</td><td>마이그레이션 적용 시 최신 문법 사용 가능</td></tr>
+<tr><td>전체 사용자 수</td><td>8명</td><td>소규모 사용자, 삭제/변경 시 영향 범위가 작음</td></tr>
+<tr><td>RECRUITER 역할 사용자</td><td>1명</td><td>실사용자 데이터 존재, 처리 방안 필요</td></tr>
+<tr><td>JobListing 전체</td><td>64개</td><td>데이터 존재</td></tr>
+<tr><td><span class="mono">recruiterId</span>가 있는 JobListing</td><td>0개</td><td>컬럼/외래키를 제거해도 데이터 손실 없음</td></tr>
+<tr><td><span class="mono">UserNotification</span> 인덱스</td><td><span class="mono">userId_createdAt_idx</span> 없음</td><td>스키마-DB 간 인덱스 드리프트 존재</td></tr>
+</tbody>
+</table>
+<p style="font-size:11px;color:var(--gray-500);line-height:1.6;margin-top:12px">※ 실제 사용자 식별 정보(이메일, 이름, 기업명)는 보고서에 기재하지 않으며, MCP 조회 결과에 따라 별도 보관.</p>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">02</span>
+<span class="section-text">완전 삭제 대상</span>
+</div>
+<p>Recruiter 기능을 완전히 제거하려면 다음 스키마/코드/설정을 정리해야 한다.</p>
+<table class="report-table">
+<thead>
+<tr><th>영역</th><th>대상</th><th>삭제/수정 내용</th></tr>
+</thead>
+<tbody>
+<tr><td>Prisma 스키마</td><td><span class="mono">User</span></td><td><span class="mono">companyName</span>, <span class="mono">companyDesc</span>, <span class="mono">isApproved</span> 컬럼 제거; <span class="mono">role</span> 주석에서 RECRUITER 제거</td></tr>
+<tr><td>Prisma 스키마</td><td><span class="mono">JobListing</span></td><td><span class="mono">recruiterId</span>, <span class="mono">recruiter</span> 관계 제거 (이미 스키마에서 제거, DB 미적용)</td></tr>
+<tr><td>Prisma 스키마</td><td><span class="mono">User</span></td><td><span class="mono">recruitListings</span> 관계 제거 (이미 스키마에서 제거)</td></tr>
+<tr><td>코드</td><td><span class="mono">lib/api.ts</span></td><td><span class="mono">sanitizeUser</span>에서 company 필드 제거</td></tr>
+<tr><td>코드</td><td><span class="mono">app/(admin)/admin/users/*</span></td><td>role select에서 RECRUITER 제거, company 입력/표시 제거</td></tr>
+<tr><td>코드</td><td><span class="mono">app/api/admin/users/*</span></td><td>update body에서 company 필드 제거</td></tr>
+<tr><td>코드</td><td><span class="mono">app/api/auth/register/*</span></td><td>RECRUITER role 등록 방지</td></tr>
+<tr><td>설정</td><td><span class="mono">next.config.js</span></td><td><span class="mono">/register-recruiter</span>, <span class="mono">/recruit</span>, <span class="mono">/recruiter</span> 리다이렉트 제거</td></tr>
+<tr><td>문서</td><td><span class="mono">README.md</span></td><td>RECRUITER 설명 제거</td></tr>
+<tr><td>타입</td><td><span class="mono">types/index.ts</span></td><td>User 타입에서 company 필드 제거 (있다면)</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">03</span>
+<span class="section-text">데이터 처리 방안 (가장 민감)</span>
+</div>
+<p>DB에 1명의 RECRUITER 사용자가 존재하므로, <strong>컬럼을 drop하기 전에 반드시 데이터 처리 방침을 정해야 한다.</strong></p>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">01</span>옵션 A) 사용자 삭제</h4>
+<div class="detail-block"><h5>설명</h5><p>해당 계정이 테스트/더미 데이터라면 <span class="mono">DELETE FROM "User" WHERE role = 'RECRUITER'</span> 후 컬럼 drop. 가장 단순.</p></div>
+<div class="detail-block"><h5>리스크</h5><p>실사용자일 경우 계정 영구 삭제.</p></div>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">02</span>옵션 B) USER 또는 ADMIN으로 전환</h4>
+<div class="detail-block"><h5>설명</h5><p><span class="mono">UPDATE "User" SET role = 'USER' WHERE role = 'RECRUITER'</span> 실행 후 company 컬럼 drop. 기업 정보는 별도 백업 파일로 보존.</p></div>
+<div class="detail-block"><h5>권장</h5><p>실사용자일 경우 가장 안전. 별도 Recruiter 기능이 없으므로 일반 사용자로 전환해도 서비스 이용 가능.</p></div>
+</div>
+<div class="issue-detail" style="margin-bottom:12px">
+<h4><span class="num">03</span>옵션 C) 데이터 보존 후 컬럼 제거</h4>
+<div class="detail-block"><h5>설명</h5><p><span class="mono">companyName</span>/<span class="mono">companyDesc</span>/<span class="mono">isApproved</span>를 별도 테이블 <span class="mono">RecruiterProfile</span>으로 마이그레이션 후 <span class="mono">User</span>에서 제거. 기능은 그대로 둠.</p></div>
+<div class="detail-block"><h5>리스크</h5><p>아직 Recruiter 페이지가 없으므로 별도 테이블도 미사용 가능성. 과한 설계.</p></div>
+</div>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">04</span>
+<span class="section-text">마이그레이션 SQL 예시</span>
+</div>
+<p>옵션 B를 전제로 한 SQL이다.</p>
+<div style="background:var(--gray-50);border:1px solid var(--gray-200);padding:12px 14px;font-family:Consolas,monospace;font-size:10px;line-height:1.6;word-break:break-all;color:var(--gray-900);margin:12px 0">
+-- 1. JobListing recruiterId 관계 제거<br>
+ALTER TABLE "JobListing" DROP CONSTRAINT "JobListing_recruiterId_fkey";<br>
+ALTER TABLE "JobListing" DROP COLUMN "recruiterId";<br><br>
+-- 2. RECRUITER 사용자를 USER로 전환<br>
+UPDATE "User" SET role = 'USER' WHERE role = 'RECRUITER';<br><br>
+-- 3. User에서 Recruiter 전용 컬럼 제거<br>
+ALTER TABLE "User" DROP COLUMN "companyName";<br>
+ALTER TABLE "User" DROP COLUMN "companyDesc";<br>
+ALTER TABLE "User" DROP COLUMN "isApproved";<br><br>
+-- 4. 기존 드리프트 인덱스 생성<br>
+CREATE INDEX "UserNotification_userId_createdAt_idx" ON "UserNotification"("userId", "createdAt");
+</div>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">05</span>
+<span class="section-text">실행 순서 및 검증</span>
+</div>
+<ol style="color:var(--muted);font-size:12px;line-height:1.75">
+<li>사용자로부터 데이터 처리 옵션(A/B/C) 확정</li>
+<li>해당 사용자 데이터 백업 (<span class="mono">prisma/recruiter-data-backup.json</span> 등, PII 주의)</li>
+<li>Prisma 마이그레이션 파일 작성 (<span class="mono">npx prisma migrate dev --create-only</span>)</li>
+<li>Schema 및 코드 변경 적용</li>
+<li><span class="mono">npx prisma generate</span></li>
+<li><span class="mono">npm run test</span>, <span class="mono">npx tsc --noEmit</span>, <span class="mono">npm run lint</span>, <span class="mono">npx next build</span></li>
+<li>원격 DB에 마이그레이션 적용 (<span class="mono">npx prisma migrate deploy</span>)</li>
+<li><span class="mono">npx next start</span> + smoke test</li>
+</ol>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">06</span>
+<span class="section-text">롤백 계획</span>
+</div>
+<ul style="color:var(--muted);font-size:12px;line-height:1.75">
+<li>마이그레이션 적용 전 <span class="mono">pg_dump</span> 또는 Supabase 대시보드 백업 생성</li>
+<li>컬럼 drop 후 복원하려면 백업에서 복구하거나 reverse migration(SQL 추가) 작성</li>
+<li>마이그레이션 파일은 <span class="mono">prisma/migrations/</span>에 보존되므로 필요 시 <span class="mono">npx prisma migrate diff</span>로 rollback SQL 생성 가능</li>
+</ul>
+</div>
+<div class="section">
+<div class="section-title">
+<span class="section-num">07</span>
+<span class="section-text">결론 및 권장</span>
+</div>
+<p>
+        Supabase MCP 조회 결과 <span class="mono">recruiterId</span>를 사용하는 JobListing은 0개이므로 관계 제거는 안전하다.
+        다만 1명의 RECRUITER 사용자 데이터가 존재하므로, <strong>옵션 B(USER 전환)</strong>을 권장한다.
+        이후 <span class="mono">User</span>에서 <span class="mono">companyName</span>/<span class="mono">companyDesc</span>/<span class="mono">isApproved</span> 컬럼을 drop하면 완전 삭제가 가능하다.
+        마이그레이션에는 <span class="mono">UserNotification</span>의 <span class="mono">userId_createdAt_idx</span> 인덱스도 포함해 기존 스키마 드리프트를 함께 해소한다.
+      </p>
+</div>
+<div class="quote">
+      "MCP로 실제 DB를 확인한 결과, Recruiter 관계 제거는 데이터 손실 없이 안전하지만 1명의 RECRUITER 사용자 데이터는 보존/전환 처리가 필요하다."
       <small>JobFilter 프로젝트 · 2026.08.15</small>
 </div>
 </div>
