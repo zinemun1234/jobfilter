@@ -2,11 +2,9 @@
  * 어드민 계정 생성 스크립트
  * 실행: ADMIN_PASSWORD=your-secure-password npx tsx scripts/create-admin.ts
  */
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 async function main() {
   const email = process.env.ADMIN_EMAIL ?? 'admin@admin.com';

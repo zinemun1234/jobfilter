@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 // ─── 로드맵 템플릿 (정적 데이터) ──────────────────────────────────────────────
 const roadmapTemplates = [
@@ -101,54 +99,51 @@ async function main() {
   // 1. 관리자 계정
   const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@admin.com';
   const adminPassword = process.env.ADMIN_PASSWORD;
-  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
-  if (!existingAdmin && adminPassword) {
-    const hashed = await bcrypt.hash(adminPassword, 10);
-    await prisma.user.create({
-      data: {
-        email: adminEmail,
-        password: hashed,
-        name: '관리자',
-        role: 'ADMIN',
-        skills: '[]',
-      },
-    });
-    logger.info({ email: adminEmail }, '관리자 시드 계정 생성');
-  } else {
-    if (!adminPassword) {
-      logger.warn('ADMIN_PASSWORD가 설정되지 않아 관리자 시드 계정을 생성하지 않습니다.');
+  if (adminPassword) {
+    const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+    if (!existingAdmin) {
+      const hashed = await bcrypt.hash(adminPassword, 10);
+      await prisma.user.create({
+        data: {
+          email: adminEmail,
+          password: hashed,
+          name: '관리자',
+          role: 'ADMIN',
+          skills: '[]',
+        },
+      });
+      logger.info({ email: adminEmail }, '관리자 시드 계정 생성');
     } else {
       logger.info('관리자 계정 이미 존재');
     }
+  } else {
+    logger.warn('ADMIN_PASSWORD가 설정되지 않아 관리자 시드 계정을 생성하지 않습니다.');
   }
 
   // 2. 테스트 학생 계정
   const studentEmail = process.env.STUDENT_EMAIL ?? 'student@test.com';
   const studentPassword = process.env.STUDENT_PASSWORD;
-  const existingStudent = await prisma.user.findUnique({ where: { email: studentEmail } });
-  let studentId: string;
-  if (!existingStudent && studentPassword) {
-    const hashed = await bcrypt.hash(studentPassword, 10);
-    const student = await prisma.user.create({
-      data: {
-        email: studentEmail,
-        password: hashed,
-        name: '홍길동',
-        major: '컴퓨터공학부',
-        targetJob: '백엔드 개발자',
-        role: 'USER',
-        skills: JSON.stringify(['TypeScript', 'React', 'Node.js', 'PostgreSQL']),
-      },
-    });
-    studentId = student.id;
-    logger.info({ email: studentEmail }, '테스트 학생 시드 계정 생성');
-  } else {
-    studentId = existingStudent.id;
-    if (!studentPassword) {
-      logger.warn('STUDENT_PASSWORD가 설정되지 않아 학생 시드 계정을 생성하지 않습니다.');
+  if (studentPassword) {
+    const existingStudent = await prisma.user.findUnique({ where: { email: studentEmail } });
+    if (!existingStudent) {
+      const hashed = await bcrypt.hash(studentPassword, 10);
+      await prisma.user.create({
+        data: {
+          email: studentEmail,
+          password: hashed,
+          name: '홍길동',
+          major: '컴퓨터공학부',
+          targetJob: '백엔드 개발자',
+          role: 'USER',
+          skills: JSON.stringify(['TypeScript', 'React', 'Node.js', 'PostgreSQL']),
+        },
+      });
+      logger.info({ email: studentEmail }, '테스트 학생 시드 계정 생성');
     } else {
       logger.info('테스트 학생 계정 이미 존재');
     }
+  } else {
+    logger.warn('STUDENT_PASSWORD가 설정되지 않아 학생 시드 계정을 생성하지 않습니다.');
   }
 
   // 3. 면접 기본 질문

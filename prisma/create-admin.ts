@@ -10,11 +10,9 @@
  *   ADMIN_NAME     (기본: 관리자)
  */
 
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import logger from '@/lib/logger';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 const ADMIN_EMAIL    = process.env.ADMIN_EMAIL    ?? 'admin@admin.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
