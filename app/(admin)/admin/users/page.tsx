@@ -24,6 +24,9 @@ type AdminUser = {
   major: string | null;
   targetJob: string | null;
   role: string;
+  companyName: string | null;
+  companyDesc: string | null;
+  isApproved: boolean;
   createdAt: string;
   _count: { jobPostings: number; portfolios: number; roadmapItems: number; interviewAnswers: number };
 };
@@ -53,6 +56,19 @@ export default function AdminUsersPage() {
       if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? 'Failed'); }
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-users'] }); toast.success('권한이 변경되었습니다'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: async ({ id, isApproved }: { id: string; isApproved: boolean }) => {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isApproved }),
+      });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? 'Failed'); }
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-users'] }); toast.success('승인 상태가 변경되었습니다'); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -151,20 +167,42 @@ export default function AdminUsersPage() {
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <select
-                      value={u.role}
-                      onChange={e => roleMutation.mutate({ id: u.id, role: e.target.value })}
-                      disabled={roleMutation.isPending}
-                      aria-label="사용자 권한"
-                      className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        u.role === 'ADMIN'
-                          ? 'bg-red-50 text-red-600 focus:ring-red-300'
-                          : 'bg-gray-100 text-gray-600 focus:ring-gray-300'
-                      }`}
-                    >
-                      <option value="USER">USER</option>
-                      <option value="ADMIN">ADMIN</option>
-                    </select>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={u.role}
+                        onChange={e => roleMutation.mutate({ id: u.id, role: e.target.value })}
+                        disabled={roleMutation.isPending}
+                        aria-label="사용자 권한"
+                        className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          u.role === 'ADMIN'
+                            ? 'bg-red-50 text-red-600 focus:ring-red-300'
+                            : u.role === 'RECRUITER'
+                              ? 'bg-emerald-50 text-emerald-600 focus:ring-emerald-300'
+                              : 'bg-gray-100 text-gray-600 focus:ring-gray-300'
+                        }`}
+                      >
+                        <option value="USER">USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="RECRUITER">RECRUITER</option>
+                      </select>
+                      {u.role === 'RECRUITER' && (
+                        <button
+                          type="button"
+                          onClick={() => approveMutation.mutate({ id: u.id, isApproved: !u.isApproved })}
+                          disabled={approveMutation.isPending}
+                          className={`text-xs rounded-full px-2 py-0.5 font-medium transition-colors ${
+                            u.isApproved
+                              ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                              : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                          }`}
+                        >
+                          {u.isApproved ? '승인됨' : '승인 대기'}
+                        </button>
+                      )}
+                    </div>
+                    {u.role === 'RECRUITER' && u.companyName && (
+                      <p className="mt-1 text-[10px] text-gray-400">{u.companyName}</p>
+                    )}
                   </td>
                   <td className="px-4 py-4 text-xs text-gray-400 hidden sm:table-cell tabular-nums">
                     {new Date(u.createdAt).toLocaleDateString('ko-KR')}

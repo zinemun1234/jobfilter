@@ -19,6 +19,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isRegistered = searchParams.get('registered') === 'true';
+  const isRecruiterRegistered = searchParams.get('registered') === 'recruiter';
   const [authError, setAuthError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
@@ -32,8 +33,16 @@ export default function LoginPage() {
     setAuthError(null);
     try {
       const result = await signIn('credentials', { email: data.email, password: data.password, redirect: false });
-      if (result?.ok) router.push('/dashboard');
-      else setAuthError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      if (!result?.ok) { setAuthError('이메일 또는 비밀번호가 올바르지 않습니다.'); return; }
+
+      // 로그인 성공 후 role에 따라 분기
+      const sessionRes = await fetch('/api/auth/session');
+      const session = await sessionRes.json();
+      const role = session?.user?.role;
+
+      if (role === 'RECRUITER') router.push('/recruiter');
+      else if (role === 'ADMIN') router.push('/admin');
+      else router.push('/dashboard');
     } catch {
       setAuthError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
@@ -129,6 +138,12 @@ export default function LoginPage() {
               <p className="text-sm text-emerald-700">회원가입 완료! 로그인해주세요.</p>
             </div>
           )}
+          {isRecruiterRegistered && (
+            <div className="mb-5 flex items-center gap-3 rounded-xl bg-amber-50 border border-amber-100 px-4 py-3">
+              <CheckCircle2 className="h-4 w-4 text-amber-500 shrink-0" />
+              <p className="text-sm text-amber-700">기업 회원가입 완료! 관리자 승인 후 로그인 가능합니다.</p>
+            </div>
+          )}
           {authError && (
             <div className="mb-5 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
               {authError}
@@ -211,6 +226,12 @@ export default function LoginPage() {
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted"
             >
               학생 회원가입
+            </Link>
+            <Link
+              href="/register-recruiter"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-100/50 bg-emerald-50/30 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm transition-all hover:bg-emerald-50/50"
+            >
+              기업 회원가입
             </Link>
           </div>
         </div>

@@ -5,9 +5,13 @@
  * - AI 사용 안 함
  * - 키워드 매칭으로 jobType(frontend/backend/data/ai/보안/기획) 결정
  * - 포트폴리오/자소서에서 언급된 기술 스택별 질문 생성
+ *
+ * DB의 Template 테이블(type='interview-recommend')을 우선 조회하고,
+ * 없으면 하드코딩 상수를 fallback으로 사용합니다.
  */
 
-import { INTERVIEW_QUESTION_TEMPLATES } from './interview-questions';
+import { getInterviewQuestions } from './interview-questions';
+import { getTemplateByTypeName, parseTemplateData } from './template-service';
 import type { QuestionCategory } from '@/types';
 
 export type RecommendInput = {
@@ -24,8 +28,14 @@ type QuestionGroup = {
   question: string;
 };
 
+type InterviewRecommendData = {
+  jobTypePatterns: Record<string, string[]>;
+  skillQuestions: Record<string, string[]>;
+  commonQuestions: Record<string, string[]>;
+};
+
 // 직무별 질문 후보군
-const JOB_TYPE_PATTERNS: Record<string, string[]> = {
+export const JOB_TYPE_PATTERNS: Record<string, string[]> = {
   frontend: ['프론트', 'front', 'react', 'vue', 'angular'],
   backend: ['백엔드', 'back', '서버', 'spring', 'node', 'django', 'api'],
   data: ['데이터', 'data', 'ai', 'ml', '머신러닝', '딥러닝', '분석'],
@@ -37,7 +47,7 @@ const JOB_TYPE_PATTERNS: Record<string, string[]> = {
 };
 
 // 기술별 질문 맵
-const SKILL_QUESTIONS: Record<string, string[]> = {
+export const SKILL_QUESTIONS: Record<string, string[]> = {
   react: ['React의 Virtual DOM과 렌더링 최적화에 대해 설명해주세요.'],
   next: ['Next.js의 SSR/SSG/ISR 차이점과 사용 사례를 설명해주세요.'],
   typescript: ['TypeScript의 타입 시스템 장점과 사용 경험을 말씀해주세요.'],
@@ -62,7 +72,7 @@ const SKILL_QUESTIONS: Record<string, string[]> = {
 };
 
 // 직무 공통 질문
-const COMMON_QUESTIONS: Record<string, string[]> = {
+export const COMMON_QUESTIONS: Record<string, string[]> = {
   frontend: [
     '브라우저 렌더링 과정과 성능 최적화 방법을 설명해주세요.',
     'CSS Box Model과 Flexbox/Grid 레이아웃 경험을 말씀해주세요.',
@@ -97,23 +107,60 @@ const COMMON_QUESTIONS: Record<string, string[]> = {
   ],
 };
 
-function detectJobType(position: string, tags?: string[]): string {
+export async function getInterviewRecommendData(): Promise<InterviewRecommendData> {
+  try {
+    const template = await getTemplateByTypeName('interview-recommend', 'default');
+    if (!template) {
+      return {
+        jobTypePatterns: JOB_TYPE_PATTERNS,
+        skillQuestions: SKILL_QUESTIONS,
+        commonQuestions: COMMON_QUESTIONS,
+      };
+    }
+    const parsed = parseTemplateData<InterviewRecommendData>(template, {
+      jobTypePatterns: {},
+      skillQuestions: {},
+      commonQuestions: {},
+    });
+    return {
+      jobTypePatterns: Object.keys(parsed.jobTypePatterns).length ? parsed.jobTypePatterns : JOB_TYPE_PATTERNS,
+      skillQuestions: Object.keys(parsed.skillQuestions).length ? parsed.skillQuestions : SKILL_QUESTIONS,
+      commonQuestions: Object.keys(parsed.commonQuestions).length ? parsed.commonQuestions : COMMON_QUESTIONS,
+    };
+  } catch (error) {
+    console.error('Failed to load interview recommend template from DB:', error);
+    return {
+      jobTypePatterns: JOB_TYPE_PATTERNS,
+      skillQuestions: SKILL_QUESTIONS,
+      commonQuestions: COMMON_QUESTIONS,
+    };
+  }
+}
+
+function detectJobType(
+  position: string,
+  jobTypePatterns: Record<string, string[]>,
+  tags?: string[]
+): string {
   const text = `${position} ${(tags ?? []).join(' ')}`.toLowerCase();
-  for (const [type, patterns] of Object.entries(JOB_TYPE_PATTERNS)) {
+  for (const [type, patterns] of Object.entries(jobTypePatterns)) {
     if (type === 'common') continue;
     if (patterns.some((p) => text.includes(p))) return type;
   }
   return 'common';
 }
 
-function extractTechKeywords(input: RecommendInput): string[] {
+function extractTechKeywords(
+  input: RecommendInput,
+  skillQuestions: Record<string, string[]>
+): string[] {
   const keywords = new Set<string>();
 
   const push = (value: string) => {
     const normalized = value.toLowerCase().replace(/[^a-z가-힣0-9]/g, '');
-    if (SKILL_QUESTIONS[normalized]) keywords.add(normalized);
+    if (skillQuestions[normalized]) keywords.add(normalized);
     // 원문 토큰도 확인
-    if (SKILL_QUESTIONS[value.toLowerCase()]) keywords.add(value.toLowerCase());
+    if (skillQuestions[value.toLowerCase()]) keywords.add(value.toLowerCase());
   };
 
   input.skills?.forEach(push);
@@ -122,13 +169,13 @@ function extractTechKeywords(input: RecommendInput): string[] {
     for (const tech of portfolio.techStack) push(tech);
     // 프로젝트 제목에서 키워드 추출
     const titleTokens = portfolio.title.toLowerCase().split(/\s+|[,\/]+/);
-    for (const token of titleTokens) if (SKILL_QUESTIONS[token]) keywords.add(token);
+    for (const token of titleTokens) if (skillQuestions[token]) keywords.add(token);
   }
 
   for (const cl of input.coverLetters ?? []) {
     for (const item of cl.items) {
       const tokens = item.answer.toLowerCase().split(/\s+|[,\/\(\)]+/);
-      for (const token of tokens) if (SKILL_QUESTIONS[token]) keywords.add(token);
+      for (const token of tokens) if (skillQuestions[token]) keywords.add(token);
     }
   }
 
@@ -144,21 +191,22 @@ function dedupe(questions: QuestionGroup[]): QuestionGroup[] {
   });
 }
 
-export function recommendQuestions(input: RecommendInput): QuestionGroup[] {
-  const jobType = detectJobType(input.position, input.tags);
+export async function recommendQuestions(input: RecommendInput): Promise<QuestionGroup[]> {
+  const { jobTypePatterns, skillQuestions, commonQuestions } = await getInterviewRecommendData();
+  const jobType = detectJobType(input.position, jobTypePatterns, input.tags);
   const result: QuestionGroup[] = [];
 
   // 1. 템플릿에서 직무/공통 질문 선택
-  const templates = INTERVIEW_QUESTION_TEMPLATES.filter((q) => {
+  const templates = await getInterviewQuestions();
+  const filtered = templates.filter((q) => {
     if (q.jobType && q.jobType !== jobType && q.jobType !== 'common') return false;
-    if (!q.jobType || q.jobType === 'common') return true;
-    return q.jobType === jobType;
+    return true;
   });
-  result.push(...templates.map((t) => ({ ...t, jobType: t.jobType ?? jobType })));
+  result.push(...filtered.map((t) => ({ ...t, jobType: t.jobType ?? jobType })));
 
   // 2. 직무 공통 질문
   result.push(
-    ...(COMMON_QUESTIONS[jobType] ?? COMMON_QUESTIONS.common).map((q) => ({
+    ...(commonQuestions[jobType] ?? commonQuestions.common).map((q) => ({
       category: 'TECHNICAL' as QuestionCategory,
       jobType,
       question: q,
@@ -166,9 +214,9 @@ export function recommendQuestions(input: RecommendInput): QuestionGroup[] {
   );
 
   // 3. 기술 스택별 질문
-  const techs = extractTechKeywords(input);
+  const techs = extractTechKeywords(input, skillQuestions);
   for (const tech of techs) {
-    const questions = SKILL_QUESTIONS[tech] ?? [`${tech}에 대해 설명하고 실제 사용 경험을 말씀해주세요.`];
+    const questions = skillQuestions[tech] ?? [`${tech}에 대해 설명하고 실제 사용 경험을 말씀해주세요.`];
     for (const q of questions) {
       result.push({ category: 'TECHNICAL', jobType, question: q });
     }

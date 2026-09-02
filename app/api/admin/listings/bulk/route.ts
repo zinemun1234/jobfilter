@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { extractJobTags } from '@/lib/job-tags';
+import { classifyMajor } from '@/lib/majors';
 import { requireAdmin } from '@/lib/api';
 import { notifyUsersOfNewListingsSummary } from '@/lib/notifications';
 import type { Prisma } from '@/lib/generated/prisma';
@@ -10,7 +11,7 @@ export const dynamic = 'force-dynamic';
 type BulkRow = {
   company: string; position: string; location?: string; career?: string;
   employType?: string; education?: string; salary?: string;
-  deadline?: string; url?: string; description?: string;
+  deadline?: string; url?: string; description?: string; category?: string;
 };
 
 export async function POST(req: NextRequest) {
@@ -37,13 +38,15 @@ export async function POST(req: NextRequest) {
   const validRows: Prisma.JobListingCreateManyInput[] = [];
   const failedRows: { row: number; company: string; position: string; reason: string }[] = [];
 
-  newRows.forEach((r, idx) => {
+  for (let idx = 0; idx < newRows.length; idx++) {
+    const r = newRows[idx];
     try {
       if (!r.company?.trim() || !r.position?.trim()) {
         throw new Error('회사명과 직무명은 필수입니다.');
       }
       const sourceText = `${r.position} ${r.company} ${r.description ?? ''}`;
-      const tags = extractJobTags(sourceText);
+      const tags = await extractJobTags(sourceText);
+      const category = r.category ?? (await classifyMajor(`${r.position} ${r.description ?? ''}`)).category;
       const deadlineDate = r.deadline ? new Date(r.deadline) : null;
       if (r.deadline && (!deadlineDate || isNaN(deadlineDate.getTime()))) {
         throw new Error('마감일 형식이 올바르지 않습니다.');
@@ -60,6 +63,7 @@ export async function POST(req: NextRequest) {
         url: r.url?.trim() || null,
         description: r.description?.trim() || null,
         tags: tags.length > 0 ? JSON.stringify(tags) : null,
+        category,
         isActive: true,
       });
     } catch (e) {
@@ -70,7 +74,7 @@ export async function POST(req: NextRequest) {
         reason: e instanceof Error ? e.message : '변환 오류',
       });
     }
-  });
+  }
 
   if (!validRows.length) {
     return NextResponse.json({ data: { count: 0, duplicateCount, failed: failedRows } }, { status: 400 });

@@ -5,8 +5,12 @@
  *
  * getInterviewQuestions(category?, jobType?): 필터링된 질문 목록 반환
  * getRandomQuestions(count, category?, jobType?): 랜덤 섞어서 count개 반환 (모의 면접용)
+ *
+ * DB의 Template 테이블(type='interview-question')을 우선 조회하고,
+ * 비어 있으면 하드코딩 INTERVIEW_QUESTION_TEMPLATES를 fallback으로 사용합니다.
  */
 import type { QuestionCategory } from '@/types';
+import { listTemplates, countTemplates, parseTemplateData } from './template-service';
 
 export interface InterviewQuestionTemplate {
   category: QuestionCategory;
@@ -151,16 +155,41 @@ export const INTERVIEW_QUESTION_TEMPLATES: InterviewQuestionTemplate[] = [
   },
 ];
 
-export function getInterviewQuestions(category?: QuestionCategory, jobType?: string): InterviewQuestionTemplate[] {
-  return INTERVIEW_QUESTION_TEMPLATES.filter(question => {
-    if (category && question.category !== category) return false;
-    if (jobType && question.jobType && question.jobType !== jobType && question.jobType !== 'common') return false;
-    return true;
-  });
+export async function getInterviewQuestions(
+  category?: QuestionCategory,
+  jobType?: string
+): Promise<InterviewQuestionTemplate[]> {
+  try {
+    const count = await countTemplates('interview-question');
+    let source: InterviewQuestionTemplate[] = INTERVIEW_QUESTION_TEMPLATES;
+    if (count > 0) {
+      const fromDb = (await listTemplates('interview-question')).flatMap((row) =>
+        parseTemplateData<InterviewQuestionTemplate[]>(row, [])
+      );
+      if (fromDb.length > 0) source = fromDb;
+    }
+
+    return source.filter((question) => {
+      if (category && question.category !== category) return false;
+      if (jobType && question.jobType && question.jobType !== jobType && question.jobType !== 'common') return false;
+      return true;
+    });
+  } catch (error) {
+    console.error('Failed to load interview questions from DB:', error);
+    return INTERVIEW_QUESTION_TEMPLATES.filter((question) => {
+      if (category && question.category !== category) return false;
+      if (jobType && question.jobType && question.jobType !== jobType && question.jobType !== 'common') return false;
+      return true;
+    });
+  }
 }
 
-export function getRandomQuestions(count: number, category?: QuestionCategory, jobType?: string): InterviewQuestionTemplate[] {
-  const questions = getInterviewQuestions(category, jobType);
+export async function getRandomQuestions(
+  count: number,
+  category?: QuestionCategory,
+  jobType?: string
+): Promise<InterviewQuestionTemplate[]> {
+  const questions = await getInterviewQuestions(category, jobType);
   const shuffled = [...questions].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+  return shuffled.slice(0, Math.max(0, count));
 }

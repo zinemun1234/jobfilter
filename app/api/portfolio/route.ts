@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -41,7 +42,7 @@ export async function GET() {
 
     return NextResponse.json({ data: parsed });
   } catch (error) {
-    console.error('Failed to fetch portfolios:', error);
+    logger.error({ err: error }, 'Failed to fetch portfolios');
     return NextResponse.json({ error: 'Failed to fetch portfolios' }, { status: 500 });
   }
 }
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
         ...validatedData,
         jobId: validatedData.jobId || null,
         techStack: JSON.stringify(validatedData.techStack), // JSON string for SQLite compatibility
-        startDate: new Date(validatedData.startDate),
+        startDate: validatedData.startDate ? new Date(validatedData.startDate) : new Date(),
         endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
         userId: session.user.id,
       },
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: sanitizePortfolio(result) } as ApiResponse<typeof result>, { status: 201 });
   } catch (error) {
-    console.error('Failed to create portfolio:', error);
+    logger.error({ err: error }, 'Failed to create portfolio');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }

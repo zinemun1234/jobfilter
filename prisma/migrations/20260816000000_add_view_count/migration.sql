@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "JobListing" ADD COLUMN "viewCount" INTEGER NOT NULL DEFAULT 0;

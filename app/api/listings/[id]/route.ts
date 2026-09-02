@@ -13,8 +13,17 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const listing = await prisma.jobListing.findUnique({ where: { id: params.id } });
-  if (!listing || !listing.isActive) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const existing = await prisma.jobListing.findUnique({
+    where: { id: params.id },
+    include: { recruiter: { select: { companyName: true, companyDesc: true, companyLogoUrl: true, companyAttachments: true } } },
+  });
+  if (!existing || !existing.isActive) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  const listing = await prisma.jobListing.update({
+    where: { id: params.id },
+    data: { viewCount: { increment: 1 } },
+    include: { recruiter: { select: { companyName: true, companyDesc: true, companyLogoUrl: true, companyAttachments: true } } },
+  });
 
   const sanitized = sanitizeJobListing({
     ...listing,

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import logger from '@/lib/logger';
 
 async function main() {
   const coverLetters = await prisma.coverLetter.findMany({
@@ -9,7 +10,7 @@ async function main() {
         { items: { contains: '"1"' } },
       ],
     },
-    select: { id: true, company: true, position: true, items: true, userId: true, createdAt: true },
+    select: { id: true, company: true, position: true, items: true, createdAt: true },
     take: 10,
   });
 
@@ -32,7 +33,7 @@ async function main() {
         { position: { in: ['1', '11', '1234'] } },
       ],
     },
-    select: { id: true, company: true, position: true, userId: true, confirmedAt: true },
+    select: { id: true, company: true, position: true, confirmedAt: true },
     take: 10,
   });
 
@@ -42,9 +43,9 @@ async function main() {
     take: 10,
   });
 
-  console.log(JSON.stringify({ coverLetters, notices, questions, employments, notifications }, null, 2));
+  logger.info({ coverLetters, notices, questions, employments, notifications }, 'placeholder list');
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
+  .catch((e) => { logger.error({ err: e }, 'Placeholder 조회 실패'); process.exit(1); })
   .finally(() => prisma.$disconnect());

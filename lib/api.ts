@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { AppError, ERROR_CODES } from '@/lib/errors';
 
 // 공통 응답 타입
@@ -102,6 +103,36 @@ export async function requireAdminOrOwner(resourceUserId: string): Promise<{ use
   }
 
   return { userId: session.user.id, role: session.user.role };
+}
+
+// 리크루터 권한 확인 (로그인 + role === RECRUITER)
+export async function requireRecruiter(): Promise<{ userId: string; role: string }> {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    throw new AppError('인증이 필요합니다.', ERROR_CODES.UNAUTHORIZED);
+  }
+  if (session.user.role !== 'RECRUITER') {
+    throw new AppError('리크루터 권한이 필요합니다.', ERROR_CODES.FORBIDDEN);
+  }
+
+  return { userId: session.user.id, role: session.user.role };
+}
+
+// 승인된 리크루터 권한 확인
+export async function requireApprovedRecruiter(): Promise<{ userId: string; role: string }> {
+  const { userId } = await requireRecruiter();
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { isApproved: true },
+  });
+
+  if (!user?.isApproved) {
+    throw new AppError('관리자 승인 후 이용 가능합니다.', ERROR_CODES.FORBIDDEN);
+  }
+
+  return { userId, role: 'RECRUITER' };
 }
 
 // 민감정보 제거 DTO (password / passwordHash 모두 제거)

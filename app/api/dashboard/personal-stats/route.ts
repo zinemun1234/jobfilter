@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getPersonalStats } from '@/lib/dashboard-stats';
@@ -16,7 +17,7 @@ export async function GET() {
     const stats = await getPersonalStats(session.user.id);
     return successResponse(stats);
   } catch (error) {
-    console.error('Failed to fetch personal stats:', error);
+    logger.error({ err: error }, 'Failed to fetch personal stats');
     return internalError('개인 통계를 불러오지 못했습니다.');
   }
 }

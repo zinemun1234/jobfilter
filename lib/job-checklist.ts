@@ -96,3 +96,10 @@ export function parseChecklist(json?: string | null): ChecklistItem[] {
     return [];
   }
 }
+
+export function getChecklistProgress(json?: string | null): number | null {
+  const items = parseChecklist(json);
+  if (items.length === 0) return null;
+  const checked = items.filter((i) => i.checked).length;
+  return Math.round((checked / items.length) * 100);
+}

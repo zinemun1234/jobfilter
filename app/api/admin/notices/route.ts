@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
+import { createAuditLog } from '@/lib/audit-log';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -27,8 +28,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  let userId: string;
   try {
-    await requireAdmin();
+    ({ userId } = await requireAdmin());
   } catch (error) {
     return handleApiError(error);
   }
@@ -42,6 +44,15 @@ export async function POST(req: NextRequest) {
       content: data.content,
       isPinned: data.isPinned,
     },
+  });
+
+  await createAuditLog({
+    userId,
+    action: 'CREATE_NOTICE',
+    resource: 'Notice',
+    resourceId: notice.id,
+    details: { id: notice.id, title: notice.title },
+    request: req,
   });
 
   return NextResponse.json({ data: notice }, { status: 201 });

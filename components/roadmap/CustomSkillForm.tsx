@@ -1,5 +1,7 @@
 'use client';
 
+import logger from '@/lib/logger';
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -62,7 +64,7 @@ export function CustomSkillForm({ jobCategory, onSuccess }: CustomSkillFormProps
       setReferenceLinks([]);
     } catch (error) {
       toast.error('추가에 실패했습니다');
-      console.error(error);
+      logger.error({ err: error }, '커스텀 기술 추가 실패');
     } finally {
       setIsSubmitting(false);
     }

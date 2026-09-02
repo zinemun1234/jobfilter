@@ -29,6 +29,7 @@ import FilterPanel, { type FilterState } from '@/components/listings/FilterPanel
 import Pagination from '@/components/listings/Pagination';
 import ReasonTooltip from '@/components/listings/ReasonTooltip';
 import { Badge } from '@/components/ui/badge';
+import { isRecruiterSource } from '@/lib/utils';
 import EmptyState from '@/components/ui/EmptyState';
 import SkeletonList from '@/components/ui/SkeletonList';
 import { Search } from 'lucide-react';
@@ -47,6 +48,8 @@ type Listing = {
   deadline: string | null;
   url: string | null;
   description: string | null;
+  source: string | null;
+  category: string | null;
   tags: string[];
   createdAt: string;
   matching: {
@@ -55,6 +58,8 @@ type Listing = {
     matchedSkills: string[];
     missingSkills: string[];
     reasons: string[];
+    majorScore?: number;
+    majorMatched?: boolean;
   } | null;
   popularityScore: number;
   freshnessScore: number;
@@ -80,6 +85,7 @@ function parseFilters(searchParams: URLSearchParams): FilterState {
     search: searchParams.get('search') ?? '',
     career: (searchParams.get('career') ?? 'all') as FilterState['career'],
     employType: (searchParams.get('employType') ?? 'all') as FilterState['employType'],
+    category: (searchParams.get('category') ?? 'all') as FilterState['category'],
     location: searchParams.get('location') ?? '',
     tags: (searchParams.get('tags') ?? '')
       .split(',')
@@ -99,6 +105,7 @@ function buildParams(filters: FilterState & { page?: number }): URLSearchParams 
   if (filters.search) params.set('search', filters.search);
   if (filters.career && filters.career !== 'all') params.set('career', filters.career);
   if (filters.employType && filters.employType !== 'all') params.set('employType', filters.employType);
+  if (filters.category && filters.category !== 'all') params.set('category', filters.category);
   if (filters.location) params.set('location', filters.location);
   if (filters.tags.length > 0) params.set('tags', filters.tags.join(','));
   if (filters.deadlineFrom) params.set('deadlineFrom', filters.deadlineFrom);
@@ -250,6 +257,11 @@ export default function ListingsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <p className="text-xs font-medium text-muted-foreground">{l.company}</p>
+                            {isRecruiterSource(l.source) && (
+                              <Badge className="text-xs font-bold bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-50">
+                                기업 직접 등록
+                              </Badge>
+                            )}
                             {isNew && (
                               <Badge className="text-xs font-bold bg-primary text-primary-foreground hover:bg-primary">
                                 NEW
@@ -258,6 +270,11 @@ export default function ListingsPage() {
                             {isUrgent && (
                               <Badge variant="destructive" className="text-xs font-bold">
                                 마감임박
+                              </Badge>
+                            )}
+                            {l.category && (
+                              <Badge className="text-xs font-bold bg-violet-50 text-violet-600 border-violet-200 hover:bg-violet-50">
+                                {l.category}
                               </Badge>
                             )}
                             <MatchBadge score={score} />

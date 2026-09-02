@@ -14,10 +14,13 @@
  * rows는 DB에 저장하지 않고 클라이언트에서 확인 후 별도 저장
  */
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import * as XLSX from 'xlsx';
+import * as Papa from 'papaparse';
+import { classifyMajor } from '@/lib/majors';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +49,7 @@ function isCSRelated(position: string, description?: string): boolean {
 }
 
 // 엑셀 컬럼명 → 우리 필드 매핑 (유연하게)
-function mapRow(row: Record<string, unknown>): {
+async function mapRow(row: Record<string, unknown>): Promise<{
   company: string;
   position: string;
   location?: string;
@@ -57,7 +60,8 @@ function mapRow(row: Record<string, unknown>): {
   deadline?: string;
   url?: string;
   description?: string;
-} | null {
+  category: string;
+} | null> {
   const get = (...keys: string[]) => {
     for (const k of keys) {
       const found = Object.entries(row).find(
@@ -89,6 +93,9 @@ function mapRow(row: Record<string, unknown>): {
     }
   }
 
+  const description = get('상세내용', '업무내용', '주요업무', '자격요건', 'description', '내용');
+  const category = (await classifyMajor(`${position} ${description ?? ''}`)).category;
+
   return {
     company,
     position,
@@ -99,7 +106,8 @@ function mapRow(row: Record<string, unknown>): {
     salary: get('급여', '연봉', '임금', 'salary'),
     deadline,
     url: get('url', '링크', '공고링크', '지원링크', '채용공고url'),
-    description: get('상세내용', '업무내용', '주요업무', '자격요건', 'description', '내용'),
+    description,
+    category,
   };
 }
 
@@ -117,34 +125,21 @@ export async function POST(req: NextRequest) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  // CSV 파일은 raw 텍스트로 직접 파싱 (한글 인코딩 문제 방지)
+  // CSV 파일은 raw 텍스트를 papaparse로 파싱 (한글 인코딩 문제 방지)
   const isCsv = file.name.toLowerCase().endsWith('.csv');
   let rows: Record<string, unknown>[];
 
   if (isCsv) {
-    // UTF-8 BOM 제거 후 텍스트 파싱
-    let text = buffer.toString('utf-8').replace(/^\uFEFF/, '');
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
-    if (lines.length < 2) {
-      return NextResponse.json({ data: { total: 0, parsed: 0, filtered: 0, duplicateCount: 0, invalidCount: 0, excludedCount: 0, categoryStats: {}, rows: [] } });
-    }
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-    rows = lines.slice(1).map(line => {
-      // 쉼표 포함 셀(따옴표로 감싼 것) 처리
-      const cells: string[] = [];
-      let cur = '';
-      let inQuote = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') { inQuote = !inQuote; }
-        else if (ch === ',' && !inQuote) { cells.push(cur.trim()); cur = ''; }
-        else { cur += ch; }
-      }
-      cells.push(cur.trim());
-      const obj: Record<string, unknown> = {};
-      headers.forEach((h, i) => { obj[h] = cells[i] ?? ''; });
-      return obj;
+    // UTF-8 BOM 제거 후 papaparse로 파싱 (따옴표/쉼표/개행 포함 셀 처리)
+    const text = buffer.toString('utf-8').replace(/^\uFEFF/, '');
+    const result = Papa.parse<Record<string, unknown>>(text, {
+      header: true,
+      skipEmptyLines: true,
     });
+    if (result.errors.length > 0) {
+      logger.warn({ errors: result.errors }, 'CSV 파싱 경고');
+    }
+    rows = result.data;
   } else {
     const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: false, codepage: 65001 });
     const sheetName = workbook.SheetNames[0];
@@ -157,7 +152,9 @@ export async function POST(req: NextRequest) {
   }
 
   const total = rows.length;
-  const parsed = rows.map(mapRow).filter(Boolean) as NonNullable<ReturnType<typeof mapRow>>[];
+  const parsed = (await Promise.all(rows.map(mapRow))).filter(Boolean) as NonNullable<
+    Awaited<ReturnType<typeof mapRow>>
+  >[];
   const filtered = parsed.filter(r => isCSRelated(r.position, r.description));
   const existing = await prisma.jobListing.findMany({ select: { company: true, position: true } });
   const existingKeys = new Set(existing.map(row => `${row.company.trim()}__${row.position.trim()}`));

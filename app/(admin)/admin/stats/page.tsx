@@ -7,7 +7,7 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Cell,
 } from 'recharts';
-import { Users, Briefcase, TrendingUp, ClipboardList, UserPlus, ArrowUpRight, BarChart2, Download, Printer, AlertCircle } from 'lucide-react';
+import { Users, Briefcase, TrendingUp, ClipboardList, UserPlus, ArrowUpRight, BarChart2, Download, Printer, AlertCircle, FileSpreadsheet } from 'lucide-react';
 import Link from 'next/link';
 import { STATUS_CONFIG } from '@/lib/status-config';
 import { Button } from '@/components/ui/button';
@@ -155,9 +155,19 @@ export default function AdminStatsPage() {
           <h1 className="text-xl font-semibold text-foreground">취업 통계 대시보드</h1>
           <p className="text-xs text-muted-foreground mt-1">플랫폼 전체 취업 현황 및 학생 활동 데이터</p>
         </div>
-        <Link href="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-          관리 홈 <ArrowUpRight className="w-3 h-3" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <a
+            href="/api/admin/stats/export"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <FileSpreadsheet className="w-4 h-4" /> 통계 엑셀 다운로드
+          </a>
+          <Link href="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+            관리 홈 <ArrowUpRight className="w-3 h-3" />
+          </Link>
+        </div>
       </div>
 
       {/* 날짜 필터 & export */}

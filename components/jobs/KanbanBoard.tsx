@@ -39,6 +39,7 @@ import { toast } from 'sonner';
 import { STATUS_CONFIG, STATUS_ORDER } from '@/lib/status-config';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 
 function JobCard({
   job,
@@ -90,6 +91,17 @@ function JobCard({
                 {expired ? '마감' : daysLeft === 0 ? 'D-Day' : `D-${daysLeft}`}
               </span>
               {near && !expired && <AlertCircle className="w-3 h-3 text-amber-500" />}
+            </div>
+          )}
+          {typeof (job as any).checklistProgress === 'number' && (
+            <div className="mt-2 w-full">
+              <div className="flex items-center justify-between text-[10px] text-gray-500 mb-0.5">
+                <span>준비율</span>
+                <span className={`font-medium ${(job as any).checklistProgress === 100 ? 'text-emerald-600' : 'text-blue-600'}`}>
+                  {(job as any).checklistProgress}%
+                </span>
+              </div>
+              <Progress value={(job as any).checklistProgress} className="h-1" />
             </div>
           )}
         </div>

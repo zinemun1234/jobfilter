@@ -15,10 +15,12 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, MapPin, Briefcase, GraduationCap, Clock,
-  ExternalLink, Plus, CheckCircle, Building2, Tag, FileEdit,
+  ExternalLink, Plus, CheckCircle, Building2, Tag, FileEdit, Paperclip,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { isRecruiterSource } from '@/lib/utils';
 
 type Listing = {
   id: string;
@@ -34,7 +36,14 @@ type Listing = {
   description: string | null;
   tags: string[];
   source: string | null;
+  category: string | null;
   createdAt: string;
+  recruiter: {
+    companyName: string | null;
+    companyDesc: string | null;
+    companyLogoUrl: string | null;
+    companyAttachments: string | null;
+  } | null;
 };
 
 export default function ListingDetailPage() {
@@ -119,12 +128,17 @@ export default function ListingDetailPage() {
       <div className="rounded-xl border border-gray-100 bg-white shadow-sm p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <Building2 className="w-4 h-4 text-gray-400" />
               <p className="text-sm font-medium text-gray-500">{listing.company}</p>
-              {listing.source && (
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{listing.source}</span>
+              {isRecruiterSource(listing.source) && (
+                <Badge className="text-xs font-bold bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-50">
+                  기업 직접 등록
+                </Badge>
               )}
+              <Badge className="text-xs font-bold bg-violet-50 text-violet-600 border-violet-200 hover:bg-violet-50">
+                {listing.category ?? '기타'}
+              </Badge>
             </div>
             <h1 className="text-xl font-semibold text-gray-900">{listing.position}</h1>
           </div>
@@ -201,6 +215,37 @@ export default function ListingDetailPage() {
         <div className="rounded-xl border border-gray-100 bg-white shadow-sm p-5">
           <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">공고 상세</p>
           <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{listing.description}</p>
+        </div>
+      )}
+
+      {/* 기업 정보 (리크루터 공고) */}
+      {listing.recruiter && (
+        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Building2 className="w-4 h-4 text-emerald-500" />
+            <p className="text-xs font-medium text-emerald-600 uppercase tracking-widest">기업 정보</p>
+          </div>
+          <div className="flex items-start gap-3">
+            {listing.recruiter.companyLogoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={listing.recruiter.companyLogoUrl} alt="" className="h-14 w-14 rounded-lg border border-emerald-100 bg-white object-contain p-1" />
+            )}
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-emerald-900">{listing.recruiter.companyName ?? listing.company}</h3>
+              {listing.recruiter.companyDesc && (
+                <p className="text-sm text-emerald-700 mt-2 leading-relaxed whitespace-pre-wrap">{listing.recruiter.companyDesc}</p>
+              )}
+              {listing.recruiter.companyAttachments && (
+                <div className="mt-3 space-y-1.5">
+                  {(() => { try { return JSON.parse(listing.recruiter.companyAttachments); } catch { return []; } })().map((a: { id: string; name: string; url: string }) => (
+                    <a key={a.id} href={a.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-emerald-100 px-2.5 py-1.5 text-xs text-emerald-700 hover:bg-emerald-100">
+                      <Paperclip className="w-3 h-3" /> {a.name}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

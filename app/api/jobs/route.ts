@@ -6,11 +6,13 @@
  * 새 지원 공고 등록 (Zod 스키마 검증)
  */
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { jobPostingSchema } from '@/lib/validations';
 import { ApiResponse, sanitizeJobPosting } from '@/lib/api';
+import { getChecklistProgress } from '@/lib/job-checklist';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,10 +42,13 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const sanitized = jobs.map(sanitizeJobPosting);
+    const sanitized = jobs.map((job) => ({
+      ...sanitizeJobPosting(job),
+      checklistProgress: getChecklistProgress(job.checklist),
+    }));
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
-    console.error('Failed to fetch jobs:', error);
+    logger.error({ err: error }, 'Failed to fetch jobs');
     return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
   }
 }
@@ -76,7 +81,7 @@ export async function POST(request: NextRequest) {
     const sanitized = sanitizeJobPosting(job);
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>, { status: 201 });
   } catch (error) {
-    console.error('Failed to create job:', error);
+    logger.error({ err: error }, 'Failed to create job');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }

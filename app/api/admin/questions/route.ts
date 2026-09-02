@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin, sanitizeInterviewQuestion } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
+import { createAuditLog } from '@/lib/audit-log';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -30,8 +31,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  let userId: string;
   try {
-    await requireAdmin();
+    ({ userId } = await requireAdmin());
   } catch (error) {
     return handleApiError(error);
   }
@@ -41,6 +43,15 @@ export async function POST(req: NextRequest) {
 
   const question = await prisma.interviewQuestion.create({
     data: { ...data, isDefault: true, userId: null },
+  });
+
+  await createAuditLog({
+    userId,
+    action: 'CREATE_QUESTION',
+    resource: 'InterviewQuestion',
+    resourceId: question.id,
+    details: { id: question.id, category: question.category, jobType: question.jobType },
+    request: req,
   });
 
   return NextResponse.json({ data: sanitizeInterviewQuestion(question) }, { status: 201 });

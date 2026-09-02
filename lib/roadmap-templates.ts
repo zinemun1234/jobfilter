@@ -6,8 +6,12 @@
  *
  * getRoadmapTemplate(jobCategory): 직군에 맞는 템플릿 반환
  * calculateProgress(items): COMPLETED 항목 비율로 0~100% 진행률 계산
+ *
+ * DB의 Template 테이블(type='roadmap')을 우선 조회하고,
+ * 비어 있으면 하드코딩 ROADMAP_TEMPLATES를 fallback으로 사용합니다.
  */
 import type { SkillStatus } from '@/types';
+import { listTemplates, countTemplates, parseTemplateData } from './template-service';
 
 export interface RoadmapTemplate {
   jobCategory: string;
@@ -98,8 +102,31 @@ export const ROADMAP_TEMPLATES: RoadmapTemplate[] = [
 
 export const ROADMAP_CATEGORIES = ROADMAP_TEMPLATES.map(template => template.jobCategory);
 
-export function getRoadmapTemplate(jobCategory: string): RoadmapTemplate | undefined {
-  return ROADMAP_TEMPLATES.find(template => template.jobCategory === jobCategory);
+export async function getRoadmapTemplates(): Promise<RoadmapTemplate[]> {
+  try {
+    const count = await countTemplates('roadmap');
+    if (count === 0) return ROADMAP_TEMPLATES;
+
+    const rows = await listTemplates('roadmap');
+    const result: RoadmapTemplate[] = [];
+    for (const row of rows) {
+      const data = parseTemplateData<{ skills: RoadmapTemplate['skills'] }>(row, { skills: [] });
+      if (!data.skills.length) continue;
+      result.push({
+        jobCategory: row.jobType || row.name,
+        skills: data.skills,
+      });
+    }
+    return result.length > 0 ? result : ROADMAP_TEMPLATES;
+  } catch (error) {
+    console.error('Failed to load roadmap templates from DB:', error);
+    return ROADMAP_TEMPLATES;
+  }
+}
+
+export async function getRoadmapTemplate(jobCategory: string): Promise<RoadmapTemplate | undefined> {
+  const templates = await getRoadmapTemplates();
+  return templates.find(template => template.jobCategory === jobCategory);
 }
 
 /**

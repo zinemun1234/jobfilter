@@ -11,7 +11,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Plus, Trash2, Search, ExternalLink, Edit2, ToggleLeft, ToggleRight, Upload, CheckCircle, Tag, AlertCircle, ClipboardList } from 'lucide-react';
+import { Plus, Trash2, Search, ExternalLink, Edit2, ToggleLeft, ToggleRight, Upload, CheckCircle, X, Tag, AlertCircle, ClipboardList, FileSpreadsheet } from 'lucide-react';
 import Link from 'next/link';
 import { SlideOver } from '@/components/ui/slide-over';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
@@ -33,6 +33,7 @@ type Listing = {
   tags: string | null;
   source: string | null;
   isActive: boolean;
+  rejectionReason: string | null;
   createdAt: string;
 };
 
@@ -64,7 +65,8 @@ export default function AdminListingsPage() {
     queryFn: () => fetchListings(search),
   });
 
-  const pendingListings = listings.filter((l: Listing) => !l.isActive && l.source === '구인자 직접등록');
+  const isRecruiterSource = (source: string | null) => source === '구인자 직접등록' || source === 'RECRUITER';
+  const pendingListings = listings.filter((l: Listing) => !l.isActive && isRecruiterSource(l.source));
   const displayListings = tab === 'pending' ? pendingListings : listings;
 
   function openNew() {
@@ -116,10 +118,11 @@ export default function AdminListingsPage() {
 
   const toggleMutation = useMutation({
     mutationFn: async (l: Listing) => {
+      const tags = l.tags ? (() => { try { return JSON.parse(l.tags); } catch { return []; } })() : [];
       const res = await fetch(`/api/admin/listings/${l.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...l, isActive: !l.isActive }),
+        body: JSON.stringify({ ...l, tags, isActive: !l.isActive, rejectionReason: l.rejectionReason }),
       });
       if (!res.ok) throw new Error('Failed');
     },
@@ -128,6 +131,25 @@ export default function AdminListingsPage() {
       toast.success('상태가 변경되었습니다');
     },
     onError: () => toast.error('상태 변경에 실패했습니다'),
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: async (l: Listing) => {
+      const reason = window.prompt(`[${l.company}] ${l.position} 공고 반려 사유를 입력하세요.`)?.trim();
+      if (!reason) return;
+      const tags = l.tags ? (() => { try { return JSON.parse(l.tags); } catch { return []; } })() : [];
+      const res = await fetch(`/api/admin/listings/${l.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...l, tags, isActive: false, rejectionReason: reason }),
+      });
+      if (!res.ok) throw new Error('Failed');
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-listings'] });
+      toast.success('공고가 반려되었습니다');
+    },
+    onError: () => toast.error('반려에 실패했습니다'),
   });
 
   const deleteMutation = useMutation({
@@ -167,6 +189,14 @@ export default function AdminListingsPage() {
           >
             <Upload className="w-4 h-4" /> 엑셀 업로드
           </Link>
+          <a
+            href="/api/admin/listings/export"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <FileSpreadsheet className="w-4 h-4" /> 공고 목록 엑셀 다운로드
+          </a>
           <button
             type="button"
             onClick={openNew}
@@ -282,12 +312,18 @@ export default function AdminListingsPage() {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center justify-end gap-1">
-                        {/* 구인자 등록 공고 승인 버튼 */}
-                        {l.source === '구인자 직접등록' && !l.isActive && (
-                          <button type="button" onClick={() => toggleMutation.mutate(l)} aria-label="승인" disabled={toggleMutation.isPending}
-                            className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200 disabled:opacity-50">
-                            <CheckCircle className="w-3.5 h-3.5" /> 승인
-                          </button>
+                        {/* 구인자 등록 공고 승인/반려 버튼 */}
+                        {isRecruiterSource(l.source) && !l.isActive && (
+                          <>
+                            <button type="button" onClick={() => toggleMutation.mutate(l)} aria-label="승인" disabled={toggleMutation.isPending}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200 disabled:opacity-50">
+                              <CheckCircle className="w-3.5 h-3.5" /> 승인
+                            </button>
+                            <button type="button" onClick={() => rejectMutation.mutate(l)} aria-label="반려" disabled={rejectMutation.isPending}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors border border-red-200 disabled:opacity-50">
+                              <X className="w-3.5 h-3.5" /> 반려
+                            </button>
+                          </>
                         )}
                         {l.url && (
                           <a href={l.url} target="_blank" rel="noopener noreferrer" aria-label="원본 링크"

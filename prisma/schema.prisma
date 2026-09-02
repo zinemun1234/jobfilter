@@ -21,16 +21,19 @@ model User {
   major       String?  // 전공 (예: 컴퓨터공학)
   targetJob   String?  // 목표 직무 (예: 백엔드 개발자)
   skills      String   // JSON string[] (기술 스택)
-  role        String   @default("USER") // USER | ADMIN | RECRUITER
+  role          String   @default("USER") // USER | ADMIN | RECRUITER
   // RECRUITER 전용
-  companyName String?  // 기업명
-  companyDesc String?  // 기업 소개
-  isApproved  Boolean  @default(false) // 관리자 승인 여부
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  companyName       String?  // 기업명
+  companyDesc       String?  // 기업 소개
+  companyLogoUrl    String?  // 기업 로고 URL
+  companyAttachments String? // JSON: [{id, name, url}] 첨부파일 목록
+  isApproved        Boolean  @default(false) // 관리자 승인 여부
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   portfolios       Portfolio[]
   jobPostings      JobPosting[]
+  recruitListings  JobListing[] // RECRUITER가 등록한 공고
   roadmapItems     RoadmapItem[]
   interviewAnswers InterviewAnswer[]
   customQuestions  InterviewQuestion[]
@@ -93,19 +96,24 @@ model JobPosting {
   url         String?
   deadline    DateTime?
   interviewAt DateTime? // 면접 날짜
-  status      String    @default("PREPARING") // PREPARING|APPLIED|DOCUMENT_PASS|INTERVIEW|FINAL_PASS|REJECTED
+  status        String    @default("PREPARING") // PREPARING|APPLIED|DOCUMENT_PASS|INTERVIEW|FINAL_PASS|REJECTED
+  recruiterNote String?   // 리크루터용 지원자 메모
   contacts    String?   // JSON: [{name, role, email, phone, memo}]
   checklist   String?   // JSON: [{ label, checked }]
   followUpAt  DateTime?
+  listingId   String?   // JobListing과 연결 (공고에서 추가한 경우)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing          JobListing?       @relation(fields: [listingId], references: [id], onDelete: SetNull)
   statusHistory    StatusHistory[]
   coverLetters     CoverLetter[]
   portfolios       Portfolio[]
   experiences      Experience[]
   interviewAnswers InterviewAnswer[]
+
+  @@index([listingId])
 }
 
 model StatusHistory {
@@ -208,12 +216,20 @@ model JobListing {
   url          String?   // 원본 공고 링크
   description  String?   // 공고 상세 내용
   tags         String?   // JSON: string[] (기술스택 태그)
+  category     String?   // 학과/전공 분류 (classifyMajor 결과)
   source       String?   // 출처 (예: 학생성공처, 사람인 등)
-  isActive     Boolean   @default(true)
+  isActive       Boolean   @default(true)
+  rejectionReason String?  // 관리자 반려 사유
+  recruiterId    String?   // RECRUITER가 등록한 공고일 경우
+  viewCount      Int       @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  recruiter    User?     @relation(fields: [recruiterId], references: [id], onDelete: SetNull)
   bookmarks    JobBookmark[]
+  applications JobPosting[]
+
+  @@index([recruiterId])
 }
 
 // ─── 공고 북마크/찜 ───────────────────────────────────────────────────────────
@@ -279,4 +295,55 @@ model PasswordResetToken {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+// ─── 키워드 사전 (공고 태그, 전공 분류, 직무/기술 패턴) ────────────────────────
+model Keyword {
+  id        String   @id @default(cuid())
+  category  String   // 'job-tag' | 'major' | 'job-type' | 'skill-question'
+  key       String   // 예: 'react', 'frontend', '컴퓨터공학'
+  value     String   // 표시/매칭용 값
+  aliases   String?  // JSON: ["React.js", "reactjs"]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([category, key, value], name: "category_key_value")
+  @@index([category])
+  @@index([key])
+}
+
+// ─── 템플릿 (자소서, 로드맵, 면접 질문, 면접 추천) ─────────────────────────────
+model Template {
+  id        String   @id @default(cuid())
+  type      String   // 'cover-letter' | 'roadmap' | 'interview-question' | 'interview-recommend'
+  name      String   // 템플릿 식별자
+  label     String?  // 표시 이름
+  data      String   // JSON: 문항 배열, 스킬 목록, 질문 목록 등
+  jobType   String?  // 'frontend' | 'backend' | 'common' | null
+  category  String?  // TECHNICAL | PERSONALITY | SITUATIONAL | null
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([type, name], name: "type_name")
+  @@index([type])
+  @@index([name])
+  @@index([jobType])
+}
+
+// ─── 감사 로그 ─────────────────────────────────────────────────────────────────
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  details    String?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([resource, resourceId])
+  @@index([action])
+  @@index([createdAt])
 }

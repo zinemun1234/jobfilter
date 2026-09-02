@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
 
       // 해당 카테고리 데이터가 없으면 템플릿에서 생성
       if (roadmapItems.length === 0) {
-        const template = getRoadmapTemplate(jobCategory);
+        const template = await getRoadmapTemplate(jobCategory);
         if (template) {
           await prisma.roadmapItem.createMany({
             data: template.skills.map(skill => ({
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ data: parsed });
     }
   } catch (error) {
-    console.error('Failed to fetch roadmap:', error);
+    logger.error({ err: error }, 'Failed to fetch roadmap');
     return NextResponse.json({ error: 'Failed to fetch roadmap' }, { status: 500 });
   }
 }
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
     const sanitized = sanitizeRoadmapItem(roadmapItem);
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>, { status: 201 });
   } catch (error) {
-    console.error('Failed to create roadmap item:', error);
+    logger.error({ err: error }, 'Failed to create roadmap item');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }

@@ -10,6 +10,7 @@
  * 커스텀 질문 생성 (Zod interviewQuestionSchema 검증)
  */
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     if (random) {
       // For mock interview: mix template questions + user's custom questions
-      const templateQuestions = getRandomQuestions(Math.max(count - customQuestions.length, 5), category, jobType ?? undefined);
+      const templateQuestions = await getRandomQuestions(Math.max(count - customQuestions.length, 5), category, jobType ?? undefined);
       const templateMapped = templateQuestions.map(t => ({
         id: `default-${t.category}-${t.question.slice(0, 30)}`,
         category: t.category,
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Normal listing: default templates + custom questions
-    const templates = getInterviewQuestions(category, jobType ?? undefined);
+    const templates = await getInterviewQuestions(category, jobType ?? undefined);
     const defaultQuestions = templates.map(t => ({
       id: `default-${t.category}-${t.question.slice(0, 30)}`,
       category: t.category,
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
     const sanitized = questions.map((q) => sanitizeInterviewQuestion(q as Record<string, unknown>));
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
-    console.error('Failed to fetch interview questions:', error);
+    logger.error({ err: error }, 'Failed to fetch interview questions');
     return NextResponse.json({ error: 'Failed to fetch interview questions' }, { status: 500 });
   }
 }
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
     const sanitized = sanitizeInterviewQuestion(question);
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>, { status: 201 });
   } catch (error) {
-    console.error('Failed to create interview question:', error);
+    logger.error({ err: error }, 'Failed to create interview question');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }

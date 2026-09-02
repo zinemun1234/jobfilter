@@ -1,5 +1,3 @@
-import { prisma } from '@/lib/prisma';
-
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
  type JobNotificationInput = {
@@ -17,6 +15,8 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
  * type + referenceId로 중복 생성을 방지합니다.
  */
 export async function syncJobNotifications(userId: string) {
+  const { prisma } = await import('@/lib/prisma');
+
   const jobs = await prisma.jobPosting.findMany({
     where: { userId },
     select: {
@@ -116,6 +116,8 @@ export async function notifyUsersOfNewListing(listing: {
   position: string;
   deadline?: Date | null;
 }) {
+  const { prisma } = await import('@/lib/prisma');
+
   const users = await prisma.user.findMany({ select: { id: true } });
   const deadlineText = listing.deadline
     ? `마감일: ${listing.deadline.toLocaleDateString('ko-KR')}`
@@ -134,7 +136,7 @@ export async function notifyUsersOfNewListing(listing: {
             referenceId: listing.id,
           },
         },
-        update: { title, body, isRead: false },
+        update: { title, body, isRead: false, actionUrl: `/listings/${listing.id}` },
         create: {
           userId: u.id,
           type: 'NEW_LISTING',
@@ -153,6 +155,8 @@ export async function notifyUsersOfNewListing(listing: {
  */
 export async function notifyUsersOfNewListingsSummary(count: number) {
   if (count <= 0) return;
+
+  const { prisma } = await import('@/lib/prisma');
 
   const users = await prisma.user.findMany({ select: { id: true } });
   const title = `${count}개의 새 공고가 등록되었어요`;
@@ -173,4 +177,54 @@ export async function notifyUsersOfNewListingsSummary(count: number) {
       })
     )
   );
+}
+
+/**
+ * 알림 유형과 참조 ID에 따라 이동할 경로를 반환합니다.
+ * 클라이언트에서도 사용할 수 있도록 서버 전용 의존성을 갖지 않습니다.
+ */
+export function getNotificationLink(notification: {
+  type: string;
+  referenceId?: string | null;
+}): string | null {
+  const { type, referenceId } = notification;
+
+  switch (type) {
+    case 'LISTING_APPROVED':
+    case 'LISTING_REJECTED':
+    case 'NEW_RECRUITER_LISTING':
+      return '/recruiter/listings';
+
+    case 'NEW_APPLICANT': {
+      if (!referenceId) return '/recruiter/listings';
+      return `/recruiter/listings/${referenceId}/applicants`;
+    }
+
+    case 'APPLICATION_STATUS':
+      return '/jobs';
+
+    case 'NEW_RECRUITER':
+      return '/admin/users';
+
+    case 'DEADLINE':
+    case 'FOLLOWUP':
+      return '/jobs';
+
+    case 'INTERVIEW':
+      return '/interview';
+
+    case 'NOTICE':
+      return '/notices';
+
+    case 'NEW_LISTING': {
+      if (!referenceId) return '/listings';
+      return `/listings/${referenceId}`;
+    }
+
+    case 'NEW_LISTING_SUMMARY':
+      return '/listings';
+
+    default:
+      return null;
+  }
 }

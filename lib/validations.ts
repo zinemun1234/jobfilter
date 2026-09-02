@@ -15,9 +15,18 @@ import { z } from 'zod';
 export const portfolioSchema = z.object({
   title: z.string().min(1, '제목은 필수입니다'),
   description: z.string().min(1, '설명은 필수입니다'),
-  techStack: z.array(z.string()).min(1, '최소 1개 이상의 기술 스택을 선택해야 합니다'),
-  startDate: z.string().min(1, '시작일은 필수입니다'),
-  endDate: z.string().optional(),
+  techStack: z.preprocess(
+    (val) => (Array.isArray(val) ? val : []),
+    z.array(z.string()).default([])
+  ),
+  startDate: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? undefined : val),
+    z.string().min(1, '시작일은 필수입니다').optional()
+  ),
+  endDate: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.string().optional()
+  ),
   githubUrl: z.string().url('유효한 GitHub URL을 입력해주세요').optional().or(z.literal('')),
   deployUrl: z.string().url('유효한 배포 URL을 입력해주세요').optional().or(z.literal('')),
   jobId: z.string().optional(),

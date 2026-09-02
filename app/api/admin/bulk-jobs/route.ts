@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin, sanitizeJobListing } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
+import { classifyMajor } from '@/lib/majors';
 import * as XLSX from 'xlsx';
 
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,7 @@ type JobRow = {
   deadline?: string;
   url?: string;
   description?: string;
+  category?: string;
   contactEmail?: string;
   headcount?: string;
 };
@@ -38,7 +40,7 @@ function get(row: Record<string, unknown>, ...keys: string[]): string | undefine
   return undefined;
 }
 
-function parseRow(row: Record<string, unknown>): JobRow | null {
+async function parseRow(row: Record<string, unknown>): Promise<JobRow | null> {
   const company = get(row, '회사명', '기업명', '회사', 'company', '업체명', '구인업체');
   const position = get(row, '직무', '직종', '모집직종', '채용직무', '포지션', 'position', '모집분야');
   if (!company || !position) return null;
@@ -55,6 +57,9 @@ function parseRow(row: Record<string, unknown>): JobRow | null {
     }
   }
 
+  const description = get(row, '상세내용', '업무내용', '주요업무', '자격요건', 'description');
+  const category = (await classifyMajor(`${position} ${description ?? ''}`)).category;
+
   return {
     company,
     position,
@@ -65,7 +70,8 @@ function parseRow(row: Record<string, unknown>): JobRow | null {
     salary: get(row, '급여', '연봉', '임금', 'salary'),
     deadline,
     url: get(row, 'url', '링크', '공고링크', '지원링크'),
-    description: get(row, '상세내용', '업무내용', '주요업무', '자격요건', 'description'),
+    description,
+    category,
     contactEmail: get(row, '담당자이메일', '연락처이메일', '이메일', 'email', 'contactemail'),
     headcount: get(row, '모집인원', '채용인원', 'headcount'),
   };
@@ -92,7 +98,7 @@ export async function POST(req: NextRequest) {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' });
 
-    const parsed = rows.map(parseRow).filter(Boolean) as JobRow[];
+    const parsed = (await Promise.all(rows.map(parseRow))).filter(Boolean) as JobRow[];
 
     // 마감일 지난 공고 자동 필터링
     const now = new Date();
@@ -137,27 +143,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: { count: 0, duplicateCount, message: '모두 중복 공고입니다.' } });
   }
 
-  const created = await prisma.jobListing.createMany({
-    data: newRows.map(r => ({
-      company: r.company,
-      position: r.position,
-      location: r.location ?? null,
-      career: r.career ?? null,
-      employType: r.employType ?? null,
-      education: r.education ?? null,
-      salary: r.salary ?? null,
-      deadline: r.deadline ? (isNaN(new Date(r.deadline).getTime()) ? null : new Date(r.deadline)) : null,
-      url: r.url ?? null,
-      description: [
-        r.description,
-        r.headcount ? `모집인원: ${r.headcount}` : null,
-        r.contactEmail ? `담당자: ${r.contactEmail}` : null,
-      ].filter(Boolean).join('\n') || null,
-      tags: null,
-      source: '구인자 직접등록',
-      isActive: true,
-    })),
-  });
+  const data = await Promise.all(newRows.map(async r => ({
+    company: r.company,
+    position: r.position,
+    location: r.location ?? null,
+    career: r.career ?? null,
+    employType: r.employType ?? null,
+    education: r.education ?? null,
+    salary: r.salary ?? null,
+    deadline: r.deadline ? (isNaN(new Date(r.deadline).getTime()) ? null : new Date(r.deadline)) : null,
+    url: r.url ?? null,
+    description: [
+      r.description,
+      r.headcount ? `모집인원: ${r.headcount}` : null,
+      r.contactEmail ? `담당자: ${r.contactEmail}` : null,
+    ].filter(Boolean).join('\n') || null,
+    category: r.category ?? (await classifyMajor(`${r.position} ${r.description ?? ''}`)).category,
+    tags: null,
+    source: '구인자 직접등록',
+    isActive: true,
+  })));
+
+  const created = await prisma.jobListing.createMany({ data });
 
   return NextResponse.json({ data: { count: created.count, duplicateCount } }, { status: 201 });
 }

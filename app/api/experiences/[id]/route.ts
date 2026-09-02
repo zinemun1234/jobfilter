@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession, sanitizeExperience } from '@/lib/api';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit-log';
 
 function parseTechnologies(value: string): string[] {
   try {
@@ -57,9 +58,24 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const userId = await getAuthSession();
+    const existing = await prisma.experience.findFirst({
+      where: { id: params.id, userId },
+      select: { id: true, title: true },
+    });
+    if (!existing) return NextResponse.json({ error: '경험을 찾을 수 없습니다.' }, { status: 404 });
+
+    await createAuditLog({
+      userId,
+      action: 'DELETE_EXPERIENCE',
+      resource: 'Experience',
+      resourceId: params.id,
+      details: { id: params.id, title: existing.title },
+      request,
+    });
+
     const deleted = await prisma.experience.deleteMany({ where: { id: params.id, userId } });
     if (deleted.count === 0) return NextResponse.json({ error: '경험을 찾을 수 없습니다.' }, { status: 404 });
     return NextResponse.json({ data: { ok: true } });

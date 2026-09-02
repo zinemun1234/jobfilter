@@ -27,6 +27,7 @@ import SkeletonList from '@/components/ui/SkeletonList';
 import FilterPanel, { type FilterState } from '@/components/listings/FilterPanel';
 import Pagination from '@/components/listings/Pagination';
 import { Badge } from '@/components/ui/badge';
+import { isRecruiterSource } from '@/lib/utils';
 
 type Listing = {
   id: string;
@@ -38,6 +39,8 @@ type Listing = {
   employType: string | null;
   salary: string | null;
   deadline: string | null;
+  source: string | null;
+  category: string | null;
   tags: string[];
   createdAt: string;
 };
@@ -58,6 +61,7 @@ function parseFilters(searchParams: URLSearchParams): FilterState {
     search: searchParams.get('search') ?? '',
     career: (searchParams.get('career') ?? 'all') as FilterState['career'],
     employType: (searchParams.get('employType') ?? 'all') as FilterState['employType'],
+    category: (searchParams.get('category') ?? 'all') as FilterState['category'],
     location: searchParams.get('location') ?? '',
     tags: (searchParams.get('tags') ?? '')
       .split(',')
@@ -77,6 +81,7 @@ function buildParams(filters: FilterState & { page?: number }): URLSearchParams 
   if (filters.search) params.set('search', filters.search);
   if (filters.career && filters.career !== 'all') params.set('career', filters.career);
   if (filters.employType && filters.employType !== 'all') params.set('employType', filters.employType);
+  if (filters.category && filters.category !== 'all') params.set('category', filters.category);
   if (filters.location) params.set('location', filters.location);
   if (filters.tags.length > 0) params.set('tags', filters.tags.join(','));
   if (filters.deadlineFrom) params.set('deadlineFrom', filters.deadlineFrom);
@@ -235,6 +240,11 @@ function OpenListingsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                             <p className="text-xs font-medium text-muted-foreground">{l.company}</p>
+                            {isRecruiterSource(l.source) && (
+                              <Badge className="text-xs font-bold bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-50">
+                                기업 직접 등록
+                              </Badge>
+                            )}
                             {isNew && (
                               <Badge className="text-xs font-bold bg-primary text-primary-foreground hover:bg-primary">
                                 NEW
@@ -243,6 +253,11 @@ function OpenListingsPage() {
                             {isUrgent && (
                               <Badge variant="destructive" className="text-xs font-bold">
                                 마감임박
+                              </Badge>
+                            )}
+                            {l.category && (
+                              <Badge className="text-xs font-bold bg-violet-50 text-violet-600 border-violet-200 hover:bg-violet-50">
+                                {l.category}
                               </Badge>
                             )}
                           </div>

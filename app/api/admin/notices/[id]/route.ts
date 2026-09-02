@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
+import { createAuditLog } from '@/lib/audit-log';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -13,8 +14,9 @@ const updateSchema = z.object({
 });
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  let userId: string;
   try {
-    await requireAdmin();
+    ({ userId } = await requireAdmin());
   } catch (error) {
     return handleApiError(error);
   }
@@ -31,16 +33,33 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     },
   });
 
+  await createAuditLog({
+    userId,
+    action: 'UPDATE_NOTICE',
+    resource: 'Notice',
+    resourceId: params.id,
+    details: { id: params.id, title: notice.title, changed: Object.keys(data) },
+    request: req,
+  });
+
   return NextResponse.json({ data: notice });
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  let userId: string;
   try {
-    await requireAdmin();
+    ({ userId } = await requireAdmin());
   } catch (error) {
     return handleApiError(error);
   }
 
   await prisma.notice.delete({ where: { id: params.id } });
+  await createAuditLog({
+    userId,
+    action: 'DELETE_NOTICE',
+    resource: 'Notice',
+    resourceId: params.id,
+    request: req,
+  });
   return NextResponse.json({ data: { ok: true } });
 }

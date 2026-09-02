@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sanitizeCoverLetter } from '@/lib/api';
+import { createAuditLog } from '@/lib/audit-log';
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -83,9 +84,24 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ data: letter });
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const existing = await prisma.coverLetter.findFirst({
+    where: { id: params.id, userId: session.user.id },
+    select: { id: true, company: true, position: true },
+  });
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  await createAuditLog({
+    userId: session.user.id,
+    action: 'DELETE_COVER_LETTER',
+    resource: 'CoverLetter',
+    resourceId: params.id,
+    details: { id: params.id, company: existing.company, position: existing.position },
+    request,
+  });
 
   await prisma.coverLetter.deleteMany({ where: { id: params.id, userId: session.user.id } });
   return NextResponse.json({ ok: true });

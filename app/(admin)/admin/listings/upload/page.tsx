@@ -121,6 +121,14 @@ export default function ListingUploadPage() {
           <h1 className="text-xl font-semibold text-gray-900">엑셀 일괄 업로드</h1>
           <p className="text-xs text-gray-400 mt-1">엑셀 파일을 업로드하면 컴퓨터공학부 맞춤 직군을 자동으로 필터링합니다</p>
         </div>
+        <a
+          href="/api/admin/listings/template"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          <FileSpreadsheet className="w-4 h-4" /> 템플릿 다운로드
+        </a>
       </div>
 
       {/* 업로드 영역 */}

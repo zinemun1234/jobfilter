@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     return badRequest('지원하지 않는 action입니다.');
   } catch (error) {
-    console.error('Failed to bulk update jobs:', error);
+    logger.error({ err: error }, 'Failed to bulk update jobs');
     return internalError('일괄 처리 중 오류가 발생했습니다.');
   }
 }

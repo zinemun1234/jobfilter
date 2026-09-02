@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin, sanitizeJobListing } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import { notifyUsersOfNewListing } from '@/lib/notifications';
+import { classifyMajor } from '@/lib/majors';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,6 +48,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '회사명과 직무는 필수입니다' }, { status: 400 });
   }
 
+  const { category } = await classifyMajor(`${position} ${description ?? ''}`);
+
   const listing = await prisma.jobListing.create({
     data: {
       company,
@@ -60,6 +63,7 @@ export async function POST(req: NextRequest) {
       url: url || null,
       description: description || null,
       tags: tags ? JSON.stringify(tags) : null,
+      category,
     },
   });
 

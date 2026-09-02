@@ -147,8 +147,11 @@ export type JobListing = {
   url: string | null;
   description: string | null;
   tags: string | null; // JSON: string[]
+  category?: string | null;
   source: string | null;
   isActive: boolean;
+  rejectionReason: string | null;
+  viewCount: number;
   createdAt: Date;
   updatedAt: Date;
 };

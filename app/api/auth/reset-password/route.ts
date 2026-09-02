@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { checkRequestSecurity, rateLimiters } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  const security = await checkRequestSecurity(request, {
+    rateLimit: true,
+    requireOrigin: true,
+    limiter: rateLimiters.auth,
+  });
+  if (security) return security;
+
   try {
     const { token, password } = await request.json();
     if (!token || !password) {
@@ -36,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: '비밀번호가 변경되었습니다.' });
   } catch (e) {
-    console.error(e);
+    logger.error({ err: e }, '비밀번호 재설정 실패');
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
   }
 }

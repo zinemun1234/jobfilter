@@ -1,3 +1,5 @@
+import { listTemplates, countTemplates, parseTemplateData } from './template-service';
+
 export type CLItem = { question: string; answer: string };
 
 export type CoverLetterTemplate = {
@@ -140,10 +142,33 @@ export const COVER_LETTER_TEMPLATES: Record<string, CoverLetterTemplate> = {
   },
 };
 
+export async function getCoverLetterTemplates(): Promise<Record<string, CoverLetterTemplate>> {
+  try {
+    const count = await countTemplates('cover-letter');
+    if (count === 0) return COVER_LETTER_TEMPLATES;
+
+    const rows = await listTemplates('cover-letter');
+    const result: Record<string, CoverLetterTemplate> = {};
+    for (const row of rows) {
+      const data = parseTemplateData<{ items: CLItem[] }>(row, { items: [] });
+      if (!data.items.length) continue;
+      result[row.name] = {
+        label: row.label || row.name,
+        items: data.items,
+      };
+    }
+    return Object.keys(result).length > 0 ? result : COVER_LETTER_TEMPLATES;
+  } catch (error) {
+    console.error('Failed to load cover letter templates from DB:', error);
+    return COVER_LETTER_TEMPLATES;
+  }
+}
+
 // 템플릿 검색/자동완성용 헬퍼
-export function searchTemplates(keyword: string): [string, CoverLetterTemplate][] {
+export async function searchTemplates(keyword: string): Promise<[string, CoverLetterTemplate][]> {
   const lower = keyword.toLowerCase();
-  return Object.entries(COVER_LETTER_TEMPLATES).filter(([, tpl]) =>
+  const templates = await getCoverLetterTemplates();
+  return Object.entries(templates).filter(([, tpl]) =>
     tpl.label.toLowerCase().includes(lower)
   );
 }

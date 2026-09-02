@@ -1,0 +1,3 @@
+-- Recruiter relation on JobListing and User
+-- recruiterId column and FK already exist in the database from the initial migration.
+-- This migration marks the schema/model alignment only.

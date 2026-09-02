@@ -11,6 +11,7 @@
  * questionText로 기존 레코드를 찾거나 없으면 새로 생성한다.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
     const sanitized = answers.map((answer) => sanitizeInterviewAnswer(answer));
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
-    console.error('Failed to fetch interview answers:', error);
+    logger.error({ err: error }, 'Failed to fetch interview answers');
     return NextResponse.json({ error: 'Failed to fetch interview answers' }, { status: 500 });
   }
 }
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
     const sanitized = sanitizeInterviewAnswer(answer);
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
-    console.error('Failed to save interview answer:', error);
+    logger.error({ err: error }, 'Failed to save interview answer');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }

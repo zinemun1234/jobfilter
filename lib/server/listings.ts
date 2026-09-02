@@ -22,6 +22,7 @@ export type ListingQuery = {
   search: string;
   career: string;
   employType: string;
+  category: string;
   location: string;
   tags: string[];
   deadlineFrom: Date | null;
@@ -43,6 +44,8 @@ export type ListingResult = {
   deadline: string | null;
   url: string | null;
   description: string | null;
+  category: string | null;
+  source: string | null;
   tags: string[];
   createdAt: string;
   matching: MatchingResult | null;
@@ -112,6 +115,7 @@ export function parseListingQuery(
     search: (searchParams.get('search') ?? '').trim(),
     career: (searchParams.get('career') ?? 'all').trim().toLowerCase(),
     employType: (searchParams.get('employType') ?? 'all').trim().toLowerCase(),
+    category: (searchParams.get('category') ?? 'all').trim(),
     location: (searchParams.get('location') ?? '').trim(),
     tags,
     deadlineFrom: parseDate(searchParams.get('deadlineFrom'), false),
@@ -188,10 +192,17 @@ function matchesTags(listingTags: string[], queryTags: string[]): boolean {
   return queryTags.every((q) => normalized.includes(q.trim().toLowerCase()));
 }
 
+function matchesCategory(category: string | null, filter: string): boolean {
+  if (filter === 'all') return true;
+  const c = (category ?? '기타').trim();
+  return c === filter;
+}
+
 function applyClientFilters(listings: JobListingWithCount[], query: ListingQuery): JobListingWithCount[] {
   return listings.filter((l) => {
     if (!matchesCareer(l.career, query.career)) return false;
     if (!matchesEmployType(l.employType, query.employType)) return false;
+    if (!matchesCategory(l.category, query.category)) return false;
     if (!matchesTags(parseJsonArray(l.tags), query.tags)) return false;
     return true;
   });
@@ -246,13 +257,14 @@ export async function getListings(
     userId
       ? prisma.user.findUnique({
           where: { id: userId },
-          select: { skills: true, targetJob: true },
+          select: { skills: true, targetJob: true, major: true },
         })
       : null,
   ]);
 
   const userSkills = parseJsonArray(profile?.skills);
   const targetJob = profile?.targetJob ?? null;
+  const userMajor = profile?.major ?? null;
 
   let filtered = applyClientFilters(listings, query);
 
@@ -267,6 +279,8 @@ export async function getListings(
           career: l.career,
           targetJob,
           deadline: l.deadline,
+          major: userMajor,
+          category: l.category,
         })
       : null;
     return { ...l, matching };
@@ -316,6 +330,7 @@ export async function getListings(
       id: l.id,
       company: l.company,
       position: l.position,
+      source: l.source,
       location: l.location,
       career: l.career,
       education: l.education,
@@ -324,6 +339,7 @@ export async function getListings(
       deadline: l.deadline ? l.deadline.toISOString() : null,
       url: l.url,
       description: l.description,
+      category: l.category,
       tags,
       createdAt: l.createdAt.toISOString(),
       matching,

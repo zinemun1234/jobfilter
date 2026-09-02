@@ -112,6 +112,12 @@ export default async function Home({ searchParams }: { searchParams: { from?: st
           >
             로그인
           </Link>
+          <Link
+            href="/register-recruiter"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-7 py-3.5 text-sm font-medium text-emerald-300 transition-colors hover:bg-emerald-400/15 sm:w-auto"
+          >
+            기업 회원 가입
+          </Link>
         </div>
       </section>
 

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { roadmapItemSchema } from '@/lib/validations';
 import { ApiResponse, sanitizeRoadmapItem } from '@/lib/api';
+import { createAuditLog } from '@/lib/audit-log';
 
 export async function PUT(
   request: NextRequest,
@@ -46,7 +48,7 @@ export async function PUT(
     const sanitized = sanitizeRoadmapItem(roadmapItem);
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
-    console.error('Failed to update roadmap item:', error);
+    logger.error({ err: error }, 'Failed to update roadmap item');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }
@@ -80,13 +82,22 @@ export async function DELETE(
       return NextResponse.json({ error: 'Cannot delete template items' }, { status: 400 });
     }
 
+    await createAuditLog({
+      userId: session.user.id,
+      action: 'DELETE_ROADMAP_ITEM',
+      resource: 'RoadmapItem',
+      resourceId: params.id,
+      details: { id: params.id, skill: existingItem.skill, jobCategory: existingItem.jobCategory },
+      request,
+    });
+
     await prisma.roadmapItem.delete({
       where: { id: params.id },
     });
 
     return NextResponse.json({ data: { success: true } } as ApiResponse<{ success: boolean }>);
   } catch (error) {
-    console.error('Failed to delete roadmap item:', error);
+    logger.error({ err: error }, 'Failed to delete roadmap item');
     return NextResponse.json({ error: 'Failed to delete roadmap item' }, { status: 500 });
   }
 }

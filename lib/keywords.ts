@@ -8,6 +8,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { safeJsonParse, stringifyJson } from '@/lib/json-utils';
+import { listKeywords } from './keyword-service';
 
 export type KeywordStat = {
   keyword: string;
@@ -39,24 +40,52 @@ function detectCategory(keyword: string): string {
   return '언어/기타';
 }
 
+async function loadJobTagMap(): Promise<Map<string, { keyword: string; normalized: string }>> {
+  try {
+    const keywords = await listKeywords('job-tag');
+    const map = new Map<string, { keyword: string; normalized: string }>();
+    for (const k of keywords) {
+      const valueNormalized = normalizeKeyword(k.value);
+      const keyNormalized = normalizeKeyword(k.key);
+      map.set(keyNormalized, { keyword: k.value, normalized: valueNormalized });
+      map.set(valueNormalized, { keyword: k.value, normalized: valueNormalized });
+      if (k.aliases) {
+        for (const alias of k.aliases) {
+          map.set(normalizeKeyword(alias), { keyword: k.value, normalized: valueNormalized });
+        }
+      }
+    }
+    return map;
+  } catch (error) {
+    console.error('Failed to load job-tag keyword map:', error);
+    return new Map();
+  }
+}
+
 export async function getKeywordStats(): Promise<KeywordStat[]> {
-  const listings = await prisma.jobListing.findMany({
-    where: { isActive: true },
-    select: { tags: true },
-  });
+  const [listings, tagMap] = await Promise.all([
+    prisma.jobListing.findMany({
+      where: { isActive: true },
+      select: { tags: true },
+    }),
+    loadJobTagMap(),
+  ]);
 
   const counter = new Map<string, { count: number; normalized: string }>();
 
   for (const listing of listings) {
     const tags = safeJsonParse<string[]>(listing.tags, []);
     for (const tag of tags) {
-      const normalized = normalizeKeyword(tag);
-      if (!normalized) continue;
-      const existing = counter.get(tag);
+      const tagNormalized = normalizeKeyword(tag);
+      if (!tagNormalized) continue;
+      const matched = tagMap.get(tagNormalized);
+      const keyword = matched ? matched.keyword : tag;
+      const normalized = matched ? matched.normalized : tagNormalized;
+      const existing = counter.get(keyword);
       if (existing) {
         existing.count += 1;
       } else {
-        counter.set(tag, { count: 1, normalized });
+        counter.set(keyword, { count: 1, normalized });
       }
     }
   }

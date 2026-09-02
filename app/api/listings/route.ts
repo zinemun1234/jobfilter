@@ -54,8 +54,45 @@ export async function POST(req: NextRequest) {
       deadline: listing.deadline,
       status: 'PREPARING',
       checklist: checklist.length > 0 ? JSON.stringify(checklist) : null,
+      listingId: listing.id,
     },
   });
+
+  // 리크루터 공고에 지원하면 리크루터에게 알림
+  if (listing.recruiterId) {
+    try {
+      const student = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true, email: true },
+      });
+      const actionUrl = `/recruiter/listings/${listing.id}/applicants`;
+      await prisma.userNotification.upsert({
+        where: {
+          userId_type_referenceId: {
+            userId: listing.recruiterId,
+            type: 'NEW_APPLICANT',
+            referenceId: listing.id,
+          },
+        },
+        update: {
+          title: '새로운 지원자',
+          body: `${student?.name ?? '학생'}님이 [${listing.company}] ${listing.position} 공고에 지원했습니다.`,
+          actionUrl,
+          isRead: false,
+        },
+        create: {
+          userId: listing.recruiterId,
+          type: 'NEW_APPLICANT',
+          referenceId: listing.id,
+          actionUrl,
+          title: '새로운 지원자',
+          body: `${student?.name ?? '학생'}님이 [${listing.company}] ${listing.position} 공고에 지원했습니다.`,
+        },
+      });
+    } catch {
+      // 알림 실패는 지원 등록에 영향을 주지 않음
+    }
+  }
 
   return NextResponse.json({ data: sanitizeJobPosting(job) }, { status: 201 });
 }

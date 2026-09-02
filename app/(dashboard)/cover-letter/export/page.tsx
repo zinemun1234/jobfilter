@@ -1,5 +1,7 @@
 'use client';
 
+import logger from '@/lib/logger';
+
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Download, FileText } from 'lucide-react';
@@ -85,7 +87,7 @@ export default function CoverLetterExportPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('PDF 다운로드 실패:', error);
+      logger.error({ err: error }, 'PDF 다운로드 실패');
       alert('PDF 다운로드에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setDownloading(false);

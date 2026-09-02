@@ -8,12 +8,20 @@
  * PUT/PATCH는 본인 또는 ADMIN도 접근할 수 있다.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { jobPostingSchema } from '@/lib/validations';
-import { ApiResponse, sanitizeJobPosting } from '@/lib/api';
+import {
+  ApiResponse,
+  notFound,
+  requireAdminOrOwner,
+  sanitizeJobPosting,
+} from '@/lib/api';
+import { AppError, handleApiError } from '@/lib/errors';
 import { safeJsonParse, stringifyJson } from '@/lib/json-utils';
+import { createAuditLog } from '@/lib/audit-log';
 
 export async function GET(
   request: NextRequest,
@@ -74,7 +82,7 @@ export async function GET(
     const result = sanitizeJobPosting(parsed);
     return NextResponse.json({ data: result } as ApiResponse<typeof result>);
   } catch (error) {
-    console.error('Failed to fetch job:', error);
+    logger.error({ err: error }, 'Failed to fetch job');
     return NextResponse.json({ error: 'Failed to fetch job' }, { status: 500 });
   }
 }
@@ -84,11 +92,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
     const validatedData = jobPostingSchema.parse(body);
 
@@ -97,12 +100,10 @@ export async function PUT(
     });
 
     if (!existingJob) {
-      return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+      return notFound();
     }
 
-    if (existingJob.userId !== session.user.id && session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    await requireAdminOrOwner(existingJob.userId);
 
     // 상태가 변경되면 이력 기록
     if (existingJob.status !== validatedData.status) {
@@ -143,7 +144,10 @@ export async function PUT(
     };
     return NextResponse.json({ data: sanitizeJobPosting(result) } as ApiResponse<typeof result>);
   } catch (error) {
-    console.error('Failed to update job:', error);
+    if (error instanceof AppError) {
+      return handleApiError(error);
+    }
+    logger.error({ err: error }, 'Failed to update job');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }
@@ -156,11 +160,6 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
     const { status } = body;
 
@@ -177,12 +176,10 @@ export async function PATCH(
     });
 
     if (!existingJob) {
-      return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+      return notFound();
     }
 
-    if (existingJob.userId !== session.user.id && session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    await requireAdminOrOwner(existingJob.userId);
 
     if (existingJob.status !== validatedStatus) {
       await prisma.statusHistory.create({
@@ -203,7 +200,10 @@ export async function PATCH(
     const sanitized = sanitizeJobPosting(job);
     return NextResponse.json({ data: sanitized } as ApiResponse<typeof sanitized>);
   } catch (error) {
-    console.error('Failed to patch job:', error);
+    if (error instanceof AppError) {
+      return handleApiError(error);
+    }
+    logger.error({ err: error }, 'Failed to patch job');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }
@@ -247,7 +247,7 @@ export async function POST(
     };
     return NextResponse.json({ data: sanitizeJobPosting(result) } as ApiResponse<typeof result>);
   } catch (error) {
-    console.error('Failed to update checklist:', error);
+    logger.error({ err: error }, 'Failed to update checklist');
     return NextResponse.json({ error: 'Failed to update checklist' }, { status: 500 });
   }
 }
@@ -273,13 +273,22 @@ export async function DELETE(
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
+    await createAuditLog({
+      userId: session.user.id,
+      action: 'DELETE_JOB_POSTING',
+      resource: 'JobPosting',
+      resourceId: params.id,
+      details: { id: params.id, company: existingJob.company, position: existingJob.position },
+      request,
+    });
+
     await prisma.jobPosting.delete({
       where: { id: params.id },
     });
 
     return NextResponse.json({ data: { success: true } } as ApiResponse<{ success: boolean }>);
   } catch (error) {
-    console.error('Failed to delete job:', error);
+    logger.error({ err: error }, 'Failed to delete job');
     return NextResponse.json({ error: 'Failed to delete job' }, { status: 500 });
   }
 }

@@ -121,6 +121,14 @@ export default function BulkJobsPage() {
           </div>
           <p className="text-xs text-gray-400">기업 담당자가 제공한 엑셀 파일을 업로드하여 공고를 일괄 등록합니다. 마감된 공고는 자동으로 제외됩니다.</p>
         </div>
+        <a
+          href="/api/admin/bulk-jobs/template"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          <FileSpreadsheet className="w-4 h-4" /> 템플릿 다운로드
+        </a>
       </div>
 
       {/* 차이점 안내 */}

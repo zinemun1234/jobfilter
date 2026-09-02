@@ -6,14 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { profileSchema, ProfileInput } from '@/lib/validations/profile';
 import { User } from '@/types';
 import { X } from 'lucide-react';
-
-const MAJOR_OPTIONS = [
-  { value: '컴퓨터공학', label: '컴퓨터공학' },
-  { value: '소프트웨어공학', label: '소프트웨어공학' },
-  { value: '정보통신', label: '정보통신' },
-  { value: '전자공학', label: '전자공학' },
-  { value: '기타', label: '기타' },
-];
+import { MAJOR_OPTIONS } from '@/lib/majors';
 
 const TARGET_JOB_OPTIONS = [
   { value: '프론트엔드 개발자', label: '프론트엔드 개발자' },

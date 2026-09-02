@@ -7,6 +7,7 @@ import {
   Users, Briefcase, TrendingUp, ClipboardList,
   UserPlus, ChevronRight, BarChart2, MessageSquare,
   FileText, HelpCircle, Bell, ArrowUpRight, AlertCircle,
+  Tag,
 } from 'lucide-react';
 
 type StatsData = {
@@ -35,6 +36,8 @@ const NAV_ITEMS = [
   { href: '/admin/stats', icon: BarChart2, label: '취업 통계', desc: '지원 현황 및 합격률 분석', color: 'violet' },
   { href: '/admin/notices', icon: Bell, label: '공지사항', desc: '전체 공지 작성 및 관리', color: 'emerald' },
   { href: '/admin/questions', icon: HelpCircle, label: '면접 질문', desc: '면접 질문 풀 관리', color: 'rose' },
+  { href: '/admin/keywords', icon: Tag, label: '키워드 사전', desc: '태그/전공/직무 키워드 관리', color: 'sky' },
+  { href: '/admin/templates', icon: FileText, label: '템플릿 관리', desc: '자소서·로드맵·면접 템플릿 관리', color: 'indigo' },
   { href: '/admin/bulk-jobs', icon: FileText, label: '일괄 작업', desc: '공고 일괄 처리', color: 'gray' },
 ];
 
@@ -45,6 +48,8 @@ const COLOR_MAP: Record<string, { bg: string; icon: string; badge: string }> = {
   emerald:{ bg: 'bg-emerald-50',icon: 'text-emerald-600',badge: 'bg-emerald-100' },
   rose:   { bg: 'bg-rose-50',   icon: 'text-rose-600',   badge: 'bg-rose-100' },
   gray:   { bg: 'bg-gray-100',  icon: 'text-gray-600',   badge: 'bg-gray-200' },
+  sky:    { bg: 'bg-sky-50',    icon: 'text-sky-600',    badge: 'bg-sky-100' },
+  indigo: { bg: 'bg-indigo-50', icon: 'text-indigo-600', badge: 'bg-indigo-100' },
 };
 
 export default function AdminHomePage() {

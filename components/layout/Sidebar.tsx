@@ -37,6 +37,8 @@ import {
   BarChart2,
   MessageSquare,
   Bookmark,
+  Tags,
+  Library,
   CalendarDays,
   Trophy,
   ChevronRight,
@@ -108,16 +110,25 @@ const userNavItems = [
   { href: '/profile',       label: '프로필',       icon: User },
 ];
 
+const recruiterNavItems = [
+  { href: '/recruiter',          label: '기업 대시보드',  icon: Building2 },
+  { href: '/recruiter/listings', label: '공고 관리',      icon: ClipboardList },
+  { href: '/recruiter/profile',  label: '기업 정보',      icon: User },
+];
+
 const adminNavItems = [
   { href: '/admin',                  label: '관리 대시보드',  icon: Shield,         exact: true },
   { href: '/admin/stats',            label: '취업 통계',      icon: BarChart2 },
   { href: '/admin/employment',       label: '취업 확정 관리', icon: Trophy },
   { href: '/admin/listings',         label: '공고 DB 관리',   icon: ClipboardList },
   { href: '/admin/listings/upload',  label: '엑셀 업로드',    icon: Upload },
+  { href: '/admin/listings/keywords', label: '공고 키워드 통계', icon: BarChart2 },
   { href: '/admin/bulk-jobs',        label: '구인자 업로드',  icon: Building2 },
   { href: '/admin/users',            label: '사용자 관리',    icon: Users },
   { href: '/admin/notices',          label: '공지사항 관리',  icon: Bell },
   { href: '/admin/questions',        label: '면접 질문 관리', icon: MessageSquare },
+  { href: '/admin/keywords',         label: '키워드 사전',    icon: Tags },
+  { href: '/admin/templates',        label: '템플릿 관리',    icon: Library },
 ];
 
 interface SidebarProps {
@@ -255,10 +266,10 @@ function NotificationNavItem({
 }
 
 function SidebarContent({
-  pathname, isAdmin, userName, userEmail, onClose,
+  pathname, isAdmin, isRecruiter, userName, userEmail, onClose,
   unreadCount, recentNotifications, notices, bookmarkCount,
 }: {
-  pathname: string; isAdmin: boolean;
+  pathname: string; isAdmin: boolean; isRecruiter: boolean;
   userName?: string | null; userEmail?: string | null;
   onClose?: () => void;
   unreadCount: number;
@@ -390,6 +401,40 @@ function SidebarContent({
           </div>
         )}
 
+        {/* 리크루터 메뉴 */}
+        {isRecruiter && (
+          <div className="px-3 pb-4">
+            <div className="border-t border-white/10 pt-4">
+              <p className="px-3 mb-2 text-xs font-semibold text-white/30 uppercase tracking-widest">
+                기업 회원
+              </p>
+              <div className="space-y-0.5">
+                {recruiterNavItems.map(({ href, label, icon: Icon }) => {
+                  const isActive = pathname.startsWith(href) &&
+                    !recruiterNavItems.some(
+                      other => other.href !== href &&
+                        other.href.startsWith(href) &&
+                        pathname.startsWith(other.href)
+                    );
+                  return (
+                    <Link
+                      key={href} href={href} onClick={onClose}
+                      className={`flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors ${
+                        isActive
+                          ? 'bg-emerald-500/15 text-emerald-300 font-medium'
+                          : 'text-emerald-400/50 hover:bg-emerald-500/10 hover:text-emerald-300'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      {label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* 하단 유저 정보 */}
@@ -401,6 +446,11 @@ function SidebarContent({
                 {isAdmin && (
                   <span className="shrink-0 text-xs font-semibold bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
                     Admin
+                  </span>
+                )}
+                {isRecruiter && (
+                  <span className="shrink-0 text-xs font-semibold bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                    Recruiter
                   </span>
                 )}
               </div>
@@ -423,6 +473,7 @@ function SidebarContent({
 export default function Sidebar({ userName, userEmail, userRole }: SidebarProps) {
   const pathname = usePathname();
   const isAdmin = userRole === 'ADMIN';
+  const isRecruiter = userRole === 'RECRUITER';
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { data: notifications = [] } = useQuery({
@@ -452,7 +503,7 @@ export default function Sidebar({ userName, userEmail, userRole }: SidebarProps)
       {/* ── 데스크탑: 고정 사이드바 ── */}
       <div className="hidden md:flex h-full">
         <SidebarContent
-          pathname={pathname} isAdmin={isAdmin}
+          pathname={pathname} isAdmin={isAdmin} isRecruiter={isRecruiter}
           userName={userName} userEmail={userEmail}
           unreadCount={unreadCount}
           recentNotifications={recentNotifications}
@@ -488,7 +539,7 @@ export default function Sidebar({ userName, userEmail, userRole }: SidebarProps)
           />
           <div className="relative z-10 h-full">
             <SidebarContent
-              pathname={pathname} isAdmin={isAdmin}
+              pathname={pathname} isAdmin={isAdmin} isRecruiter={isRecruiter}
               userName={userName} userEmail={userEmail}
               onClose={() => setMobileOpen(false)}
               unreadCount={unreadCount}

@@ -1,9 +1,14 @@
 /**
  * 공고 제목/내용에서 IT/개발/기획 관련 기술 키워드를 추출합니다.
  * AI 없이 룰 기반으로 동작하며, 중복을 제거한 태그 배열을 반환합니다.
+ *
+ * DB의 Keyword 테이블(category='job-tag')을 우선 조회하고,
+ * 비어 있으면 하드코딩 KEYWORDS를 fallback으로 사용합니다.
  */
 
-const KEYWORDS: { keyword: string; tag: string }[] = [
+import { listKeywords, countKeywords } from './keyword-service';
+
+export const KEYWORDS: { keyword: string; tag: string }[] = [
   // 언어
   { keyword: 'JavaScript', tag: 'JavaScript' },
   { keyword: 'TypeScript', tag: 'TypeScript' },
@@ -113,10 +118,33 @@ function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export function extractJobTags(text: string): string[] {
+export async function getJobTags(): Promise<{ keyword: string; tag: string }[]> {
+  try {
+    const count = await countKeywords('job-tag');
+    if (count === 0) return KEYWORDS;
+
+    const dbKeywords = await listKeywords('job-tag');
+    const result: { keyword: string; tag: string }[] = [];
+    for (const k of dbKeywords) {
+      result.push({ keyword: k.key, tag: k.value });
+      if (k.aliases) {
+        for (const alias of k.aliases) {
+          result.push({ keyword: alias, tag: k.value });
+        }
+      }
+    }
+    return result.length > 0 ? result : KEYWORDS;
+  } catch (error) {
+    console.error('Failed to load job tags from DB:', error);
+    return KEYWORDS;
+  }
+}
+
+export async function extractJobTags(text: string): Promise<string[]> {
   const lower = text.toLowerCase();
   const tags = new Set<string>();
-  for (const { keyword, tag } of KEYWORDS) {
+  const keywords = await getJobTags();
+  for (const { keyword, tag } of keywords) {
     const escaped = escapeRegExp(keyword);
     const pattern = /[a-z0-9#+./]/.test(keyword)
       ? new RegExp(`(^|[^\\w])${escaped}($|[^\\w])`, 'i')

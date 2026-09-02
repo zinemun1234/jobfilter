@@ -14,7 +14,8 @@
  */
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
 /**
  * 인증된 사용자의 ID를 가져옵니다.
@@ -83,7 +84,7 @@ export function validateOrigin(request: Request): boolean {
  * Rate limiting을 위한 간단한 메모리 저장소
  * (실제 프로덕션에서는 Redis 등을 사용해야 합니다)
  */
-class SimpleRateLimiter {
+export class SimpleRateLimiter {
   private requests: Map<string, number[]> = new Map();
   
   constructor(private maxRequests: number, private windowMs: number) {}
@@ -125,6 +126,65 @@ export function checkRateLimit(
     allowed,
     resetTime: allowed ? undefined : Date.now() + 15 * 60 * 1000,
   };
+}
+
+/**
+ * NextRequest에서 클라이언트 IP를 추출합니다.
+ * x-forwarded-for → x-real-ip → request.ip → unknown 순서로 시도합니다.
+ */
+export function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const first = forwarded.split(',')[0].trim();
+    if (first) return first;
+  }
+
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp) return realIp.trim();
+
+  return request.ip ?? 'unknown';
+}
+
+/**
+ * Origin 및 Rate limit 검증을 한 번에 수행합니다.
+ * 검증 실패 시 적절한 NextResponse를, 통과 시 null을 반환합니다.
+ */
+export async function checkRequestSecurity(
+  request: NextRequest,
+  options?: { rateLimit?: boolean; requireOrigin?: boolean; limiter?: SimpleRateLimiter }
+): Promise<NextResponse | null> {
+  const { rateLimit = false, requireOrigin = false, limiter } = options ?? {};
+
+  if (requireOrigin && !validateOrigin(request)) {
+    logger.warn({ path: request.nextUrl.pathname }, 'Invalid origin');
+    return NextResponse.json(
+      { error: '유효하지 않은 요청 출처입니다.' },
+      { status: 403 }
+    );
+  }
+
+  if (rateLimit) {
+    const selectedLimiter =
+      limiter ??
+      (request.nextUrl.pathname.startsWith('/api/auth')
+        ? rateLimiters.auth
+        : rateLimiters.default);
+    const identifier = `${getClientIp(request)}:${request.nextUrl.pathname}`;
+    const result = checkRateLimit(identifier, selectedLimiter);
+
+    if (!result.allowed) {
+      const retryAfter = result.resetTime
+        ? Math.max(0, Math.ceil((result.resetTime - Date.now()) / 1000))
+        : 15 * 60;
+      logger.warn({ path: request.nextUrl.pathname }, 'Rate limit exceeded');
+      return NextResponse.json(
+        { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+        { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+      );
+    }
+  }
+
+  return null;
 }
 
 /**

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import logger from '@/lib/logger';
 
 async function main() {
   // 1. 자소서: company/position이 '1'인 경우 데모 문구로 교체
@@ -37,7 +38,7 @@ async function main() {
       data: { company, position, items: JSON.stringify(newItems) },
     });
   }
-  console.log(`✅ CoverLetter placeholders cleaned: ${badCoverLetters.length}`);
+  logger.info(`CoverLetter placeholders cleaned: ${badCoverLetters.length}`);
 
   // 2. 공지사항
   const notices = await prisma.notice.findMany({
@@ -52,7 +53,7 @@ async function main() {
       },
     });
   }
-  console.log(`✅ Notice placeholders cleaned: ${notices.length}`);
+  logger.info(`Notice placeholders cleaned: ${notices.length}`);
 
   // 3. 면접 질문
   const questions = await prisma.interviewQuestion.findMany({
@@ -68,7 +69,7 @@ async function main() {
       data: { question: sampleQuestions[i % sampleQuestions.length] },
     });
   }
-  console.log(`✅ InterviewQuestion placeholders cleaned: ${questions.length}`);
+  logger.info(`InterviewQuestion placeholders cleaned: ${questions.length}`);
 
   // 4. 취업 확정
   const employments = await prisma.employmentRecord.findMany({
@@ -85,7 +86,7 @@ async function main() {
       data: { company: '네이버', position: '백엔드 개발자' },
     });
   }
-  console.log(`✅ EmploymentRecord placeholders cleaned: ${employments.length}`);
+  logger.info(`EmploymentRecord placeholders cleaned: ${employments.length}`);
 
   // 5. 취업 확정 알림 (body에 '1 1 취업' 또는 '취업이 확정'이 들어간 경우)
   const notifications = await prisma.userNotification.findMany({
@@ -99,9 +100,9 @@ async function main() {
       });
     }
   }
-  console.log(`✅ UserNotification placeholders cleaned: ${notifications.length}`);
+  logger.info(`UserNotification placeholders cleaned: ${notifications.length}`);
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
+  .catch((e) => { logger.error({ err: e }, 'Placeholder 정리 실패'); process.exit(1); })
   .finally(() => prisma.$disconnect());

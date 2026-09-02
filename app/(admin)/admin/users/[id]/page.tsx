@@ -8,7 +8,8 @@ import { STATUS_CONFIG } from '@/lib/status-config';
 
 type UserDetail = {
   id: string; email: string; name: string | null; major: string | null;
-  targetJob: string | null; role: string; createdAt: string;
+  targetJob: string | null; role: string; companyName: string | null;
+  companyDesc: string | null; isApproved: boolean; createdAt: string;
   jobPostings: { id: string; company: string; position: string; status: string; createdAt: string }[];
   portfolios: { id: string; title: string; createdAt: string }[];
   roadmapItems: { id: string; jobCategory: string; skill: string; status: string }[];
@@ -89,7 +90,8 @@ export default function AdminUserDetailPage() {
             <p className="text-sm text-gray-500 mt-1">{user.email}</p>
           </div>
           <span className={`text-xs font-medium rounded-full px-3 py-1 ${
-            user.role === 'ADMIN' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'
+            user.role === 'ADMIN' ? 'bg-red-50 text-red-600' :
+              user.role === 'RECRUITER' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-600'
           }`}>
             {user.role}
           </span>
@@ -98,6 +100,13 @@ export default function AdminUserDetailPage() {
           <div><p className="text-xs text-gray-400 mb-0.5">전공</p><p className="text-gray-700">{user.major ?? '-'}</p></div>
           <div><p className="text-xs text-gray-400 mb-0.5">목표 직무</p><p className="text-gray-700">{user.targetJob ?? '-'}</p></div>
           <div><p className="text-xs text-gray-400 mb-0.5">가입일</p><p className="text-gray-700">{new Date(user.createdAt).toLocaleDateString('ko-KR')}</p></div>
+          {user.role === 'RECRUITER' && (
+            <>
+              <div className="col-span-2"><p className="text-xs text-gray-400 mb-0.5">기업명</p><p className="text-gray-700">{user.companyName ?? '-'}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-400 mb-0.5">기업 소개</p><p className="text-gray-700 whitespace-pre-line">{user.companyDesc ?? '-'}</p></div>
+              <div><p className="text-xs text-gray-400 mb-0.5">승인 상태</p><p className="text-gray-700">{user.isApproved ? '승인 완료' : '승인 대기'}</p></div>
+            </>
+          )}
         </div>
       </div>
 

@@ -10,3 +10,7 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export function isRecruiterSource(source: string | null | undefined): boolean {
+  return source === 'RECRUITER' || source === '구인자 직접등록';
+}

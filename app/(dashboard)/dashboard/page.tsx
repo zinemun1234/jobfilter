@@ -9,12 +9,14 @@ import {
 } from 'lucide-react';
 import ApplicationSummary from '@/components/dashboard/ApplicationSummary';
 import RoadmapProgress from '@/components/dashboard/RoadmapProgress';
+import { Progress } from '@/components/ui/progress';
 import UrgentDeadlines from '@/components/dashboard/UrgentDeadlines';
 import PrioritySection from '@/components/dashboard/PrioritySection';
 import RecentAlerts from '@/components/dashboard/RecentAlerts';
 import PersonalStats from '@/components/dashboard/PersonalStats';
 import { aggregateByStatus, calculateRoadmapProgress } from '@/lib/dashboard';
 import { syncJobNotifications } from '@/lib/notifications';
+import { getChecklistProgress } from '@/lib/job-checklist';
 
 type NoticeRow = { id: string; title: string; content: string; isPinned: number | boolean; createdAt: string };
 type TodayTask = { id: string; jobId: string; company: string; position: string; label: string; detail: string; priority: 'urgent' | 'normal' };
@@ -108,6 +110,15 @@ export default async function DashboardPage() {
     }
   }
   todayTasks.sort((a, b) => Number(b.priority === 'urgent') - Number(a.priority === 'urgent'));
+
+  // 체크리스트 준비율 집계
+  const checklistProgressList = todayPostings
+    .map((p) => ({ id: p.id, company: p.company, position: p.position, progress: getChecklistProgress(p.checklist) }))
+    .filter((p): p is typeof p & { progress: number } => p.progress !== null);
+  const checklistAvg = checklistProgressList.length > 0
+    ? Math.round(checklistProgressList.reduce((acc, p) => acc + p.progress, 0) / checklistProgressList.length)
+    : null;
+  const incompleteChecklist = checklistProgressList.filter((p) => p.progress < 100).slice(0, 5);
 
   // 준비 현황 계산
   const skillReq = user?.targetJob ? JOB_REQUIRED_SKILLS[user.targetJob] : null;
@@ -375,8 +386,8 @@ export default async function DashboardPage() {
           <ApplicationSummary counts={applicationCounts} />
         </div>
 
-        {/* 로드맵 진행률 + 마감 임박 2단 */}
-        <div className="grid md:grid-cols-2 gap-5">
+        {/* 로드맵 진행률 + 체크리스트 준비율 + 마감 임박 */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           <div className="rounded-3xl border border-gray-200 bg-white shadow-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">로드맵 진행률</p>
@@ -389,6 +400,46 @@ export default async function DashboardPage() {
               total={roadmapItems.length}
               completed={roadmapCompleted}
             />
+          </div>
+          <div className="rounded-3xl border border-gray-200 bg-white shadow-lg p-6">
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">서류 준비 현황</p>
+              <Link href="/jobs" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium">
+                관리 <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+            {checklistAvg === null ? (
+              <div className="rounded-2xl bg-gray-50 px-4 py-8 text-center">
+                <p className="text-sm text-gray-500">등록된 서류 체크리스트가 없습니다.</p>
+                <p className="text-xs text-gray-400 mt-1">공고 상세에서 체크리스트를 추가하면 현황이 표시됩니다.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-gray-600">전체 평균 준비율</span>
+                    <span className={`font-bold ${checklistAvg === 100 ? 'text-emerald-600' : 'text-blue-600'}`}>{checklistAvg}%</span>
+                  </div>
+                  <Progress value={checklistAvg} className="h-2" />
+                </div>
+                {incompleteChecklist.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-gray-500">미완료 공고</p>
+                    <div className="space-y-2">
+                      {incompleteChecklist.map((p) => (
+                        <Link key={p.id} href={`/jobs/${p.id}`} className="block rounded-xl border border-gray-100 bg-gray-50 px-3 py-2 hover:border-blue-200 hover:bg-blue-50/40 transition-colors">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium text-gray-800 truncate">{p.company} · {p.position}</span>
+                            <span className={`text-[11px] font-semibold ${p.progress === 100 ? 'text-emerald-600' : 'text-blue-600'}`}>{p.progress}%</span>
+                          </div>
+                          <Progress value={p.progress} className="h-1" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between">

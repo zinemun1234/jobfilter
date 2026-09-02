@@ -4,6 +4,8 @@ export type MatchingInput = {
   position?: string | null;
   career?: string | null;
   targetJob?: string | null;
+  major?: string | null;
+  category?: string | null;
   deadline?: Date | string | null;
 };
 
@@ -13,6 +15,8 @@ export type MatchingResult = {
   roleScore: number;
   careerScore: number;
   urgencyScore: number;
+  majorScore: number;
+  majorMatched: boolean;
   matchedSkills: string[];
   missingSkills: string[];
   reasons: string[];
@@ -53,13 +57,16 @@ export function calculateMatching(input: MatchingInput): MatchingResult {
     ? /신입|무관|인턴/i.test(input.career) ? 100 : 50
     : 50;
   const urgencyScore = calculateUrgency(input.deadline);
-  const score = Math.round(skillScore * 0.55 + roleScore * 0.2 + careerScore * 0.15 + urgencyScore * 0.1);
+  const majorScore = input.major && input.category && input.major === input.category ? 100 : 0;
+  const majorMatched = majorScore === 100;
+  const score = Math.round(skillScore * 0.45 + roleScore * 0.2 + careerScore * 0.15 + urgencyScore * 0.1 + majorScore * 0.1);
   const reasons: string[] = [];
 
   if (matchedSkills.length > 0) reasons.push(`일치 기술 ${matchedSkills.length}개`);
   if (roleScore === 100) reasons.push('목표 직무와 유사');
   if (input.career && /신입|무관|인턴/i.test(input.career)) reasons.push('신입 지원 가능');
   if (input.deadline && urgencyScore >= 70) reasons.push('마감 임박');
+  if (majorMatched) reasons.push('전공 일치');
 
   return {
     score,
@@ -67,6 +74,8 @@ export function calculateMatching(input: MatchingInput): MatchingResult {
     roleScore,
     careerScore,
     urgencyScore,
+    majorScore,
+    majorMatched,
     matchedSkills,
     missingSkills,
     reasons: reasons.length > 0 ? reasons : ['프로필 정보를 추가하면 더 정확한 매칭이 가능합니다.'],

@@ -1,7 +1,7 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import { COVER_LETTER_TEMPLATES, type CoverLetterTemplate, type CLItem } from '@/lib/cover-letter-templates';
+import { type CoverLetterTemplate, type CLItem } from '@/lib/cover-letter-templates';
 import { cn } from '@/lib/utils';
 
 export type TemplateSelection = {
@@ -12,10 +12,11 @@ export type TemplateSelection = {
 
 interface TemplateSelectorProps {
   value?: string;
+  templates?: Record<string, CoverLetterTemplate>;
   onSelect: (selection: TemplateSelection) => void;
 }
 
-export function TemplateSelector({ value, onSelect }: TemplateSelectorProps) {
+export function TemplateSelector({ value, templates = {}, onSelect }: TemplateSelectorProps) {
   return (
     <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-5 space-y-3">
       <div>
@@ -25,7 +26,7 @@ export function TemplateSelector({ value, onSelect }: TemplateSelectorProps) {
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {Object.entries(COVER_LETTER_TEMPLATES).map(([key, tpl]) => {
+        {Object.entries(templates).map(([key, tpl]) => {
           const selected = value === key;
           return (
             <button

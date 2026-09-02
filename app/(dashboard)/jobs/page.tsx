@@ -17,8 +17,11 @@ import { toast } from 'sonner';
 import { JobPosting } from '@/lib/generated/prisma';
 import type { ApplicationStatus } from '@/types';
 import { STATUS_CONFIG, STATUS_ORDER } from '@/lib/status-config';
+import { Progress } from '@/components/ui/progress';
 
-async function fetchJobs(search?: string): Promise<JobPosting[]> {
+type JobWithProgress = JobPosting & { checklistProgress: number | null };
+
+async function fetchJobs(search?: string): Promise<JobWithProgress[]> {
   const url = search ? `/api/jobs?search=${encodeURIComponent(search)}` : '/api/jobs';
   const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to fetch jobs');
@@ -329,6 +332,7 @@ export default function JobsPage() {
                   <th scope="col" className="text-left px-4 py-3.5 text-xs font-medium text-gray-400 uppercase tracking-wider">직무</th>
                   <th scope="col" className="text-left px-4 py-3.5 text-xs font-medium text-gray-400 uppercase tracking-wider">상태</th>
                   <th scope="col" className="text-left px-4 py-3.5 text-xs font-medium text-gray-400 uppercase tracking-wider">마감일</th>
+                  <th scope="col" className="text-left px-4 py-3.5 text-xs font-medium text-gray-400 uppercase tracking-wider w-32">준비율</th>
                   <th scope="col" className="px-4 py-3.5 text-xs font-medium text-gray-400 uppercase tracking-wider sr-only">액션</th>
                 </tr>
               </thead>
@@ -375,6 +379,21 @@ export default function JobsPage() {
                             </span>
                             {near && !expired && <AlertCircle className="w-3.5 h-3.5 text-amber-500" />}
                             {expired && <span className="text-xs text-red-400">만료</span>}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                        {typeof job.checklistProgress === 'number' ? (
+                          <div className="w-28">
+                            <div className="flex items-center justify-between text-[11px] mb-1">
+                              <span className="text-gray-500">준비율</span>
+                              <span className={`font-semibold ${job.checklistProgress === 100 ? 'text-emerald-600' : 'text-blue-600'}`}>
+                                {job.checklistProgress}%
+                              </span>
+                            </div>
+                            <Progress value={job.checklistProgress} className="h-1.5" />
                           </div>
                         ) : (
                           <span className="text-xs text-gray-300">—</span>

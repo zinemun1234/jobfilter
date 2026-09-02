@@ -18,7 +18,7 @@ import PortfolioLibrary from '@/components/cover-letter/PortfolioLibrary';
 import { TemplateSelector } from '@/components/cover-letter/TemplateSelector';
 import { VersionList } from '@/components/cover-letter/VersionList';
 import type { FeedbackItem } from '@/lib/cover-letter-analysis';
-import type { CLItem } from '@/lib/cover-letter-templates';
+import type { CLItem, CoverLetterTemplate } from '@/lib/cover-letter-templates';
 
 type CoverLetter = {
   id: string;
@@ -63,6 +63,12 @@ async function fetchProfile(): Promise<{ targetJob?: string | null; skills?: str
     targetJob: data.targetJob,
     skills: (() => { try { return JSON.parse(data.skills); } catch { return []; } })(),
   };
+}
+
+async function fetchCoverLetterTemplates(): Promise<Record<string, CoverLetterTemplate>> {
+  const res = await fetch('/api/cover-letter/templates');
+  if (!res.ok) throw new Error('Failed');
+  return (await res.json()).data;
 }
 
 // 직군별 필요 기술 맵 — 교수님 피드백: "나는 어떤 기술이 있고 어떤 쪽으로 가고싶어 → 이것을 준비하세요"
@@ -213,20 +219,26 @@ function SkillReadiness({ targetJob, skills }: { targetJob?: string | null; skil
   );
 }
 
-// 히트맵에서 선택한 키워드를 답변 텍스트에서 강조 표시
+// 히트맵에서 선택한 키워드를 답변 텍스트에서 강조 표시 (대소문자 구분 없이)
+function escapeRegExp(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function HighlightedAnswer({ answer, keyword }: { answer: string; keyword?: string }) {
   if (!keyword || !answer) return <>{answer || '(답변 없음)'}</>;
-  const parts = answer.split(keyword);
+
+  const lowerKeyword = keyword.toLowerCase();
+  const regex = new RegExp(`(${escapeRegExp(keyword)})`, 'gi');
+  const parts = answer.split(regex);
+
   return (
     <>
-      {parts.map((part, i) => (
-        <span key={i}>
-          {part}
-          {i < parts.length - 1 && (
-            <mark className="bg-amber-200 text-amber-900 rounded px-0.5">{keyword}</mark>
-          )}
-        </span>
-      ))}
+      {parts.map((part, i) => {
+        if (part.toLowerCase() === lowerKeyword) {
+          return <mark key={i} className="bg-amber-200 text-amber-900 rounded px-0.5">{part}</mark>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
     </>
   );
 }
@@ -532,6 +544,11 @@ export default function CoverLetterPage() {
   const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: fetchJobs });
   const { data: listings = [] } = useQuery({ queryKey: ['listings'], queryFn: fetchListings });
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: fetchProfile });
+  const { data: templates = {} } = useQuery({
+    queryKey: ['cover-letter-templates'],
+    queryFn: fetchCoverLetterTemplates,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CoverLetter | null>(null);
@@ -883,6 +900,7 @@ export default function CoverLetterPage() {
           {!editing && (
             <TemplateSelector
               value={templateKey ?? undefined}
+              templates={templates}
               onSelect={selection => {
                 setTemplateKey(selection.key);
                 setItems(selection.items.map(it => ({ ...it })));

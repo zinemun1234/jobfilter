@@ -4,10 +4,18 @@ import { prisma } from '@/lib/prisma';
 import { successResponse, badRequest, conflict, sanitizeUser } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import { registerSchema } from '@/lib/validations/auth';
+import { checkRequestSecurity, rateLimiters } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  const security = await checkRequestSecurity(request, {
+    rateLimit: true,
+    requireOrigin: true,
+    limiter: rateLimiters.auth,
+  });
+  if (security) return security;
+
   try {
     const body = await request.json();
 

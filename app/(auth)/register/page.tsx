@@ -245,6 +245,10 @@ export default function RegisterPage() {
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted">
               이미 계정이 있으신가요? 로그인
             </Link>
+            <Link href="/register-recruiter"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-100/50 bg-emerald-50/30 px-4 py-3 text-sm font-medium text-emerald-700 shadow-sm transition-all hover:bg-emerald-50/50">
+              기업 회원으로 가입
+            </Link>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
       items: safeJsonParse(cl.items, []),
     }));
 
-    const recommendations = recommendQuestions({
+    const recommendations = await recommendQuestions({
       position: job.position,
       skills,
       portfolios,
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(recommendations);
   } catch (error) {
-    console.error('Failed to recommend interview questions:', error);
+    logger.error({ err: error }, 'Failed to recommend interview questions');
     return internalError('면접 질문 추천에 실패했습니다.');
   }
 }

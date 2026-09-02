@@ -25,6 +25,9 @@ export async function GET() {
       major: true,
       targetJob: true,
       role: true,
+      companyName: true,
+      companyDesc: true,
+      isApproved: true,
       createdAt: true,
       _count: {
         select: {

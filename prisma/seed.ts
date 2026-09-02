@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import logger from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -95,13 +96,14 @@ const interviewQuestions = [
 
 // ─── main ─────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log('🌱 시드 데이터 생성 시작...');
+  logger.info('시드 데이터 생성 시작');
 
   // 1. 관리자 계정
-  const adminEmail = 'admin@admin.com';
+  const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@admin.com';
+  const adminPassword = process.env.ADMIN_PASSWORD;
   const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
-  if (!existingAdmin) {
-    const hashed = await bcrypt.hash('admin1234!', 10);
+  if (!existingAdmin && adminPassword) {
+    const hashed = await bcrypt.hash(adminPassword, 10);
     await prisma.user.create({
       data: {
         email: adminEmail,
@@ -111,17 +113,22 @@ async function main() {
         skills: '[]',
       },
     });
-    console.log('✅ 관리자 계정 생성: admin@admin.com / admin1234!');
+    logger.info({ email: adminEmail }, '관리자 시드 계정 생성');
   } else {
-    console.log('ℹ️  관리자 계정 이미 존재');
+    if (!adminPassword) {
+      logger.warn('ADMIN_PASSWORD가 설정되지 않아 관리자 시드 계정을 생성하지 않습니다.');
+    } else {
+      logger.info('관리자 계정 이미 존재');
+    }
   }
 
   // 2. 테스트 학생 계정
-  const studentEmail = 'student@test.com';
+  const studentEmail = process.env.STUDENT_EMAIL ?? 'student@test.com';
+  const studentPassword = process.env.STUDENT_PASSWORD;
   const existingStudent = await prisma.user.findUnique({ where: { email: studentEmail } });
   let studentId: string;
-  if (!existingStudent) {
-    const hashed = await bcrypt.hash('student1234!', 10);
+  if (!existingStudent && studentPassword) {
+    const hashed = await bcrypt.hash(studentPassword, 10);
     const student = await prisma.user.create({
       data: {
         email: studentEmail,
@@ -134,10 +141,14 @@ async function main() {
       },
     });
     studentId = student.id;
-    console.log('✅ 테스트 학생 계정 생성: student@test.com / student1234!');
+    logger.info({ email: studentEmail }, '테스트 학생 시드 계정 생성');
   } else {
     studentId = existingStudent.id;
-    console.log('ℹ️  테스트 학생 계정 이미 존재');
+    if (!studentPassword) {
+      logger.warn('STUDENT_PASSWORD가 설정되지 않아 학생 시드 계정을 생성하지 않습니다.');
+    } else {
+      logger.info('테스트 학생 계정 이미 존재');
+    }
   }
 
   // 3. 면접 기본 질문
@@ -150,9 +161,9 @@ async function main() {
         userId: null,
       })),
     });
-    console.log(`✅ 면접 기본 질문 ${interviewQuestions.length}개 생성`);
+    logger.info(`면접 기본 질문 ${interviewQuestions.length}개 생성`);
   } else {
-    console.log(`ℹ️  면접 기본 질문 이미 존재 (${existingQ}개)`);
+    logger.info(`면접 기본 질문 이미 존재 (${existingQ}개)`);
   }
 
   // 4. 샘플 공지사항
@@ -172,9 +183,9 @@ async function main() {
         },
       ],
     });
-    console.log('✅ 샘플 공지사항 2개 생성');
+    logger.info('샘플 공지사항 2개 생성');
   } else {
-    console.log('ℹ️  공지사항 이미 존재');
+    logger.info('공지사항 이미 존재');
   }
 
   // 5. 샘플 채용공고 (엑셀 업로드 시뮬레이션)
@@ -241,17 +252,17 @@ async function main() {
         },
       ],
     });
-    console.log('✅ 샘플 채용공고 5개 생성');
+    logger.info('샘플 채용공고 5개 생성');
   } else {
-    console.log('ℹ️  채용공고 이미 존재');
+    logger.info('채용공고 이미 존재');
   }
 
-  console.log('🎉 시드 완료!');
+  logger.info('시드 완료');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ 시드 실패:', e);
+    logger.error({ err: e }, '시드 실패');
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

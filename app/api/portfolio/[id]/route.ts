@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { portfolioSchema } from '@/lib/validations';
 import { ApiResponse, sanitizePortfolio } from '@/lib/api';
+import { createAuditLog } from '@/lib/audit-log';
 import { analyzeGitHubRepo } from '@/lib/github-analysis';
 
 export async function GET(
@@ -34,7 +36,7 @@ export async function GET(
     });
     return NextResponse.json({ data: parsed } as ApiResponse<typeof parsed>);
   } catch (error) {
-    console.error('Failed to fetch portfolio:', error);
+    logger.error({ err: error }, 'Failed to fetch portfolio');
     return NextResponse.json({ error: 'Failed to fetch portfolio' }, { status: 500 });
   }
 }
@@ -69,7 +71,7 @@ export async function PUT(
         ...validatedData,
         jobId: validatedData.jobId || null,
         techStack: JSON.stringify(validatedData.techStack),
-        startDate: new Date(validatedData.startDate),
+        startDate: validatedData.startDate ? new Date(validatedData.startDate) : existingPortfolio.startDate,
         endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
       },
     });
@@ -81,7 +83,7 @@ export async function PUT(
     });
     return NextResponse.json({ data: result } as ApiResponse<typeof result>);
   } catch (error) {
-    console.error('Failed to update portfolio:', error);
+    logger.error({ err: error }, 'Failed to update portfolio');
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
     }
@@ -129,7 +131,7 @@ export async function POST(
     });
     return NextResponse.json({ data: result } as ApiResponse<typeof result>);
   } catch (error) {
-    console.error('Failed to analyze portfolio:', error);
+    logger.error({ err: error }, 'Failed to analyze portfolio');
     return NextResponse.json({ error: 'Failed to analyze portfolio' }, { status: 500 });
   }
 }
@@ -155,13 +157,22 @@ export async function DELETE(
       return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 });
     }
 
+    await createAuditLog({
+      userId: session.user.id,
+      action: 'DELETE_PORTFOLIO',
+      resource: 'Portfolio',
+      resourceId: params.id,
+      details: { id: params.id, title: existingPortfolio.title },
+      request,
+    });
+
     await prisma.portfolio.delete({
       where: { id: params.id },
     });
 
     return NextResponse.json({ data: { success: true } } as ApiResponse<{ success: boolean }>);
   } catch (error) {
-    console.error('Failed to delete portfolio:', error);
+    logger.error({ err: error }, 'Failed to delete portfolio');
     return NextResponse.json({ error: 'Failed to delete portfolio' }, { status: 500 });
   }
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import logger from '@/lib/logger';
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -110,7 +112,7 @@ export function PortfolioForm({ portfolio, onSuccessAction }: PortfolioFormProps
       reset();
     } catch (error) {
       toast.error('저장에 실패했습니다');
-      console.error(error);
+      logger.error({ err: error }, '포트폴리오 저장 실패');
     } finally {
       setIsSubmitting(false);
     }

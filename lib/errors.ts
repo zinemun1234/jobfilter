@@ -7,6 +7,7 @@
  *   - 그 외 예상치 못한 에러는 500으로 응답
  */
 import { NextResponse } from 'next/server';
+import logger from '@/lib/logger';
 
 // Error code constants
 export const ERROR_CODES = {
@@ -49,7 +50,7 @@ export function handleApiError(error: unknown): NextResponse {
     );
   }
 
-  console.error('Unhandled API error:', error);
+  logger.error({ err: error }, 'Unhandled API error');
   return NextResponse.json(
     { error: '서버 오류가 발생했습니다.', code: ERROR_CODES.INTERNAL_ERROR },
     { status: 500 }

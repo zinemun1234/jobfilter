@@ -12,11 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { MAJOR_OPTIONS } from '@/lib/majors';
 
 export type FilterState = {
   search: string;
   career: string;
   employType: string;
+  category?: string;
   location: string;
   tags: string[];
   deadlineFrom: string;
@@ -36,6 +38,7 @@ const defaultValues: FilterState = {
   search: '',
   career: 'all',
   employType: 'all',
+  category: 'all',
   location: '',
   tags: [],
   deadlineFrom: '',
@@ -120,6 +123,7 @@ export default function FilterPanel({
     values.search ||
     values.career !== 'all' ||
     values.employType !== 'all' ||
+    (values.category && values.category !== 'all') ||
     values.location ||
     values.tags.length > 0 ||
     values.deadlineFrom ||
@@ -184,6 +188,23 @@ export default function FilterPanel({
               <SelectItem value="fulltime">정규직</SelectItem>
               <SelectItem value="contract">계약직</SelectItem>
               <SelectItem value="intern">인턴</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground">학과/전공</label>
+          <Select value={values.category ?? 'all'} onValueChange={(v) => onChangeAction({ category: v })}>
+            <SelectTrigger className="w-full text-xs h-9">
+              <SelectValue placeholder="학과/전공 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체 학과/전공</SelectItem>
+              {MAJOR_OPTIONS.map((m) => (
+                <SelectItem key={m.value} value={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
