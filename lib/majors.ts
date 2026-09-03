@@ -121,12 +121,13 @@ export async function getMajorKeywords(): Promise<Record<string, string[]>> {
   }
 }
 
-export async function classifyMajor(text: string): Promise<{ category: MajorCategory | '기타'; score: number }> {
+export function classifyMajorWithKeywords(
+  text: string,
+  majorKeywords: Record<string, string[]>
+): { category: MajorCategory | '기타'; score: number } {
   const lowered = text.toLowerCase();
   let best: MajorCategory | '기타' = '기타';
   let bestScore = 0;
-
-  const majorKeywords = await getMajorKeywords();
 
   for (const [category, keywords] of Object.entries(majorKeywords)) {
     if (category === '기타' || !keywords.length) continue;
@@ -147,4 +148,8 @@ export async function classifyMajor(text: string): Promise<{ category: MajorCate
   }
 
   return { category: bestScore > 0 ? best : '기타', score: bestScore };
+}
+
+export async function classifyMajor(text: string): Promise<{ category: MajorCategory | '기타'; score: number }> {
+  return classifyMajorWithKeywords(text, await getMajorKeywords());
 }

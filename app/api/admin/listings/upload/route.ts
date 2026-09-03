@@ -20,7 +20,7 @@ import { requireAdmin } from '@/lib/api';
 import { handleApiError } from '@/lib/errors';
 import * as XLSX from 'xlsx';
 import * as Papa from 'papaparse';
-import { classifyMajor } from '@/lib/majors';
+import { classifyMajorWithKeywords, getMajorKeywords } from '@/lib/majors';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +49,10 @@ function isCSRelated(position: string, description?: string): boolean {
 }
 
 // 엑셀 컬럼명 → 우리 필드 매핑 (유연하게)
-async function mapRow(row: Record<string, unknown>): Promise<{
+async function mapRow(
+  row: Record<string, unknown>,
+  majorKeywords: Record<string, string[]>
+): Promise<{
   company: string;
   position: string;
   location?: string;
@@ -94,7 +97,7 @@ async function mapRow(row: Record<string, unknown>): Promise<{
   }
 
   const description = get('상세내용', '업무내용', '주요업무', '자격요건', 'description', '내용');
-  const category = (await classifyMajor(`${position} ${description ?? ''}`)).category;
+  const category = classifyMajorWithKeywords(`${position} ${description ?? ''}`, majorKeywords).category;
 
   return {
     company,
@@ -152,7 +155,9 @@ export async function POST(req: NextRequest) {
   }
 
   const total = rows.length;
-  const parsed = (await Promise.all(rows.map(mapRow))).filter(Boolean) as NonNullable<
+  // 분류 키워드는 요청당 한 번만 조회해 대량 업로드 시 DB 왕복을 줄인다.
+  const majorKeywords = await getMajorKeywords();
+  const parsed = (await Promise.all(rows.map(row => mapRow(row, majorKeywords)))).filter(Boolean) as NonNullable<
     Awaited<ReturnType<typeof mapRow>>
   >[];
   const filtered = parsed.filter(r => isCSRelated(r.position, r.description));

@@ -105,36 +105,38 @@ export async function PUT(
 
     await requireAdminOrOwner(existingJob.userId);
 
-    // 상태가 변경되면 이력 기록
-    if (existingJob.status !== validatedData.status) {
-      await prisma.statusHistory.create({
+    const job = await prisma.$transaction(async (tx) => {
+      // 상태 이력과 상태 변경을 하나의 작업으로 처리
+      if (existingJob.status !== validatedData.status) {
+        await tx.statusHistory.create({
+          data: {
+            jobId: params.id,
+            status: validatedData.status,
+            changedAt: new Date(),
+            note: body.statusNote ?? null,
+          },
+        });
+      }
+
+      return tx.jobPosting.update({
+        where: { id: params.id },
         data: {
-          jobId: params.id,
+          company: validatedData.company,
+          position: validatedData.position,
+          url: validatedData.url || null,
           status: validatedData.status,
-          changedAt: new Date(),
-          note: body.statusNote ?? null,
+          deadline: validatedData.deadline ? new Date(validatedData.deadline) : null,
+          interviewAt: validatedData.interviewAt ? new Date(validatedData.interviewAt) : null,
+          followUpAt: validatedData.followUpAt ? new Date(validatedData.followUpAt) : null,
+          contacts: stringifyJson(validatedData.contacts),
+          checklist: Array.isArray(body.checklist) ? stringifyJson(body.checklist) : existingJob.checklist,
+        },
+        include: {
+          statusHistory: {
+            orderBy: { changedAt: 'desc' },
+          },
         },
       });
-    }
-
-    const job = await prisma.jobPosting.update({
-      where: { id: params.id },
-      data: {
-        company: validatedData.company,
-        position: validatedData.position,
-        url: validatedData.url || null,
-        status: validatedData.status,
-        deadline: validatedData.deadline ? new Date(validatedData.deadline) : null,
-        interviewAt: validatedData.interviewAt ? new Date(validatedData.interviewAt) : null,
-        followUpAt: validatedData.followUpAt ? new Date(validatedData.followUpAt) : null,
-        contacts: stringifyJson(validatedData.contacts),
-        checklist: Array.isArray(body.checklist) ? stringifyJson(body.checklist) : existingJob.checklist,
-      },
-      include: {
-        statusHistory: {
-          orderBy: { changedAt: 'desc' },
-        },
-      },
     });
 
     const result = {
@@ -181,20 +183,23 @@ export async function PATCH(
 
     await requireAdminOrOwner(existingJob.userId);
 
-    if (existingJob.status !== validatedStatus) {
-      await prisma.statusHistory.create({
-        data: {
-          jobId: params.id,
-          status: validatedStatus,
-          changedAt: new Date(),
-          note: null,
-        },
-      });
-    }
+    const job = await prisma.$transaction(async (tx) => {
+      // 상태 이력과 상태 변경을 하나의 작업으로 처리
+      if (existingJob.status !== validatedStatus) {
+        await tx.statusHistory.create({
+          data: {
+            jobId: params.id,
+            status: validatedStatus,
+            changedAt: new Date(),
+            note: null,
+          },
+        });
+      }
 
-    const job = await prisma.jobPosting.update({
-      where: { id: params.id },
-      data: { status: validatedStatus },
+      return tx.jobPosting.update({
+        where: { id: params.id },
+        data: { status: validatedStatus },
+      });
     });
 
     const sanitized = sanitizeJobPosting(job);
