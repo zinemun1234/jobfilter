@@ -163,9 +163,21 @@ export async function getInterviewQuestions(
     const count = await countTemplates('interview-question');
     let source: InterviewQuestionTemplate[] = INTERVIEW_QUESTION_TEMPLATES;
     if (count > 0) {
-      const fromDb = (await listTemplates('interview-question')).flatMap((row) =>
-        parseTemplateData<InterviewQuestionTemplate[]>(row, [])
-      );
+      const fromDb = (await listTemplates('interview-question')).flatMap((row) => {
+        const parsed = parseTemplateData<unknown>(row, []);
+        const candidates = Array.isArray(parsed)
+          ? parsed
+          : parsed && typeof parsed === 'object' && 'questions' in parsed && Array.isArray(parsed.questions)
+            ? parsed.questions
+            : [];
+        return candidates.filter(
+          (question): question is InterviewQuestionTemplate =>
+            Boolean(question) &&
+            typeof question === 'object' &&
+            typeof (question as InterviewQuestionTemplate).category === 'string' &&
+            typeof (question as InterviewQuestionTemplate).question === 'string'
+        );
+      });
       if (fromDb.length > 0) source = fromDb;
     }
 
